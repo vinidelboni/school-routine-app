@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell, CheckCircle2, ChevronRight, Eye, Sparkles, Utensils } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle2, ChevronRight, Eye, Sparkles, Utensils } from "lucide-react";
 import { getCurrentContext } from "../../lib/auth";
 import {
   communicationKindLabels,
@@ -13,7 +13,7 @@ export default async function FamilyPage() {
   const { supabase, user, membership } = await getCurrentContext();
   if (membership.role !== "family") redirect("/app");
 
-  const [{ data: link, error: linkError }, { data: notifications, error: notificationsError }] =
+  const [{ data: link, error: linkError }, { data: notifications, error: notificationsError }, { data: occurrenceAlerts, error: occurrenceAlertsError }] =
     await Promise.all([
       supabase
         .from("guardian_links")
@@ -31,9 +31,17 @@ export default async function FamilyPage() {
         .eq("membership_id", membership.id)
         .order("created_at", { ascending: false })
         .limit(3),
+      supabase
+        .from("occurrence_recipients")
+        .select("id, acknowledged_at, occurrences!inner(severity, title, children(first_name))")
+        .eq("membership_id", membership.id)
+        .is("acknowledged_at", null)
+        .order("created_at", { ascending: false })
+        .limit(2),
     ]);
   if (linkError) throw linkError;
   if (notificationsError) throw notificationsError;
+  if (occurrenceAlertsError) throw occurrenceAlertsError;
 
   const child = link
     ? Array.isArray(link.children)
@@ -78,6 +86,24 @@ export default async function FamilyPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      {occurrenceAlerts?.length ? (
+        <section className="mb-4 rounded-2xl border border-[#d99a8d] bg-[#fff6f3] p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 shrink-0 text-[#a34336]" size={20} />
+            <div className="min-w-0 flex-1">
+              <span className="text-[9px] font-extrabold tracking-[.12em] text-[#a34336]">REQUER SUA CIÊNCIA</span>
+              {occurrenceAlerts.map((alert) => {
+                const occurrence = Array.isArray(alert.occurrences) ? alert.occurrences[0] : alert.occurrences;
+                const relatedChild = Array.isArray(occurrence.children) ? occurrence.children[0] : occurrence.children;
+                return <strong key={alert.id} className="mt-1 block text-sm">{occurrence.title} · {relatedChild?.first_name}</strong>;
+              })}
+            </div>
+            <Link href="/app/family/occurrences" className="flex shrink-0 items-center gap-1 rounded-xl bg-[#a34336] px-3 py-2 text-[10px] font-bold text-white">
+              Ver <ChevronRight size={13} />
+            </Link>
+          </div>
+        </section>
+      ) : null}
       <section className="rounded-3xl border border-[#d9ded8] bg-[#fffefa] p-5">
         <div className="flex items-start justify-between gap-3">
           <div>

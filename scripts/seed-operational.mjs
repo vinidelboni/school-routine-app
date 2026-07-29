@@ -302,6 +302,17 @@ const { error: communicationsCleanupError } = await supabase
   .eq("school_id", SCHOOL_ID);
 if (communicationsCleanupError) throw communicationsCleanupError;
 
+const { error: occurrenceRecipientsCleanupError } = await supabase
+  .from("occurrence_recipients")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (occurrenceRecipientsCleanupError) throw occurrenceRecipientsCleanupError;
+const { error: occurrencesCleanupError } = await supabase
+  .from("occurrences")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (occurrencesCleanupError) throw occurrencesCleanupError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],

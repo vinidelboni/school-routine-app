@@ -1416,6 +1416,144 @@ export async function respondToCommunication(formData: FormData) {
   revalidatePath("/app/direction/communications");
 }
 
+const occurrenceInput = z.object({
+  childId: uuid,
+  severity: z.enum(["attention", "important", "urgent"]),
+  occurredAt: z.string().min(10),
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(3).max(2000),
+  actionsTaken: z.string().trim().min(3).max(2000),
+  communicateNow: z.boolean(),
+});
+
+async function createOccurrenceRecipients(
+  occurrenceId: string,
+  childId: string,
+  schoolId: string,
+) {
+  const { supabase } = await getCurrentContext();
+  const { data: links, error } = await supabase
+    .from("guardian_links")
+    .select("membership_id, school_memberships!inner(role, status)")
+    .eq("child_id", childId)
+    .eq("active", true)
+    .eq("school_memberships.role", "family")
+    .eq("school_memberships.status", "active");
+  if (error) throw error;
+  if (!links?.length) throw new Error("Nenhum responsável ativo vinculado.");
+  const { error: insertError } = await supabase
+    .from("occurrence_recipients")
+    .insert(
+      links.map((link) => ({
+        school_id: schoolId,
+        occurrence_id: occurrenceId,
+        membership_id: link.membership_id,
+      })),
+    );
+  if (insertError) throw insertError;
+}
+
+export async function createOccurrence(formData: FormData) {
+  const parsed = occurrenceInput.parse({
+    childId: formData.get("childId"),
+    severity: formData.get("severity"),
+    occurredAt: formData.get("occurredAt"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    actionsTaken: formData.get("actionsTaken"),
+    communicateNow: formData.get("communicateNow") === "on",
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: child } = await supabase
+    .from("children")
+    .select("id")
+    .eq("id", parsed.childId)
+    .eq("school_id", membership.school_id)
+    .single();
+  if (!child) throw new Error("Criança inválida.");
+  const communicatedAt = parsed.communicateNow ? new Date().toISOString() : null;
+  const { data: occurrence, error } = await supabase
+    .from("occurrences")
+    .insert({
+      school_id: membership.school_id,
+      child_id: parsed.childId,
+      created_by: user.id,
+      severity: parsed.severity,
+      status: parsed.communicateNow ? "communicated" : "internal",
+      occurred_at: new Date(parsed.occurredAt).toISOString(),
+      title: parsed.title,
+      description: parsed.description,
+      actions_taken: parsed.actionsTaken,
+      communicated_at: communicatedAt,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  if (parsed.communicateNow) {
+    await createOccurrenceRecipients(occurrence.id, parsed.childId, membership.school_id);
+  }
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: parsed.communicateNow ? "occurrence.communicated" : "occurrence.created",
+    entity_type: "occurrence",
+    entity_id: occurrence.id,
+    metadata: { severity: parsed.severity },
+  });
+  revalidatePath("/app/direction");
+  revalidatePath("/app/direction/occurrences");
+  revalidatePath("/app/family");
+  revalidatePath("/app/family/occurrences");
+  redirect("/app/direction/occurrences?success=occurrence-created");
+}
+
+export async function communicateOccurrence(formData: FormData) {
+  const occurrenceId = uuid.parse(formData.get("occurrenceId"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: occurrence } = await supabase
+    .from("occurrences")
+    .select("id, child_id, status")
+    .eq("id", occurrenceId)
+    .eq("school_id", membership.school_id)
+    .single();
+  if (!occurrence || occurrence.status !== "internal") throw new Error("Ocorrência inválida.");
+  await createOccurrenceRecipients(occurrence.id, occurrence.child_id, membership.school_id);
+  const { error } = await supabase
+    .from("occurrences")
+    .update({ status: "communicated", communicated_at: new Date().toISOString() })
+    .eq("id", occurrence.id);
+  if (error) throw error;
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "occurrence.communicated",
+    entity_type: "occurrence",
+    entity_id: occurrence.id,
+  });
+  revalidatePath("/app/direction/occurrences");
+  revalidatePath("/app/family");
+  revalidatePath("/app/family/occurrences");
+}
+
+export async function acknowledgeOccurrence(formData: FormData) {
+  const recipientId = uuid.parse(formData.get("recipientId"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("occurrence_recipients")
+    .update({ viewed_at: now, acknowledged_at: now })
+    .eq("id", recipientId)
+    .eq("membership_id", membership.id);
+  if (error) throw error;
+  revalidatePath("/app/family");
+  revalidatePath("/app/family/occurrences");
+  revalidatePath("/app/direction");
+  revalidatePath("/app/direction/occurrences");
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

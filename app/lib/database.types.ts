@@ -1044,6 +1044,131 @@ export type Database = {
           },
         ]
       }
+      occurrence_recipients: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          id: string
+          membership_id: string
+          occurrence_id: string
+          school_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          membership_id: string
+          occurrence_id: string
+          school_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          membership_id?: string
+          occurrence_id?: string
+          school_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "occurrence_recipients_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrence_recipients_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "occurrences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrence_recipients_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      occurrences: {
+        Row: {
+          actions_taken: string
+          child_id: string
+          closed_at: string | null
+          communicated_at: string | null
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          occurred_at: string
+          school_id: string
+          severity: Database["public"]["Enums"]["occurrence_severity"]
+          status: Database["public"]["Enums"]["occurrence_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actions_taken: string
+          child_id: string
+          closed_at?: string | null
+          communicated_at?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          occurred_at: string
+          school_id: string
+          severity: Database["public"]["Enums"]["occurrence_severity"]
+          status?: Database["public"]["Enums"]["occurrence_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actions_taken?: string
+          child_id?: string
+          closed_at?: string | null
+          communicated_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          occurred_at?: string
+          school_id?: string
+          severity?: Database["public"]["Enums"]["occurrence_severity"]
+          status?: Database["public"]["Enums"]["occurrence_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "occurrences_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "occurrences_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1519,6 +1644,8 @@ export type Database = {
         | "declined"
         | "completed"
       membership_status: "invited" | "active" | "suspended"
+      occurrence_severity: "attention" | "important" | "urgent"
+      occurrence_status: "internal" | "communicated" | "acknowledged" | "closed"
       routine_category:
         | "attendance"
         | "meal"
@@ -1709,6 +1836,8 @@ export const Constants = {
         "completed",
       ],
       membership_status: ["invited", "active", "suspended"],
+      occurrence_severity: ["attention", "important", "urgent"],
+      occurrence_status: ["internal", "communicated", "acknowledged", "closed"],
       routine_category: [
         "attendance",
         "meal",

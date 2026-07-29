@@ -34,6 +34,7 @@ export default async function DirectionPage({
     { count: memberCount },
     { count: summaryCount },
     { count: viewCount },
+    { count: urgentOccurrenceCount },
     { data: classrooms },
   ] = await Promise.all([
     supabase
@@ -55,6 +56,12 @@ export default async function DirectionPage({
       .from("summary_views")
       .select("*", { count: "exact", head: true })
       .eq("school_id", membership.school_id),
+    supabase
+      .from("occurrences")
+      .select("*", { count: "exact", head: true })
+      .eq("school_id", membership.school_id)
+      .eq("severity", "urgent")
+      .neq("status", "closed"),
     supabase
       .from("classrooms")
       .select("id, name, age_group, default_start, default_end")
@@ -97,10 +104,13 @@ export default async function DirectionPage({
         </p>
       </header>
 
-      <section className="mt-8 grid gap-3 md:grid-cols-3">
+      <section className="mt-8 grid gap-3 md:grid-cols-4">
         <Metric icon={<Users size={20} />} label="Acessos ativos" value={memberCount ?? 0} />
         <Metric icon={<CheckCircle2 size={20} />} label="Resumos publicados" value={summaryCount ?? 0} />
         <Metric icon={<Eye size={20} />} label="Visualizações registradas" value={viewCount ?? 0} />
+        <Link href="/app/direction/occurrences">
+          <Metric icon={<AlertTriangle size={20} />} label="Ocorrências urgentes" value={urgentOccurrenceCount ?? 0} />
+        </Link>
       </section>
 
       <section className="mt-8 overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">

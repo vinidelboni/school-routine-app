@@ -79,6 +79,11 @@ for (const testCase of cases) {
     .select("id, communication_id, membership_id, response");
   if (recipientsError) throw recipientsError;
 
+  const { data: occurrences, error: occurrencesError } = await client
+    .from("occurrences")
+    .select("id, status");
+  if (occurrencesError) throw occurrencesError;
+
   const isolatedVisible = children.some(
     (child) => child.first_name === "Criança" && child.school_id.endsWith("0099"),
   );
@@ -93,6 +98,7 @@ for (const testCase of cases) {
     billingDocumentsVisible: billingDocuments.length,
     communicationsVisible: communications.length,
     communicationRecipientsVisible: communicationRecipients.length,
+    occurrencesVisible: occurrences.length,
     isolatedTenantVisible: isolatedVisible,
   };
 
@@ -128,6 +134,9 @@ for (const testCase of cases) {
     (communications.length !== 0 || communicationRecipients.length !== 0)
   ) {
     throw new Error("teacher: family communications were visible");
+  }
+  if (testCase.role === "teacher" && occurrences.length !== 0) {
+    throw new Error("teacher: occurrences were visible");
   }
 
   if (testCase.role === "family") {
@@ -220,6 +229,21 @@ for (const testCase of cases) {
       });
     if (!forbiddenCommunicationError) {
       throw new Error("family: unauthorized communication publish was accepted");
+    }
+    const { error: forbiddenOccurrenceError } = await client
+      .from("occurrences")
+      .insert({
+        school_id: memberships[0].school_id,
+        child_id: children[0].id,
+        created_by: currentUser.id,
+        severity: "attention",
+        occurred_at: new Date().toISOString(),
+        title: "Tentativa indevida",
+        description: "A família não pode registrar ocorrências.",
+        actions_taken: "Nenhuma.",
+      });
+    if (!forbiddenOccurrenceError) {
+      throw new Error("family: unauthorized occurrence write was accepted");
     }
     const ownRecipient = communicationRecipients[0];
     if (ownRecipient) {

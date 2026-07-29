@@ -322,11 +322,31 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await communicationForm.getByRole("button", { name: "Publicar para as famílias" }).click();
   await page.getByText("Comunicado publicado com sucesso!").waitFor();
   await page.getByText("0/1").last().waitFor();
+
+  await page.getByRole("link", { name: "Ocorrências" }).click();
+  await page.getByRole("heading", { name: "Registrar ocorrência" }).waitFor();
+  const occurrenceForm = page.locator("form").filter({ hasText: "Novo registro" });
+  await occurrenceForm.locator('[name="childId"]').selectOption({ label: "Alice Moreira" });
+  await occurrenceForm.locator('[name="severity"]').selectOption("urgent");
+  await occurrenceForm.locator('[name="occurredAt"]').fill("2026-07-29T14:30");
+  await occurrenceForm.locator('[name="title"]').fill("Queda de validação");
+  await occurrenceForm.locator('[name="description"]').fill("Alice tropeçou durante a atividade no pátio.");
+  await occurrenceForm.locator('[name="actionsTaken"]').fill("A direção acolheu, observou e entrou em contato com a família.");
+  await occurrenceForm.locator('[name="communicateNow"]').check();
+  await occurrenceForm.getByRole("button", { name: "Registrar ocorrência" }).click();
+  await page.getByText("Ocorrência registrada com sucesso!").waitFor();
+  await page.getByText("Ciência 0/1").waitFor();
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
   await page.getByText("COMUNICADOS DA ESCOLA").waitFor();
   await page.getByText("Passeio de validação").waitFor();
+  await page.getByText("REQUER SUA CIÊNCIA").waitFor();
+  await page.getByText("Queda de validação").waitFor();
+  await page.getByRole("link", { name: "Ver", exact: true }).click();
+  await page.getByRole("button", { name: "Li e estou ciente" }).click();
+  await page.getByText("Ciente").waitFor();
+  await page.getByRole("link", { name: "Início" }).click();
   await page.getByRole("button", { name: "Autorizo", exact: true }).click();
   await page.getByText("Respondido").waitFor();
   await page.getByRole("link", { name: "Avisos à escola" }).click();
@@ -349,6 +369,8 @@ await journey("director-communication-status", "direcao@laco.validacao", async (
   const communicationCard = page.locator("article").filter({ hasText: "Passeio de validação" });
   await communicationCard.getByText("1/1").first().waitFor();
   await communicationCard.getByText(/Autorizado/).waitFor();
+  await page.getByRole("link", { name: "Ocorrências" }).click();
+  await page.getByText("Ciência 1/1").waitFor();
 });
 
 for (const result of results) {
