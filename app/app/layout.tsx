@@ -68,9 +68,9 @@ export default async function OperationalLayout({
                 <Link href="/app/direction" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <LayoutDashboard size={17} /> Painel da direção
                 </Link>
-                <span className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs text-white/45">
+                <Link href="/app/direction/registry" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Users size={17} /> Pessoas e turmas
-                </span>
+                </Link>
               </>
             )}
             {membership.role === "teacher" && (

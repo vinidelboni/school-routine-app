@@ -19,7 +19,7 @@ import {
 } from "../actions";
 
 type Shift = "morning" | "afternoon";
-type SearchParams = Promise<{ shift?: string }>;
+type SearchParams = Promise<{ shift?: string; classroom?: string }>;
 
 const categoryLabels = {
   meal: "Alimentação",
@@ -35,23 +35,26 @@ export default async function TeacherPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const requestedShift = (await searchParams).shift;
+  const query = await searchParams;
+  const requestedShift = query.shift;
   const shift: Shift = requestedShift === "afternoon" ? "afternoon" : "morning";
   const { supabase, membership } = await getCurrentContext();
   if (membership.role !== "teacher") redirect("/app");
 
-  const { data: assignment, error: assignmentError } = await supabase
+  const { data: assignments, error: assignmentError } = await supabase
     .from("classroom_staff")
     .select("classroom_id, classrooms(id, name, school_id)")
     .eq("membership_id", membership.id)
-    .limit(1)
-    .maybeSingle();
+    .order("created_at");
   if (assignmentError) throw assignmentError;
-  if (!assignment) return <EmptyState message="Nenhuma turma foi atribuída a este acesso." />;
+  if (!assignments?.length) return <EmptyState message="Nenhuma turma foi atribuída a este acesso." />;
 
-  const classroom = Array.isArray(assignment.classrooms)
-    ? assignment.classrooms[0]
-    : assignment.classrooms;
+  const selectedAssignment =
+    assignments.find((assignment) => assignment.classroom_id === query.classroom) ??
+    assignments[0];
+  const classroom = Array.isArray(selectedAssignment.classrooms)
+    ? selectedAssignment.classrooms[0]
+    : selectedAssignment.classrooms;
   if (!classroom) return <EmptyState message="A turma atribuída não está disponível." />;
 
   const { data: schoolDay, error: dayError } = await supabase
@@ -175,13 +178,32 @@ export default async function TeacherPage({
       </header>
 
       <nav aria-label="Turno" className="mt-6 inline-flex rounded-xl border border-[#dfe1d9] bg-white p-1">
-        <ShiftLink active={shift === "morning"} href="/app/teacher?shift=morning">
+        <ShiftLink active={shift === "morning"} href={`/app/teacher?classroom=${classroom.id}&shift=morning`}>
           Manhã
         </ShiftLink>
-        <ShiftLink active={shift === "afternoon"} href="/app/teacher?shift=afternoon">
+        <ShiftLink active={shift === "afternoon"} href={`/app/teacher?classroom=${classroom.id}&shift=afternoon`}>
           Tarde
         </ShiftLink>
       </nav>
+
+      {assignments.length > 1 ? (
+        <nav aria-label="Turma" className="mt-3 flex flex-wrap gap-2">
+          {assignments.map((assignment) => {
+            const assignedClassroom = Array.isArray(assignment.classrooms)
+              ? assignment.classrooms[0]
+              : assignment.classrooms;
+            return assignedClassroom ? (
+              <Link
+                key={assignment.classroom_id}
+                href={`/app/teacher?classroom=${assignedClassroom.id}&shift=${shift}`}
+                className={`rounded-xl border px-4 py-2 text-xs font-bold ${assignedClassroom.id === classroom.id ? "border-[#315645] bg-[#eef3ef] text-[#315645]" : "border-[#dfe1d9] bg-white text-[#69746f]"}`}
+              >
+                {assignedClassroom.name}
+              </Link>
+            ) : null;
+          })}
+        </nav>
+      ) : null}
 
       <section className="mt-6 grid gap-4 lg:grid-cols-[.72fr_1.28fr]">
         <div className="space-y-4">

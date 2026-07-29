@@ -1,9 +1,40 @@
 import { chromium } from "playwright";
+import { createClient } from "@supabase/supabase-js";
 
 const baseUrl = process.env.VERIFY_URL ?? "http://localhost:3000";
 const password = "LacoValidacao!2026";
 const browser = await chromium.launch({ headless: true });
 const results = [];
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const admin =
+  serviceRoleKey && supabaseUrl
+    ? createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
+
+async function cleanupValidationChildren() {
+  if (!admin) return;
+  const { error } = await admin
+    .from("children")
+    .delete()
+    .in("first_name", ["Validação", "Importada"])
+    .eq("school_id", "10000000-0000-4000-8000-000000000001");
+  if (error) throw error;
+}
+
+async function cleanupValidationClassrooms() {
+  if (!admin) return;
+  const { error } = await admin
+    .from("classrooms")
+    .delete()
+    .eq("name", "Turma Validação")
+    .eq("school_id", "10000000-0000-4000-8000-000000000001");
+  if (error) throw error;
+}
+
+await Promise.all([cleanupValidationChildren(), cleanupValidationClassrooms()]);
 
 async function login(page, email) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "networkidle" });
@@ -30,6 +61,7 @@ async function journey(name, email, run) {
 }
 
 await journey("teacher", "professora@laco.validacao", async (page) => {
+  await page.getByRole("navigation", { name: "Turma" }).getByText("Berçário II").waitFor();
   await page.getByText("4 crianças previstas").waitFor();
   await page.getByRole("button", { name: "Marcar grupo presente" }).click();
   await page.getByRole("button", { name: "Atualizar chamada" }).waitFor();
@@ -72,6 +104,37 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("Visualizações registradas").waitFor();
   await page.getByText("CRM da rotina").waitFor();
   await page.getByText("Jornadas das crianças").waitFor();
+  await page.getByRole("link", { name: "Pessoas e turmas" }).click();
+  await page.getByText("Estrutura da escola").waitFor();
+  await page.getByRole("link", { name: /Berçário II 1 a 2 anos/ }).waitFor();
+
+  const classroomForm = page.locator("form").filter({ hasText: "Nova turma" });
+  await classroomForm.locator('[name="name"]').fill("Turma Validação");
+  await classroomForm.locator('[name="ageGroup"]').fill("3 a 4 anos");
+  await classroomForm.locator('[name="teacherMembershipId"]').selectOption({ label: "Ana Souza" });
+  await classroomForm.getByRole("button", { name: "Criar turma" }).click();
+  await page.getByText("O que precisa de atenção.").waitFor();
+  await page.getByRole("link", { name: "Pessoas e turmas" }).click();
+  await page.getByRole("link", { name: /Turma Validação 3 a 4 anos/ }).waitFor();
+
+  const enrollmentForm = page.locator("form").filter({ hasText: "Nova matrícula" });
+  await enrollmentForm.locator('[name="firstName"]').fill("Validação");
+  await enrollmentForm.locator('[name="lastName"]').fill("Automática");
+  await enrollmentForm.locator('[name="birthDate"]').fill("2023-05-10");
+  await enrollmentForm.getByRole("button", { name: "Cadastrar criança" }).click();
+  await page.getByText("Validação Automática").waitFor();
+
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "validacao.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "nome,sobrenome,nascimento,jornada,entrada,saida\nImportada,Automática,2023-06-11,Manhã,07:30,12:00\n",
+      "utf8",
+    ),
+  });
+  await page.getByText("Importada Automática").waitFor();
+  await page.getByRole("button", { name: "Confirmar 1 cadastros" }).click();
+  await page.getByText("1 crianças importadas com sucesso.").waitFor();
 });
 
 for (const result of results) {
@@ -82,3 +145,4 @@ for (const result of results) {
 
 console.log(JSON.stringify(results, null, 2));
 await browser.close();
+await Promise.all([cleanupValidationChildren(), cleanupValidationClassrooms()]);

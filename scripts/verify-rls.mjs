@@ -10,13 +10,13 @@ const cases = [
   {
     role: "director",
     email: "direcao@laco.validacao",
-    expectedChildren: 4,
+    expectedChildren: 5,
     expectedMemberships: 3,
   },
   {
     role: "teacher",
     email: "professora@laco.validacao",
-    expectedChildren: 4,
+    expectedChildren: 5,
     expectedMemberships: 1,
   },
   {

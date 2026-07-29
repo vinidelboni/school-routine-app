@@ -13,7 +13,9 @@ const supabase = createClient(url, serviceRoleKey, {
 
 const SCHOOL_ID = "10000000-0000-4000-8000-000000000001";
 const CLASSROOM_ID = "20000000-0000-4000-8000-000000000001";
+const SECOND_CLASSROOM_ID = "20000000-0000-4000-8000-000000000002";
 const DAY_ID = "30000000-0000-4000-8000-000000000001";
+const SECOND_DAY_ID = "30000000-0000-4000-8000-000000000002";
 const PASSWORD = "LacoValidacao!2026";
 const ISOLATION_SCHOOL_ID = "10000000-0000-4000-8000-000000000099";
 
@@ -127,12 +129,29 @@ const { error: classroomError } = await supabase.from("classrooms").upsert({
 });
 if (classroomError) throw classroomError;
 
+const { error: secondClassroomError } = await supabase.from("classrooms").upsert({
+  id: SECOND_CLASSROOM_ID,
+  school_id: SCHOOL_ID,
+  name: "Berçário II",
+  age_group: "1 a 2 anos",
+  default_start: "07:30",
+  default_end: "17:30",
+});
+if (secondClassroomError) throw secondClassroomError;
+
 const { error: staffError } = await supabase.from("classroom_staff").upsert({
   school_id: SCHOOL_ID,
   classroom_id: CLASSROOM_ID,
   membership_id: accounts.find((account) => account.role === "teacher").membershipId,
 });
 if (staffError) throw staffError;
+
+const { error: secondStaffError } = await supabase.from("classroom_staff").upsert({
+  school_id: SCHOOL_ID,
+  classroom_id: SECOND_CLASSROOM_ID,
+  membership_id: accounts.find((account) => account.role === "teacher").membershipId,
+});
+if (secondStaffError) throw secondStaffError;
 
 for (const [index, [id, firstName, lastName, scheduleName]] of children.entries()) {
   const { error: childError } = await supabase.from("children").upsert({
@@ -159,6 +178,28 @@ for (const [index, [id, firstName, lastName, scheduleName]] of children.entries(
   if (enrollmentError) throw enrollmentError;
 }
 
+const { error: secondChildError } = await supabase.from("children").upsert({
+  id: "50000000-0000-4000-8000-000000000005",
+  school_id: SCHOOL_ID,
+  first_name: "Eva",
+  last_name: "Lima",
+  birth_date: "2024-02-10",
+});
+if (secondChildError) throw secondChildError;
+
+const { error: secondEnrollmentError } = await supabase.from("enrollments").upsert({
+  id: "60000000-0000-4000-8000-000000000005",
+  school_id: SCHOOL_ID,
+  child_id: "50000000-0000-4000-8000-000000000005",
+  classroom_id: SECOND_CLASSROOM_ID,
+  schedule_name: "Integral",
+  expected_start: "07:30",
+  expected_end: "17:30",
+  starts_on: "2026-01-20",
+  status: "active",
+});
+if (secondEnrollmentError) throw secondEnrollmentError;
+
 const { error: guardianError } = await supabase.from("guardian_links").upsert({
   id: "70000000-0000-4000-8000-000000000001",
   school_id: SCHOOL_ID,
@@ -182,15 +223,17 @@ const routineConfigurations = [
 const { error: configError } = await supabase
   .from("routine_configurations")
   .upsert(
-    routineConfigurations.map(([category, enabled, required, options], index) => ({
-      school_id: SCHOOL_ID,
-      classroom_id: CLASSROOM_ID,
-      category,
-      enabled,
-      required,
-      position: index + 1,
-      options,
-    })),
+    [CLASSROOM_ID, SECOND_CLASSROOM_ID].flatMap((classroomId) =>
+      routineConfigurations.map(([category, enabled, required, options], index) => ({
+        school_id: SCHOOL_ID,
+        classroom_id: classroomId,
+        category,
+        enabled,
+        required,
+        position: index + 1,
+        options,
+      })),
+    ),
     { onConflict: "classroom_id,category" },
   );
 if (configError) throw configError;
@@ -224,6 +267,22 @@ const { error: dayError } = await supabase.from("school_days").upsert({
   published_by: null,
 });
 if (dayError) throw dayError;
+
+for (const table of ["shift_handoffs", "daily_summaries", "routine_entries", "attendance_records"]) {
+  const { error } = await supabase.from(table).delete().eq("school_day_id", SECOND_DAY_ID);
+  if (error) throw error;
+}
+
+const { error: secondDayError } = await supabase.from("school_days").upsert({
+  id: SECOND_DAY_ID,
+  school_id: SCHOOL_ID,
+  classroom_id: SECOND_CLASSROOM_ID,
+  day: "2026-07-29",
+  status: "draft",
+  published_at: null,
+  published_by: null,
+});
+if (secondDayError) throw secondDayError;
 
 console.log("Operational validation data is ready.");
 console.log(

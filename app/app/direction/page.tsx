@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Clock3, Eye, Settings2, Users } from "lucide-react";
 import { getCurrentContext } from "../../lib/auth";
 import {
@@ -17,7 +18,14 @@ const categoryLabels = {
   note: "Observação",
 } as const;
 
-export default async function DirectionPage() {
+type SearchParams = Promise<{ classroom?: string }>;
+
+export default async function DirectionPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const requestedClassroom = (await searchParams).classroom;
   const { supabase, membership } = await getCurrentContext();
   if (membership.role !== "director") redirect("/app");
 
@@ -56,7 +64,9 @@ export default async function DirectionPage() {
   ]);
   if (error) throw error;
 
-  const classroom = classrooms?.[0];
+  const classroom =
+    classrooms?.find((item) => item.id === requestedClassroom) ??
+    classrooms?.[0];
   const [{ data: configurations }, { data: enrollments }] = classroom
     ? await Promise.all([
         supabase
@@ -125,6 +135,20 @@ export default async function DirectionPage() {
           </div>
         )}
       </section>
+
+      {classrooms && classrooms.length > 1 ? (
+        <nav aria-label="Selecionar turma" className="mt-8 flex flex-wrap gap-2">
+          {classrooms.map((item) => (
+            <Link
+              key={item.id}
+              href={`/app/direction?classroom=${item.id}`}
+              className={`rounded-xl border px-4 py-2.5 text-xs font-bold ${classroom?.id === item.id ? "border-[#315645] bg-[#315645] text-white" : "border-[#dfe1d9] bg-white text-[#557164]"}`}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
 
       {classroom ? (
         <section className="mt-8">
