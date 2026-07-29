@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Laço
 
-## Getting Started
+Protótipo funcional de validação para uma plataforma de rotina e comunicação
+voltada a escolas particulares de educação infantil.
 
-First, run the development server:
+> Menos tempo preenchendo. Mais tempo presente.
+
+## O que este protótipo demonstra
+
+- Entrada demonstrativa por três perfis: professora, direção e família.
+- Registro coletivo da rotina com ajustes apenas para as exceções.
+- Revisão e publicação dos resumos após o horário de saída.
+- Resumo individual, simples e narrativo para a família.
+- Painel da direção orientado a pendências e ações.
+- Leitura assistida de vários boletos em PDF, com validação humana antes da
+  distribuição.
+
+Todos os nomes e dados exibidos são fictícios. Esta versão não possui
+autenticação, banco de dados ou armazenamento e não deve receber dados reais de
+crianças.
+
+## Executar localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validação
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+node scripts/verify-ui.mjs
+```
 
-## Learn More
+O teste de interface requer o Chromium do Playwright:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx playwright install chromium
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tecnologias
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Lucide Icons
+- Playwright para verificação dos fluxos
 
-## Deploy on Vercel
+## Próxima fase
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Após validação com escolas, o protótipo deverá evoluir para um MVP operacional
+com autenticação, isolamento entre instituições, banco de dados, armazenamento
+seguro, auditoria, consentimentos, política de retenção e controles compatíveis
+com a LGPD.
