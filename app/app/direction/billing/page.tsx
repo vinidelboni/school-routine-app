@@ -50,10 +50,10 @@ export default async function BillingPage({
   const now = new Date();
   const month = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
-  }).format(new Date(now.getFullYear(), now.getMonth(), 1));
+  }).format(new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1, 12)));
   const due = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
-  }).format(new Date(now.getFullYear(), now.getMonth() + 1, 10));
+  }).format(new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 10, 12)));
 
   return (
     <div>
