@@ -933,6 +933,173 @@ export async function handleFamilyRequest(formData: FormData) {
   redirect(`/app/direction/requests?success=request-updated`);
 }
 
+export async function createMedicationRequest(formData: FormData) {
+  const parsed = z
+    .object({
+      childId: uuid,
+      medicationName: z.string().trim().min(2).max(120),
+      dosage: z.string().trim().min(1).max(80),
+      scheduledTime: z.string().regex(/^\d{2}:\d{2}$/),
+      startsOn: z.iso.date(),
+      endsOn: z.iso.date(),
+      instructions: z.string().trim().min(3).max(500),
+      authorizationReference: z.string().trim().min(3).max(200),
+      policyConfirmed: z.literal("on"),
+    })
+    .refine((value) => value.endsOn >= value.startsOn, {
+      message: "A data final deve ser igual ou posterior à inicial.",
+    })
+    .parse({
+      childId: formData.get("childId"),
+      medicationName: formData.get("medicationName"),
+      dosage: formData.get("dosage"),
+      scheduledTime: formData.get("scheduledTime"),
+      startsOn: formData.get("startsOn"),
+      endsOn: formData.get("endsOn"),
+      instructions: formData.get("instructions"),
+      authorizationReference: formData.get("authorizationReference"),
+      policyConfirmed: formData.get("policyConfirmed"),
+    });
+
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+  const { data: link } = await supabase
+    .from("guardian_links")
+    .select("id")
+    .eq("membership_id", membership.id)
+    .eq("child_id", parsed.childId)
+    .eq("active", true)
+    .maybeSingle();
+  if (!link) throw new Error("Vínculo familiar inválido.");
+
+  const { data: request, error } = await supabase
+    .from("medication_requests")
+    .insert({
+      school_id: membership.school_id,
+      child_id: parsed.childId,
+      created_by: user.id,
+      medication_name: parsed.medicationName,
+      dosage: parsed.dosage,
+      scheduled_time: parsed.scheduledTime,
+      starts_on: parsed.startsOn,
+      ends_on: parsed.endsOn,
+      instructions: parsed.instructions,
+      authorization_reference: parsed.authorizationReference,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "medication_request.created",
+    entity_type: "medication_request",
+    entity_id: request.id,
+    metadata: { starts_on: parsed.startsOn, ends_on: parsed.endsOn },
+  });
+  revalidatePath("/app/family/medications");
+  revalidatePath("/app/direction/medications");
+  redirect("/app/family/medications?success=request-created");
+}
+
+export async function handleMedicationRequest(formData: FormData) {
+  const parsed = z
+    .object({
+      requestId: uuid,
+      status: z.enum(["accepted", "declined"]),
+    })
+    .parse({
+      requestId: formData.get("requestId"),
+      status: formData.get("status"),
+    });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { data: request, error } = await supabase
+    .from("medication_requests")
+    .update({
+      status: parsed.status,
+      handled_by: user.id,
+      handled_at: new Date().toISOString(),
+    })
+    .eq("id", parsed.requestId)
+    .eq("school_id", membership.school_id)
+    .eq("status", "submitted")
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!request) throw new Error("Solicitação de medicamento inválida.");
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "medication_request.status_updated",
+    entity_type: "medication_request",
+    entity_id: request.id,
+    metadata: { status: parsed.status },
+  });
+  revalidatePath("/app/family/medications");
+  revalidatePath("/app/direction/medications");
+  redirect("/app/direction/medications?success=request-updated");
+}
+
+export async function recordMedicationAdministration(formData: FormData) {
+  const parsed = z
+    .object({
+      requestId: uuid,
+      administrationStatus: z.enum(["administered", "not_administered"]),
+      note: z.string().trim().max(300),
+    })
+    .parse({
+      requestId: formData.get("requestId"),
+      administrationStatus: formData.get("administrationStatus"),
+      note: formData.get("note") ?? "",
+    });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { data: request } = await supabase
+    .from("medication_requests")
+    .select("id, scheduled_time, ends_on")
+    .eq("id", parsed.requestId)
+    .eq("school_id", membership.school_id)
+    .eq("status", "accepted")
+    .maybeSingle();
+  if (!request) throw new Error("Solicitação não está aceita.");
+
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+  const { error } = await supabase.from("medication_administrations").insert({
+    school_id: membership.school_id,
+    request_id: request.id,
+    scheduled_for: `${today}T${request.scheduled_time}-03:00`,
+    status: parsed.administrationStatus,
+    note: parsed.note || null,
+    recorded_by: user.id,
+  });
+  if (error) throw error;
+
+  if (request.ends_on <= today) {
+    await supabase
+      .from("medication_requests")
+      .update({ status: "completed" })
+      .eq("id", request.id);
+  }
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "medication_administration.recorded",
+    entity_type: "medication_request",
+    entity_id: request.id,
+    metadata: { status: parsed.administrationStatus },
+  });
+  revalidatePath("/app/family/medications");
+  revalidatePath("/app/direction/medications");
+  redirect("/app/direction/medications?success=administration-recorded");
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

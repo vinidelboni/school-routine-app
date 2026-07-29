@@ -627,6 +627,147 @@ export type Database = {
           },
         ]
       }
+      medication_administrations: {
+        Row: {
+          id: string
+          note: string | null
+          recorded_at: string
+          recorded_by: string
+          request_id: string
+          scheduled_for: string
+          school_id: string
+          status: Database["public"]["Enums"]["medication_administration_status"]
+        }
+        Insert: {
+          id?: string
+          note?: string | null
+          recorded_at?: string
+          recorded_by: string
+          request_id: string
+          scheduled_for: string
+          school_id: string
+          status: Database["public"]["Enums"]["medication_administration_status"]
+        }
+        Update: {
+          id?: string
+          note?: string | null
+          recorded_at?: string
+          recorded_by?: string
+          request_id?: string
+          scheduled_for?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["medication_administration_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_administrations_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_administrations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "medication_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_administrations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medication_requests: {
+        Row: {
+          authorization_reference: string
+          child_id: string
+          created_at: string
+          created_by: string
+          dosage: string
+          ends_on: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          instructions: string
+          medication_name: string
+          scheduled_time: string
+          school_id: string
+          starts_on: string
+          status: Database["public"]["Enums"]["medication_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          authorization_reference: string
+          child_id: string
+          created_at?: string
+          created_by: string
+          dosage: string
+          ends_on: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          instructions: string
+          medication_name: string
+          scheduled_time: string
+          school_id: string
+          starts_on: string
+          status?: Database["public"]["Enums"]["medication_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          authorization_reference?: string
+          child_id?: string
+          created_at?: string
+          created_by?: string
+          dosage?: string
+          ends_on?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          instructions?: string
+          medication_name?: string
+          scheduled_time?: string
+          school_id?: string
+          starts_on?: string
+          status?: Database["public"]["Enums"]["medication_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_requests_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_requests_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_requests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1087,6 +1228,12 @@ export type Database = {
         | "pickup_change"
         | "extended_period"
       handoff_status: "open" | "resolved"
+      medication_administration_status: "administered" | "not_administered"
+      medication_request_status:
+        | "submitted"
+        | "accepted"
+        | "declined"
+        | "completed"
       membership_status: "invited" | "active" | "suspended"
       routine_category:
         | "attendance"
@@ -1258,6 +1405,13 @@ export const Constants = {
         "extended_period",
       ],
       handoff_status: ["open", "resolved"],
+      medication_administration_status: ["administered", "not_administered"],
+      medication_request_status: [
+        "submitted",
+        "accepted",
+        "declined",
+        "completed",
+      ],
       membership_status: ["invited", "active", "suspended"],
       routine_category: [
         "attendance",

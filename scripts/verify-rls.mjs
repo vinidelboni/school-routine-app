@@ -60,6 +60,10 @@ for (const testCase of cases) {
     .select("id, created_by");
   if (familyRequestsError) throw familyRequestsError;
 
+  const { data: medicationRequests, error: medicationRequestsError } =
+    await client.from("medication_requests").select("id, created_by");
+  if (medicationRequestsError) throw medicationRequestsError;
+
   const isolatedVisible = children.some(
     (child) => child.first_name === "Criança" && child.school_id.endsWith("0099"),
   );
@@ -70,6 +74,7 @@ for (const testCase of cases) {
     membershipsVisible: memberships.length,
     familyContactsVisible: familyContacts.length,
     familyRequestsVisible: familyRequests.length,
+    medicationRequestsVisible: medicationRequests.length,
     isolatedTenantVisible: isolatedVisible,
   };
 
@@ -93,6 +98,9 @@ for (const testCase of cases) {
   }
   if (testCase.role === "teacher" && familyRequests.length !== 0) {
     throw new Error("teacher: family requests were visible");
+  }
+  if (testCase.role === "teacher" && medicationRequests.length !== 0) {
+    throw new Error("teacher: medication requests were visible");
   }
 
   if (testCase.role === "family") {
@@ -155,6 +163,23 @@ for (const testCase of cases) {
       });
     if (!forbiddenRequestError) {
       throw new Error("family: cross-tenant request write was accepted");
+    }
+    const { error: forbiddenMedicationError } = await client
+      .from("medication_requests")
+      .insert({
+        school_id: memberships[0].school_id,
+        child_id: "50000000-0000-4000-8000-000000000099",
+        created_by: currentUser.id,
+        medication_name: "Inválido",
+        dosage: "5 gotas",
+        scheduled_time: "14:00",
+        starts_on: "2026-07-29",
+        ends_on: "2026-07-29",
+        instructions: "Não deveria ser aceito",
+        authorization_reference: "Inválida",
+      });
+    if (!forbiddenMedicationError) {
+      throw new Error("family: cross-tenant medication write was accepted");
     }
     result.unauthorizedWriteBlocked = true;
     result.handoffsHidden = true;

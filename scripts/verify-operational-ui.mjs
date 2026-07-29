@@ -139,6 +139,25 @@ await journey("family", "familia@laco.validacao", async (page) => {
     .locator("article")
     .filter({ hasText: "Período integral excepcional" })
     .waitFor();
+
+  await page.getByRole("link", { name: "Medicamentos" }).click();
+  await page.getByText("Solicitar administração").waitFor();
+  const medicationForm = page
+    .locator("form")
+    .filter({ hasText: "Enviar solicitação" });
+  await medicationForm.locator('[name="medicationName"]').fill("Medicamento teste");
+  await medicationForm.locator('[name="dosage"]').fill("5 gotas");
+  await medicationForm.locator('[name="scheduledTime"]').fill("14:00");
+  await medicationForm
+    .locator('[name="instructions"]')
+    .fill("Administrar após o almoço");
+  await medicationForm
+    .locator('[name="authorizationReference"]')
+    .fill("Receita entregue na secretaria");
+  await medicationForm.locator('[name="policyConfirmed"]').check();
+  await medicationForm.getByRole("button", { name: "Enviar solicitação" }).click();
+  await page.getByText("Solicitação enviada para análise da direção!").waitFor();
+  await page.getByText("Aguardando análise").first().waitFor();
 });
 
 await journey("director", "direcao@laco.validacao", async (page) => {
@@ -249,12 +268,31 @@ await journey("director", "direcao@laco.validacao", async (page) => {
     .getByRole("button", { name: "Aprovar solicitação" })
     .click();
   await page.getByText("Aprovado").waitFor();
+
+  await page.getByRole("link", { name: "Medicamentos" }).click();
+  await page.getByText("Medicamentos", { exact: true }).waitFor();
+  const medicationCard = page
+    .locator("article")
+    .filter({ hasText: "Medicamento teste" });
+  await medicationCard
+    .getByRole("button", { name: "Aceitar solicitação" })
+    .click();
+  await page.getByText("Aceitos e aguardando registro").waitFor();
+  const acceptedMedicationCard = page
+    .locator("article")
+    .filter({ hasText: "Medicamento teste" });
+  await acceptedMedicationCard.locator('[name="note"]').fill("Sem intercorrências");
+  await acceptedMedicationCard.getByRole("button", { name: "Registrar" }).click();
+  await page.getByText("Administração registrada!").waitFor();
+  await page.getByText("Administrado · Sem intercorrências").waitFor();
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
   await page.getByRole("link", { name: "Avisos à escola" }).click();
   await page.getByText("Recebido pela escola").waitFor();
   await page.getByText("Aprovado").waitFor();
+  await page.getByRole("link", { name: "Medicamentos" }).click();
+  await page.getByText("Administração confirmada pela escola").waitFor();
 });
 
 for (const result of results) {

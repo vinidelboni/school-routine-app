@@ -247,6 +247,28 @@ const { error: familyRequestsCleanupError } = await supabase
   .eq("school_id", SCHOOL_ID);
 if (familyRequestsCleanupError) throw familyRequestsCleanupError;
 
+const { data: medicationRequests } = await supabase
+  .from("medication_requests")
+  .select("id")
+  .eq("school_id", SCHOOL_ID);
+if (medicationRequests?.length) {
+  const { error: medicationAdministrationsCleanupError } = await supabase
+    .from("medication_administrations")
+    .delete()
+    .in(
+      "request_id",
+      medicationRequests.map((request) => request.id),
+    );
+  if (medicationAdministrationsCleanupError) {
+    throw medicationAdministrationsCleanupError;
+  }
+}
+const { error: medicationRequestsCleanupError } = await supabase
+  .from("medication_requests")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (medicationRequestsCleanupError) throw medicationRequestsCleanupError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],
