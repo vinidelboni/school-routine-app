@@ -33,9 +33,8 @@ export default async function FamilyPage() {
         .limit(3),
       supabase
         .from("occurrence_recipients")
-        .select("id, acknowledged_at, occurrences!inner(severity, title, children(first_name))")
+        .select("id, acknowledged_at, occurrences!inner(severity, title, occurred_at, children(first_name))")
         .eq("membership_id", membership.id)
-        .is("acknowledged_at", null)
         .order("created_at", { ascending: false })
         .limit(2),
     ]);
@@ -88,19 +87,52 @@ export default async function FamilyPage() {
     <div className="mx-auto max-w-2xl">
       {occurrenceAlerts?.length ? (
         <section className="mb-4 rounded-2xl border border-[#d99a8d] bg-[#fff6f3] p-5">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 shrink-0 text-[#a34336]" size={20} />
-            <div className="min-w-0 flex-1">
-              <span className="text-[9px] font-extrabold tracking-[.12em] text-[#a34336]">REQUER SUA CIÊNCIA</span>
-              {occurrenceAlerts.map((alert) => {
-                const occurrence = Array.isArray(alert.occurrences) ? alert.occurrences[0] : alert.occurrences;
-                const relatedChild = Array.isArray(occurrence.children) ? occurrence.children[0] : occurrence.children;
-                return <strong key={alert.id} className="mt-1 block text-sm">{occurrence.title} · {relatedChild?.first_name}</strong>;
-              })}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <AlertTriangle className="mt-0.5 shrink-0 text-[#a34336]" size={20} />
+              <div className="min-w-0">
+                <span className="text-[9px] font-extrabold tracking-[.12em] text-[#a34336]">
+                  OCORRÊNCIAS RECENTES
+                </span>
+                <p className="mt-1 text-[10px] text-[#756459]">
+                  Comunicadas oficialmente pela direção.
+                </p>
+              </div>
             </div>
             <Link href="/app/family/occurrences" className="flex shrink-0 items-center gap-1 rounded-xl bg-[#a34336] px-3 py-2 text-[10px] font-bold text-white">
-              Ver <ChevronRight size={13} />
+              Ver todas <ChevronRight size={13} />
             </Link>
+          </div>
+          <div className="mt-4 grid gap-2">
+            {occurrenceAlerts.map((alert) => {
+              const occurrence = Array.isArray(alert.occurrences) ? alert.occurrences[0] : alert.occurrences;
+              const relatedChild = Array.isArray(occurrence.children) ? occurrence.children[0] : occurrence.children;
+              return (
+                <Link
+                  key={alert.id}
+                  href="/app/family/occurrences"
+                  className={`flex items-center justify-between gap-3 rounded-xl border p-3 ${
+                    alert.acknowledged_at
+                      ? "border-[#e2d8d2] bg-white"
+                      : "border-[#d99a8d] bg-[#fff0eb]"
+                  }`}
+                >
+                  <span>
+                    <strong className="block text-xs">{occurrence.title} · {relatedChild?.first_name}</strong>
+                    <small className="mt-1 block text-[9px] text-[#7c8680]">
+                      {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(occurrence.occurred_at))}
+                    </small>
+                  </span>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold ${
+                    alert.acknowledged_at
+                      ? "bg-[#e6efe9] text-[#315645]"
+                      : "bg-[#a34336] text-white"
+                  }`}>
+                    {alert.acknowledged_at ? "Ciente" : "Requer ciência"}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </section>
       ) : null}

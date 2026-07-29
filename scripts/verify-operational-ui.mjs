@@ -341,12 +341,14 @@ await journey("director", "direcao@laco.validacao", async (page) => {
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
   await page.getByText("COMUNICADOS DA ESCOLA").waitFor();
   await page.getByText("Passeio de validação").waitFor();
-  await page.getByText("REQUER SUA CIÊNCIA").waitFor();
+  await page.getByText("OCORRÊNCIAS RECENTES").waitFor();
   await page.getByText("Queda de validação").waitFor();
-  await page.getByRole("link", { name: "Ver", exact: true }).click();
+  await page.getByRole("link", { name: "Ver todas", exact: true }).click();
   await page.getByRole("button", { name: "Li e estou ciente" }).click();
   await page.getByText("Ciente").waitFor();
   await page.getByRole("link", { name: "Início" }).click();
+  await page.getByText("Queda de validação").waitFor();
+  await page.getByText("Ciente").first().waitFor();
   await page.getByRole("button", { name: "Autorizo", exact: true }).click();
   await page.getByText("Respondido").waitFor();
   await page.getByRole("link", { name: "Avisos à escola" }).click();

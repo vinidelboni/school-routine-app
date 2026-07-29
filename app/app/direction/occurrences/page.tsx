@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { AlertTriangle, CheckCircle2, Clock3, Send } from "lucide-react";
+import { AlertTriangle, BellRing, CheckCircle2, Clock3, Send } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 import {
   occurrenceSeverityLabels,
@@ -94,8 +94,12 @@ export default async function DirectionOccurrencesPage({
               <input type="checkbox" name="communicateNow" className="mt-0.5" />
               <span>
                 <strong className="block text-[#80512f]">Comunicar a família agora</strong>
-                <span className="mt-1 block leading-5 text-[#756459]">Se desmarcado, o registro permanece interno até a direção liberar.</span>
+                <span className="mt-1 block leading-5 text-[#756459]">
+                  Envia push exclusivo aos responsáveis vinculados e publica na
+                  tela inicial da família. Se desmarcado, permanece interno.
+                </span>
               </span>
+              <BellRing className="ml-auto shrink-0 text-[#9a623b]" size={17} />
             </label>
             <SubmitButton idleLabel="Registrar ocorrência" pendingLabel="Registrando..." className="rounded-xl bg-[#315645] px-4 py-3 text-xs font-bold text-white" />
           </div>
@@ -144,5 +148,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Status({ status, acknowledged, total }: { status: string; acknowledged: number; total: number }) {
   if (status === "internal") return <span className="flex items-center gap-1 rounded-full bg-[#eef0ed] px-2.5 py-1 text-[9px] font-bold text-[#66716b]"><Clock3 size={11} /> Interno</span>;
-  return <span className="rounded-full bg-[#fff1dc] px-2.5 py-1 text-[9px] font-bold text-[#8b5b25]">Ciência {acknowledged}/{total}</span>;
+  return (
+    <span className="flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[9px] font-bold text-[#8b5b25]">
+      <BellRing size={11} /> Push · Ciência {acknowledged}/{total}
+    </span>
+  );
 }
