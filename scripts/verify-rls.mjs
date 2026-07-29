@@ -64,6 +64,11 @@ for (const testCase of cases) {
     await client.from("medication_requests").select("id, created_by");
   if (medicationRequestsError) throw medicationRequestsError;
 
+  const { data: billingDocuments, error: billingDocumentsError } = await client
+    .from("billing_documents")
+    .select("id, child_id");
+  if (billingDocumentsError) throw billingDocumentsError;
+
   const isolatedVisible = children.some(
     (child) => child.first_name === "Criança" && child.school_id.endsWith("0099"),
   );
@@ -75,6 +80,7 @@ for (const testCase of cases) {
     familyContactsVisible: familyContacts.length,
     familyRequestsVisible: familyRequests.length,
     medicationRequestsVisible: medicationRequests.length,
+    billingDocumentsVisible: billingDocuments.length,
     isolatedTenantVisible: isolatedVisible,
   };
 
@@ -101,6 +107,9 @@ for (const testCase of cases) {
   }
   if (testCase.role === "teacher" && medicationRequests.length !== 0) {
     throw new Error("teacher: medication requests were visible");
+  }
+  if (testCase.role === "teacher" && billingDocuments.length !== 0) {
+    throw new Error("teacher: billing documents were visible");
   }
 
   if (testCase.role === "family") {

@@ -121,6 +121,118 @@ export type Database = {
           },
         ]
       }
+      billing_batches: {
+        Row: {
+          created_at: string
+          created_by: string
+          distributed_at: string | null
+          id: string
+          reference_month: string
+          school_id: string
+          status: Database["public"]["Enums"]["billing_batch_status"]
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          distributed_at?: string | null
+          id?: string
+          reference_month: string
+          school_id: string
+          status?: Database["public"]["Enums"]["billing_batch_status"]
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          distributed_at?: string | null
+          id?: string
+          reference_month?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["billing_batch_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_batches_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_documents: {
+        Row: {
+          batch_id: string
+          child_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          match_confidence: number
+          original_filename: string
+          payment_reference: string
+          school_id: string
+          status: Database["public"]["Enums"]["billing_document_status"]
+          viewed_at: string | null
+        }
+        Insert: {
+          batch_id: string
+          child_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          match_confidence?: number
+          original_filename: string
+          payment_reference: string
+          school_id: string
+          status?: Database["public"]["Enums"]["billing_document_status"]
+          viewed_at?: string | null
+        }
+        Update: {
+          batch_id?: string
+          child_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          match_confidence?: number
+          original_filename?: string
+          payment_reference?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["billing_document_status"]
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_documents_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "billing_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_documents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_documents_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_contact_links: {
         Row: {
           active: boolean
@@ -1200,6 +1312,8 @@ export type Database = {
     }
     Enums: {
       attendance_status: "present" | "absent" | "late" | "left_early"
+      billing_batch_status: "review" | "distributed"
+      billing_document_status: "matched" | "needs_review" | "distributed"
       day_status: "draft" | "ready" | "published"
       enrollment_status: "active" | "inactive"
       family_access_status:
@@ -1373,6 +1487,8 @@ export const Constants = {
   public: {
     Enums: {
       attendance_status: ["present", "absent", "late", "left_early"],
+      billing_batch_status: ["review", "distributed"],
+      billing_document_status: ["matched", "needs_review", "distributed"],
       day_status: ["draft", "ready", "published"],
       enrollment_status: ["active", "inactive"],
       family_access_status: [

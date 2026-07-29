@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Inbox, LayoutDashboard, LogOut, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { BookOpen, FileText, Inbox, LayoutDashboard, LogOut, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 
@@ -80,6 +80,9 @@ export default async function OperationalLayout({
                 <Link href="/app/direction/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Pill size={17} /> Medicamentos
                 </Link>
+                <Link href="/app/direction/billing" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <FileText size={17} /> Boletos em lote
+                </Link>
               </>
             )}
             {membership.role === "teacher" && (
@@ -97,6 +100,9 @@ export default async function OperationalLayout({
                 </Link>
                 <Link href="/app/family/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Pill size={17} /> Medicamentos
+                </Link>
+                <Link href="/app/family/documents" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <FileText size={17} /> Boletos e documentos
                 </Link>
               </>
             )}

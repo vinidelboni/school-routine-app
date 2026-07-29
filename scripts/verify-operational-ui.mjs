@@ -285,6 +285,31 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await acceptedMedicationCard.getByRole("button", { name: "Registrar" }).click();
   await page.getByText("Administração registrada!").waitFor();
   await page.getByText("Administrado · Sem intercorrências").waitFor();
+
+  await page.getByRole("link", { name: "Boletos em lote" }).click();
+  await page.getByText("Boletos em lote", { exact: true }).waitFor();
+  await page.locator('input[type="file"]').setInputFiles([
+    {
+      name: "boleto-alice-moreira.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4 Alice"),
+    },
+    {
+      name: "boleto-bento-ribeiro.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4 Bento"),
+    },
+  ]);
+  await page.getByText("2 documento(s) analisado(s)").waitFor();
+  await page.getByText("Confiança sugerida: 96%").first().waitFor();
+  await page.getByRole("button", { name: "Criar lote para revisão" }).click();
+  await page.getByText("Lote criado para revisão!").waitFor();
+  await page.getByRole("button", { name: "Confirmar pareamentos" }).click();
+  await page.getByText("Pareamentos confirmados!").waitFor();
+  await page
+    .getByRole("button", { name: "Distribuir lote às famílias" })
+    .click();
+  await page.getByText("Lote distribuído às famílias!").waitFor();
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
@@ -293,6 +318,11 @@ await journey("family-request-status", "familia@laco.validacao", async (page) =>
   await page.getByText("Aprovado").waitFor();
   await page.getByRole("link", { name: "Medicamentos" }).click();
   await page.getByText("Administração confirmada pela escola").waitFor();
+  await page.getByRole("link", { name: "Boletos e documentos" }).click();
+  await page.getByText("Mensalidades da escola").waitFor();
+  await page.getByText("MENS-2026-07-001").waitFor();
+  await page.getByRole("button", { name: "Abrir documento" }).click();
+  await page.getByRole("button", { name: "Visualizado" }).waitFor();
 });
 
 for (const result of results) {

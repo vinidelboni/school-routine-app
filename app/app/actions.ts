@@ -1100,6 +1100,160 @@ export async function recordMedicationAdministration(formData: FormData) {
   redirect("/app/direction/medications?success=administration-recorded");
 }
 
+const billingDocumentInput = z.object({
+  filename: z.string().trim().min(1).max(240),
+  childId: z.union([uuid, z.literal("")]),
+  confidence: z.number().min(0).max(100),
+  dueDate: z.iso.date(),
+  paymentReference: z.string().trim().min(3).max(160),
+});
+
+export async function createBillingBatch(formData: FormData) {
+  const parsed = z.object({
+    title: z.string().trim().min(3).max(120),
+    referenceMonth: z.iso.date(),
+    documents: z.array(billingDocumentInput).min(1).max(100),
+  }).parse({
+    title: formData.get("title"),
+    referenceMonth: formData.get("referenceMonth"),
+    documents: JSON.parse(String(formData.get("documentsJson") ?? "[]")),
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const selectedChildIds = parsed.documents
+    .map((document) => document.childId)
+    .filter(Boolean);
+  if (selectedChildIds.length) {
+    const { data: validChildren } = await supabase
+      .from("children")
+      .select("id")
+      .eq("school_id", membership.school_id)
+      .in("id", selectedChildIds);
+    if (validChildren?.length !== new Set(selectedChildIds).size) {
+      throw new Error("Um dos pareamentos não pertence a esta escola.");
+    }
+  }
+
+  const { data: batch, error: batchError } = await supabase
+    .from("billing_batches")
+    .insert({
+      school_id: membership.school_id,
+      title: parsed.title,
+      reference_month: parsed.referenceMonth,
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
+  if (batchError) throw batchError;
+
+  const { error: documentsError } = await supabase
+    .from("billing_documents")
+    .insert(
+      parsed.documents.map((document) => ({
+        school_id: membership.school_id,
+        batch_id: batch.id,
+        child_id: document.childId || null,
+        original_filename: document.filename,
+        due_date: document.dueDate,
+        payment_reference: document.paymentReference,
+        match_confidence: document.confidence,
+        status:
+          document.childId && document.confidence >= 70
+            ? ("matched" as const)
+            : ("needs_review" as const),
+      })),
+    );
+  if (documentsError) {
+    await supabase.from("billing_batches").delete().eq("id", batch.id);
+    throw documentsError;
+  }
+  revalidatePath("/app/direction/billing");
+  redirect(`/app/direction/billing?batch=${batch.id}&success=batch-created`);
+}
+
+export async function updateBillingMatches(formData: FormData) {
+  const batchId = uuid.parse(formData.get("batchId"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: documents } = await supabase
+    .from("billing_documents")
+    .select("id")
+    .eq("batch_id", batchId)
+    .eq("school_id", membership.school_id);
+  if (!documents?.length) throw new Error("Lote inválido.");
+
+  for (const document of documents) {
+    const childId = uuid.parse(formData.get(`child-${document.id}`));
+    const { data: child } = await supabase
+      .from("children")
+      .select("id")
+      .eq("id", childId)
+      .eq("school_id", membership.school_id)
+      .maybeSingle();
+    if (!child) throw new Error("Criança inválida.");
+    const { error } = await supabase
+      .from("billing_documents")
+      .update({ child_id: childId, status: "matched" })
+      .eq("id", document.id)
+      .eq("school_id", membership.school_id);
+    if (error) throw error;
+  }
+  revalidatePath("/app/direction/billing");
+  redirect(`/app/direction/billing?batch=${batchId}&success=matches-updated`);
+}
+
+export async function distributeBillingBatch(formData: FormData) {
+  const batchId = uuid.parse(formData.get("batchId"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: documents } = await supabase
+    .from("billing_documents")
+    .select("id, child_id, status")
+    .eq("batch_id", batchId)
+    .eq("school_id", membership.school_id);
+  if (!documents?.length || documents.some((document) => !document.child_id)) {
+    throw new Error("Revise todos os pareamentos antes de distribuir.");
+  }
+  const distributedAt = new Date().toISOString();
+  const { error: documentError } = await supabase
+    .from("billing_documents")
+    .update({ status: "distributed" })
+    .eq("batch_id", batchId)
+    .eq("school_id", membership.school_id);
+  if (documentError) throw documentError;
+  const { error: batchError } = await supabase
+    .from("billing_batches")
+    .update({ status: "distributed", distributed_at: distributedAt })
+    .eq("id", batchId)
+    .eq("school_id", membership.school_id);
+  if (batchError) throw batchError;
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "billing_batch.distributed",
+    entity_type: "billing_batch",
+    entity_id: batchId,
+    metadata: { document_count: documents.length },
+  });
+  revalidatePath("/app/direction/billing");
+  revalidatePath("/app/family/documents");
+  redirect(`/app/direction/billing?batch=${batchId}&success=batch-distributed`);
+}
+
+export async function markBillingDocumentViewed(formData: FormData) {
+  const documentId = uuid.parse(formData.get("documentId"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+  const { error } = await supabase
+    .from("billing_documents")
+    .update({ viewed_at: new Date().toISOString() })
+    .eq("id", documentId)
+    .eq("status", "distributed");
+  if (error) throw error;
+  revalidatePath("/app/family/documents");
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

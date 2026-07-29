@@ -269,6 +269,26 @@ const { error: medicationRequestsCleanupError } = await supabase
   .eq("school_id", SCHOOL_ID);
 if (medicationRequestsCleanupError) throw medicationRequestsCleanupError;
 
+const { data: billingBatches } = await supabase
+  .from("billing_batches")
+  .select("id")
+  .eq("school_id", SCHOOL_ID);
+if (billingBatches?.length) {
+  const { error: billingDocumentsCleanupError } = await supabase
+    .from("billing_documents")
+    .delete()
+    .in(
+      "batch_id",
+      billingBatches.map((batch) => batch.id),
+    );
+  if (billingDocumentsCleanupError) throw billingDocumentsCleanupError;
+}
+const { error: billingBatchesCleanupError } = await supabase
+  .from("billing_batches")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (billingBatchesCleanupError) throw billingBatchesCleanupError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],
