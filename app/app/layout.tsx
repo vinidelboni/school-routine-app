@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, BookOpen, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { AlertTriangle, BarChart3, BookOpen, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 
@@ -82,6 +82,9 @@ export default async function OperationalLayout({
                 </Link>
                 <Link href="/app/direction/occurrences" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <AlertTriangle size={17} /> Ocorrências
+                </Link>
+                <Link href="/app/direction/team-engagement" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <BarChart3 size={17} /> Engajamento da equipe
                 </Link>
                 <Link href="/app/direction/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Pill size={17} /> Medicamentos

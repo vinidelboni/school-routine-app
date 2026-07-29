@@ -166,6 +166,11 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("Visualizações registradas").waitFor();
   await page.getByText("CRM da rotina").waitFor();
   await page.getByText("Jornadas das crianças").waitFor();
+  await page.getByRole("link", { name: "Engajamento da equipe" }).click();
+  await page.getByRole("heading", { name: "Engajamento da equipe" }).waitFor();
+  await page.getByText("Visão por professora").waitFor();
+  await page.getByRole("article").getByText("Ana Souza").waitFor();
+  await page.getByText("Visualizações dos responsáveis não são atribuídas à professora.").waitFor();
   await page.getByRole("link", { name: "Pessoas e turmas" }).click();
   await page.getByText("Estrutura da escola").waitFor();
   await page.getByRole("button", { name: /Berçário II 1 a 2 anos/ }).waitFor();
