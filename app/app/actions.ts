@@ -432,7 +432,7 @@ export async function createClassroom(formData: FormData) {
 
   revalidateOperationalViews();
   revalidatePath("/app/direction/registry");
-  redirect(`/app/direction?classroom=${classroom.id}`);
+  redirect(`/app/direction/registry?classroom=${classroom.id}&success=classroom-created`);
 }
 
 export async function createEnrolledChild(formData: FormData) {
@@ -498,6 +498,7 @@ export async function createEnrolledChild(formData: FormData) {
 
   revalidateOperationalViews();
   revalidatePath("/app/direction/registry");
+  redirect(`/app/direction/registry?classroom=${parsed.classroomId}&success=child-created`);
 }
 
 const rosterRow = z.object({

@@ -109,12 +109,17 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByRole("link", { name: /Berçário II 1 a 2 anos/ }).waitFor();
 
   const classroomForm = page.locator("form").filter({ hasText: "Nova turma" });
+  const createButtonColor = await classroomForm
+    .getByRole("button", { name: "Criar turma" })
+    .evaluate((element) => getComputedStyle(element).color);
+  if (createButtonColor !== "rgb(255, 255, 255)") {
+    throw new Error(`create classroom button has insufficient contrast: ${createButtonColor}`);
+  }
   await classroomForm.locator('[name="name"]').fill("Turma Validação");
   await classroomForm.locator('[name="ageGroup"]').fill("3 a 4 anos");
   await classroomForm.locator('[name="teacherMembershipId"]').selectOption({ label: "Ana Souza" });
   await classroomForm.getByRole("button", { name: "Criar turma" }).click();
-  await page.getByText("O que precisa de atenção.").waitFor();
-  await page.getByRole("link", { name: "Pessoas e turmas" }).click();
+  await page.getByText("Turma criada com sucesso!").waitFor();
   await page.getByRole("link", { name: /Turma Validação 3 a 4 anos/ }).waitFor();
 
   const enrollmentForm = page.locator("form").filter({ hasText: "Nova matrícula" });
@@ -122,6 +127,7 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await enrollmentForm.locator('[name="lastName"]').fill("Automática");
   await enrollmentForm.locator('[name="birthDate"]').fill("2023-05-10");
   await enrollmentForm.getByRole("button", { name: "Cadastrar criança" }).click();
+  await page.getByText("Criança cadastrada com sucesso!").waitFor();
   await page.getByText("Validação Automática").waitFor();
 
   await page.locator('input[type="file"]').setInputFiles({

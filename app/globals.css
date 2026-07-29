@@ -37,12 +37,12 @@ textarea {
   font: inherit;
 }
 
-button {
-  color: inherit;
-}
-
 ::selection {
   background: var(--mint);
+}
+
+button:not(:disabled) {
+  cursor: pointer;
 }
 
 .input {

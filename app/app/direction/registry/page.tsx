@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, Plus, School, Users } from "lucide-react";
+import { BookOpen, CheckCircle2, School, Users } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 import { createClassroom, createEnrolledChild } from "../../actions";
 import { ImportRoster } from "./import-roster";
+import { SubmitButton } from "./submit-button";
 
-type SearchParams = Promise<{ classroom?: string }>;
+type SearchParams = Promise<{ classroom?: string; success?: string }>;
 
 export default async function RegistryPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const requestedClassroom = (await searchParams).classroom;
+  const query = await searchParams;
+  const requestedClassroom = query.classroom;
   const { supabase, membership } = await getCurrentContext();
   if (membership.role !== "director") redirect("/app");
 
@@ -57,6 +59,28 @@ export default async function RegistryPage({
         </p>
       </header>
 
+      {query.success ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mt-6 flex items-start gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645] shadow-sm"
+        >
+          <CheckCircle2 size={22} className="mt-0.5 shrink-0" />
+          <span>
+            <strong className="block text-sm">
+              {query.success === "classroom-created"
+                ? "Turma criada com sucesso!"
+                : "Criança cadastrada com sucesso!"}
+            </strong>
+            <small className="mt-1 block text-[#557164]">
+              {query.success === "classroom-created"
+                ? "A turma já está disponível nos seletores da direção e da professora responsável."
+                : "A matrícula já aparece na turma selecionada e na rotina correspondente."}
+            </small>
+          </span>
+        </div>
+      ) : null}
+
       <section className="mt-8 grid gap-4 xl:grid-cols-2">
         <form action={createClassroom} className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
           <strong className="flex items-center gap-2 text-sm"><School size={17} /> Nova turma</strong>
@@ -77,9 +101,11 @@ export default async function RegistryPage({
               </Field>
             </div>
           </div>
-          <button className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white">
-            <Plus size={15} /> Criar turma
-          </button>
+          <SubmitButton
+            idleLabel="Criar turma"
+            pendingLabel="Criando turma..."
+            className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white"
+          />
         </form>
 
         <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
@@ -119,7 +145,11 @@ export default async function RegistryPage({
               <Field label="Entrada personalizada"><input name="expectedStart" type="time" defaultValue="07:30" required className="input" /></Field>
               <Field label="Saída personalizada"><input name="expectedEnd" type="time" defaultValue="17:30" required className="input" /></Field>
             </div>
-            <button className="mt-4 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white">Cadastrar criança</button>
+            <SubmitButton
+              idleLabel="Cadastrar criança"
+              pendingLabel="Cadastrando criança..."
+              className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white"
+            />
           </form>
           <ImportRoster classroomId={selected.id} />
         </section>
