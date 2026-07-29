@@ -107,7 +107,22 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("Jornadas das crianças").waitFor();
   await page.getByRole("link", { name: "Pessoas e turmas" }).click();
   await page.getByText("Estrutura da escola").waitFor();
-  await page.getByRole("link", { name: /Berçário II 1 a 2 anos/ }).waitFor();
+  await page.getByRole("button", { name: /Berçário II 1 a 2 anos/ }).waitFor();
+
+  await page.evaluate(() => {
+    window.__lacoClassroomSelectionMarker = "preserved";
+  });
+  await page.getByRole("button", { name: /Maternal I 2 a 3 anos/ }).click();
+  await page.getByText("Nova matrícula · Maternal I").waitFor();
+  const selectionMarker = await page.evaluate(
+    () => window.__lacoClassroomSelectionMarker,
+  );
+  if (selectionMarker !== "preserved") {
+    throw new Error("classroom selection reloaded the document");
+  }
+  if (!page.url().includes("classroom=")) {
+    throw new Error("classroom selection did not update the shareable URL");
+  }
 
   const classroomForm = page.locator("form").filter({ hasText: "Nova turma" });
   const createButtonColor = await classroomForm
@@ -121,7 +136,7 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await classroomForm.locator('[name="teacherMembershipId"]').selectOption({ label: "Ana Souza" });
   await classroomForm.getByRole("button", { name: "Criar turma" }).click();
   await page.getByText("Turma criada com sucesso!").waitFor();
-  await page.getByRole("link", { name: /Turma Validação 3 a 4 anos/ }).waitFor();
+  await page.getByRole("button", { name: /Turma Validação 3 a 4 anos/ }).waitFor();
 
   const enrollmentForm = page.locator("form").filter({ hasText: "Nova matrícula" });
   await enrollmentForm.locator('[name="firstName"]').fill("Validação");
