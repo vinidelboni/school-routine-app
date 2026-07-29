@@ -30,6 +30,7 @@ import {
   Users,
   Utensils,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import styles from "./demo-app.module.css";
 
@@ -133,9 +134,14 @@ function EntryScreen({ onChoose }: { onChoose: (role: Role) => void }) {
     <main className={styles.entry}>
       <header className={styles.entryHeader}>
         <Brand />
-        <span className={styles.demoPill}>
-          <Sparkles size={14} /> Ambiente demonstrativo
-        </span>
+        <div className="flex items-center gap-2">
+          <Link href="/demo/guide" className={styles.demoPill}>
+            <BookOpen size={14} /> Roteiro guiado
+          </Link>
+          <span className={styles.demoPill}>
+            <Sparkles size={14} /> Ambiente demonstrativo
+          </span>
+        </div>
       </header>
 
       <section className={styles.hero}>
