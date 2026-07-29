@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, LayoutDashboard, LogOut, ShieldCheck, Users } from "lucide-react";
+import { BookOpen, LayoutDashboard, LogOut, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 
@@ -70,6 +70,9 @@ export default async function OperationalLayout({
                 </Link>
                 <Link href="/app/direction/registry" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Users size={17} /> Pessoas e turmas
+                </Link>
+                <Link href="/app/direction/families" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <UsersRound size={17} /> Famílias e acessos
                 </Link>
               </>
             )}

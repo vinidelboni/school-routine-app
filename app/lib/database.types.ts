@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       attendance_records: {
@@ -139,6 +114,76 @@ export type Database = {
           },
           {
             foreignKeyName: "audit_logs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      child_contact_links: {
+        Row: {
+          active: boolean
+          can_view_communications: boolean
+          can_view_documents: boolean
+          can_view_photos: boolean
+          can_view_routine: boolean
+          child_id: string
+          contact_id: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["family_contact_kind"]
+          relationship: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          can_view_communications?: boolean
+          can_view_documents?: boolean
+          can_view_photos?: boolean
+          can_view_routine?: boolean
+          child_id: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["family_contact_kind"]
+          relationship: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          can_view_communications?: boolean
+          can_view_documents?: boolean
+          can_view_photos?: boolean
+          can_view_routine?: boolean
+          child_id?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["family_contact_kind"]
+          relationship?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_contact_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_contact_links_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "family_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_contact_links_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -393,6 +438,59 @@ export type Database = {
           },
           {
             foreignKeyName: "enrollments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_contacts: {
+        Row: {
+          access_status: Database["public"]["Enums"]["family_access_status"]
+          activated_at: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          invitation_expires_at: string | null
+          invited_at: string | null
+          phone: string
+          school_id: string
+          suspended_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_status?: Database["public"]["Enums"]["family_access_status"]
+          activated_at?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          invitation_expires_at?: string | null
+          invited_at?: string | null
+          phone: string
+          school_id: string
+          suspended_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_status?: Database["public"]["Enums"]["family_access_status"]
+          activated_at?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          invitation_expires_at?: string | null
+          invited_at?: string | null
+          phone?: string
+          school_id?: string
+          suspended_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_contacts_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -889,6 +987,17 @@ export type Database = {
       attendance_status: "present" | "absent" | "late" | "left_early"
       day_status: "draft" | "ready" | "published"
       enrollment_status: "active" | "inactive"
+      family_access_status:
+        | "not_invited"
+        | "pending"
+        | "active"
+        | "expired"
+        | "suspended"
+      family_contact_kind:
+        | "primary_guardian"
+        | "additional_guardian"
+        | "emergency_contact"
+        | "pickup_only"
       handoff_status: "open" | "resolved"
       membership_status: "invited" | "active" | "suspended"
       routine_category:
@@ -1026,14 +1135,24 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       attendance_status: ["present", "absent", "late", "left_early"],
       day_status: ["draft", "ready", "published"],
       enrollment_status: ["active", "inactive"],
+      family_access_status: [
+        "not_invited",
+        "pending",
+        "active",
+        "expired",
+        "suspended",
+      ],
+      family_contact_kind: [
+        "primary_guardian",
+        "additional_guardian",
+        "emergency_contact",
+        "pickup_only",
+      ],
       handoff_status: ["open", "resolved"],
       membership_status: ["invited", "active", "suspended"],
       routine_category: [

@@ -619,6 +619,179 @@ export async function importRoster(
   };
 }
 
+const contactKindSchema = z.enum([
+  "primary_guardian",
+  "additional_guardian",
+  "emergency_contact",
+  "pickup_only",
+]);
+
+export async function createFamilyContact(formData: FormData) {
+  const parsed = z
+    .object({
+      childIds: z.array(uuid).min(1),
+      fullName: z.string().trim().min(3).max(160),
+      email: z.union([z.email(), z.literal("")]),
+      phone: z.string().trim().min(8).max(30),
+      relationship: z.string().trim().min(2).max(60),
+      kind: contactKindSchema,
+      canViewRoutine: z.boolean(),
+      canViewPhotos: z.boolean(),
+      canViewCommunications: z.boolean(),
+      canViewDocuments: z.boolean(),
+      sendInvite: z.boolean(),
+    })
+    .parse({
+      childIds: formData.getAll("childIds"),
+      fullName: formData.get("fullName"),
+      email: formData.get("email") ?? "",
+      phone: formData.get("phone"),
+      relationship: formData.get("relationship"),
+      kind: formData.get("kind"),
+      canViewRoutine: formData.get("canViewRoutine") === "on",
+      canViewPhotos: formData.get("canViewPhotos") === "on",
+      canViewCommunications: formData.get("canViewCommunications") === "on",
+      canViewDocuments: formData.get("canViewDocuments") === "on",
+      sendInvite: formData.get("sendInvite") === "on",
+    });
+
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { data: validChildren } = await supabase
+    .from("children")
+    .select("id")
+    .eq("school_id", membership.school_id)
+    .eq("active", true)
+    .in("id", parsed.childIds);
+  if (validChildren?.length !== new Set(parsed.childIds).size) {
+    throw new Error("Uma ou mais crianças são inválidas.");
+  }
+
+  const grantsAppAccess = ["primary_guardian", "additional_guardian"].includes(
+    parsed.kind,
+  );
+  if (parsed.sendInvite && (!grantsAppAccess || !parsed.email)) {
+    throw new Error("O convite exige um responsável com e-mail válido.");
+  }
+
+  const invitedAt = parsed.sendInvite ? new Date() : null;
+  const invitationExpiresAt = invitedAt
+    ? new Date(invitedAt.getTime() + 7 * 24 * 60 * 60 * 1000)
+    : null;
+  const { data: contact, error: contactError } = await supabase
+    .from("family_contacts")
+    .insert({
+      school_id: membership.school_id,
+      full_name: parsed.fullName,
+      email: parsed.email || null,
+      phone: parsed.phone,
+      access_status: parsed.sendInvite ? "pending" : "not_invited",
+      invited_at: invitedAt?.toISOString() ?? null,
+      invitation_expires_at: invitationExpiresAt?.toISOString() ?? null,
+    })
+    .select("id")
+    .single();
+  if (contactError) throw contactError;
+
+  const permissions = grantsAppAccess
+    ? {
+        can_view_routine: parsed.canViewRoutine,
+        can_view_photos: parsed.canViewPhotos,
+        can_view_communications: parsed.canViewCommunications,
+        can_view_documents: parsed.canViewDocuments,
+      }
+    : {
+        can_view_routine: false,
+        can_view_photos: false,
+        can_view_communications: false,
+        can_view_documents: false,
+      };
+  const { error: linksError } = await supabase.from("child_contact_links").insert(
+    parsed.childIds.map((childId) => ({
+      school_id: membership.school_id,
+      child_id: childId,
+      contact_id: contact.id,
+      kind: parsed.kind,
+      relationship: parsed.relationship,
+      ...permissions,
+    })),
+  );
+  if (linksError) {
+    await supabase.from("family_contacts").delete().eq("id", contact.id);
+    throw linksError;
+  }
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "family_contact.created",
+    entity_type: "family_contact",
+    entity_id: contact.id,
+    metadata: {
+      child_ids: parsed.childIds,
+      kind: parsed.kind,
+      invitation_requested: parsed.sendInvite,
+    },
+  });
+
+  revalidatePath("/app/direction/families");
+  redirect(
+    `/app/direction/families?contact=${contact.id}&success=contact-created`,
+  );
+}
+
+export async function updateFamilyAccessStatus(formData: FormData) {
+  const parsed = z
+    .object({
+      contactId: uuid,
+      status: z.enum(["pending", "active", "expired", "suspended"]),
+    })
+    .parse({
+      contactId: formData.get("contactId"),
+      status: formData.get("status"),
+    });
+
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const now = new Date();
+  const update = {
+    access_status: parsed.status,
+    invited_at: parsed.status === "pending" ? now.toISOString() : undefined,
+    invitation_expires_at:
+      parsed.status === "pending"
+        ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        : undefined,
+    activated_at: parsed.status === "active" ? now.toISOString() : undefined,
+    suspended_at:
+      parsed.status === "suspended" ? now.toISOString() : null,
+  };
+  const { data: contact, error } = await supabase
+    .from("family_contacts")
+    .update(update)
+    .eq("id", parsed.contactId)
+    .eq("school_id", membership.school_id)
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!contact) throw new Error("Contato inválido.");
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "family_contact.access_status_updated",
+    entity_type: "family_contact",
+    entity_id: contact.id,
+    metadata: { status: parsed.status },
+  });
+
+  revalidatePath("/app/direction/families");
+  redirect(
+    `/app/direction/families?contact=${contact.id}&success=status-updated`,
+  );
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

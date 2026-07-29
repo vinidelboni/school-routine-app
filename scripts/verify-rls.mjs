@@ -10,19 +10,20 @@ const cases = [
   {
     role: "director",
     email: "direcao@laco.validacao",
-    expectedChildren: 5,
+    minimumChildren: 5,
     expectedMemberships: 3,
   },
   {
     role: "teacher",
     email: "professora@laco.validacao",
-    expectedChildren: 5,
+    minimumChildren: 5,
     expectedMemberships: 1,
   },
   {
     role: "family",
     email: "familia@laco.validacao",
-    expectedChildren: 1,
+    minimumChildren: 1,
+    exactChildren: 1,
     expectedMemberships: 1,
   },
 ];
@@ -49,6 +50,11 @@ for (const testCase of cases) {
     .select("id, role, school_id");
   if (membershipsError) throw membershipsError;
 
+  const { data: familyContacts, error: familyContactsError } = await client
+    .from("family_contacts")
+    .select("id, school_id");
+  if (familyContactsError) throw familyContactsError;
+
   const isolatedVisible = children.some(
     (child) => child.first_name === "Criança" && child.school_id.endsWith("0099"),
   );
@@ -57,10 +63,14 @@ for (const testCase of cases) {
     role: testCase.role,
     childrenVisible: children.length,
     membershipsVisible: memberships.length,
+    familyContactsVisible: familyContacts.length,
     isolatedTenantVisible: isolatedVisible,
   };
 
-  if (children.length !== testCase.expectedChildren) {
+  if (
+    children.length < testCase.minimumChildren ||
+    (testCase.exactChildren && children.length !== testCase.exactChildren)
+  ) {
     throw new Error(`${testCase.role}: unexpected child visibility`);
   }
   if (memberships.length !== testCase.expectedMemberships) {
@@ -68,6 +78,12 @@ for (const testCase of cases) {
   }
   if (isolatedVisible) {
     throw new Error(`${testCase.role}: cross-tenant child was visible`);
+  }
+  if (
+    (testCase.role === "director" && familyContacts.length < 1) ||
+    (testCase.role !== "director" && familyContacts.length !== 0)
+  ) {
+    throw new Error(`${testCase.role}: unexpected family contact visibility`);
   }
 
   if (testCase.role === "family") {
@@ -107,6 +123,16 @@ for (const testCase of cases) {
       });
     if (!forbiddenHandoffError) {
       throw new Error("family: unauthorized handoff write was accepted");
+    }
+    const { error: forbiddenContactError } = await client
+      .from("family_contacts")
+      .insert({
+        school_id: memberships[0].school_id,
+        full_name: "Contato não autorizado",
+        phone: "(11) 90000-0000",
+      });
+    if (!forbiddenContactError) {
+      throw new Error("family: unauthorized family contact write was accepted");
     }
     result.unauthorizedWriteBlocked = true;
     result.handoffsHidden = true;

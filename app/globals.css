@@ -57,6 +57,16 @@ button:not(:disabled) {
   outline: none;
 }
 
+.field-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #758079;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .input:focus {
   border-color: #6f9583;
   box-shadow: 0 0 0 3px rgba(66, 113, 93, 0.1);

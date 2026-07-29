@@ -34,8 +34,19 @@ async function cleanupValidationClassrooms() {
   if (error) throw error;
 }
 
+async function cleanupValidationContacts() {
+  if (!admin) return;
+  const { error } = await admin
+    .from("family_contacts")
+    .delete()
+    .in("full_name", ["Responsável Validação", "Retirada Validação"])
+    .eq("school_id", "10000000-0000-4000-8000-000000000001");
+  if (error) throw error;
+}
+
 await cleanupValidationChildren();
 await cleanupValidationClassrooms();
+await cleanupValidationContacts();
 
 async function login(page, email) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "networkidle" });
@@ -157,6 +168,41 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("Importada Automática").waitFor();
   await page.getByRole("button", { name: "Confirmar 1 cadastros" }).click();
   await page.getByText("1 crianças importadas com sucesso.").waitFor();
+
+  await page.getByRole("link", { name: "Famílias e acessos" }).click();
+  await page.getByText("Quem pode acessar cada criança").waitFor();
+  await page.getByRole("heading", { name: "Fernanda Moreira" }).waitFor();
+
+  const contactForm = page.locator("form").filter({ hasText: "Cadastrar contato" });
+  await contactForm.getByText("Alice Moreira").click();
+  await contactForm.getByText("Eva Lima").click();
+  await contactForm.locator('[name="fullName"]').fill("Responsável Validação");
+  await contactForm.locator('[name="relationship"]').fill("Pai");
+  await contactForm.locator('[name="email"]').fill("responsavel@laco.validacao");
+  await contactForm.locator('[name="phone"]').fill("(11) 99999-2020");
+  await contactForm.locator('[name="sendInvite"]').check();
+  await contactForm.getByRole("button", { name: "Cadastrar e vincular" }).click();
+  await page.getByText("Contato cadastrado e vinculado!").waitFor();
+  await page.getByText("Convite pendente").first().waitFor();
+  await page.getByText("2 criança(s)").waitFor();
+  await page.getByRole("button", { name: "Simular ativação" }).click();
+  await page.getByText("Situação do acesso atualizada!").waitFor();
+  await page.getByText("Acesso ativado").first().waitFor();
+  await page.getByRole("button", { name: "Suspender acesso" }).click();
+  await page.getByText("Acesso suspenso").first().waitFor();
+
+  const pickupForm = page.locator("form").filter({ hasText: "Cadastrar contato" });
+  await pickupForm.getByText("Bento Ribeiro").click();
+  await pickupForm.locator('[name="fullName"]').fill("Retirada Validação");
+  await pickupForm.locator('[name="relationship"]').fill("Tia");
+  await pickupForm.locator('[name="phone"]').fill("(11) 98888-3030");
+  await pickupForm.locator('[name="kind"]').selectOption("pickup_only");
+  await pickupForm.getByText("não terá acesso ao aplicativo").waitFor();
+  await pickupForm.getByRole("button", { name: "Cadastrar e vincular" }).click();
+  await page.getByText("Contato cadastrado e vinculado!").waitFor();
+  await page
+    .getByText("Este contato não possui nem receberá acesso ao aplicativo.")
+    .waitFor();
 });
 
 for (const result of results) {
@@ -169,3 +215,4 @@ console.log(JSON.stringify(results, null, 2));
 await browser.close();
 await cleanupValidationChildren();
 await cleanupValidationClassrooms();
+await cleanupValidationContacts();

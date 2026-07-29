@@ -1,6 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
+import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
 export function SubmitButton({
@@ -8,7 +9,7 @@ export function SubmitButton({
   pendingLabel,
   className,
 }: {
-  idleLabel: string;
+  idleLabel: ReactNode;
   pendingLabel: string;
   className: string;
 }) {

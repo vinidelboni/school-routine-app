@@ -211,6 +211,36 @@ const { error: guardianError } = await supabase.from("guardian_links").upsert({
 });
 if (guardianError) throw guardianError;
 
+const { error: familyContactError } = await supabase
+  .from("family_contacts")
+  .upsert({
+    id: "71000000-0000-4000-8000-000000000001",
+    school_id: SCHOOL_ID,
+    full_name: "Fernanda Moreira",
+    email: "familia@laco.validacao",
+    phone: "(11) 99999-0101",
+    access_status: "active",
+    activated_at: "2026-07-20T12:00:00.000Z",
+  });
+if (familyContactError) throw familyContactError;
+
+const { error: childContactLinkError } = await supabase
+  .from("child_contact_links")
+  .upsert({
+    id: "72000000-0000-4000-8000-000000000001",
+    school_id: SCHOOL_ID,
+    child_id: children[0][0],
+    contact_id: "71000000-0000-4000-8000-000000000001",
+    kind: "primary_guardian",
+    relationship: "Mãe",
+    can_view_routine: true,
+    can_view_photos: true,
+    can_view_communications: true,
+    can_view_documents: true,
+    active: true,
+  });
+if (childContactLinkError) throw childContactLinkError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],
