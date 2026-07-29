@@ -71,6 +71,15 @@ for (const testCase of cases) {
   }
 
   if (testCase.role === "family") {
+    const { data: handoffs, error: handoffReadError } = await client
+      .from("shift_handoffs")
+      .select("id");
+    if (handoffReadError) throw handoffReadError;
+    if (handoffs.length !== 0) {
+      throw new Error("family: shift handoffs were visible");
+    }
+
+    const currentUser = (await client.auth.getUser()).data.user;
     const { error: forbiddenWriteError } = await client
       .from("routine_entries")
       .insert({
@@ -80,12 +89,27 @@ for (const testCase of cases) {
         category: "meal",
         period_key: "unauthorized-test",
         value: { label: "Não deveria ser aceito" },
-        recorded_by: (await client.auth.getUser()).data.user.id,
+        recorded_by: currentUser.id,
       });
     if (!forbiddenWriteError) {
       throw new Error("family: unauthorized routine write was accepted");
     }
+    const { error: forbiddenHandoffError } = await client
+      .from("shift_handoffs")
+      .insert({
+        school_id: memberships[0].school_id,
+        school_day_id: "30000000-0000-4000-8000-000000000001",
+        classroom_id: "20000000-0000-4000-8000-000000000001",
+        from_shift: "morning",
+        to_shift: "afternoon",
+        note: "Tentativa não autorizada",
+        created_by: currentUser.id,
+      });
+    if (!forbiddenHandoffError) {
+      throw new Error("family: unauthorized handoff write was accepted");
+    }
     result.unauthorizedWriteBlocked = true;
+    result.handoffsHidden = true;
   }
 
   results.push(result);

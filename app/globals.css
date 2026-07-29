@@ -31,7 +31,9 @@ body {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -41,4 +43,21 @@ button {
 
 ::selection {
   background: var(--mint);
+}
+
+.input {
+  width: 100%;
+  height: 2.5rem;
+  border: 1px solid #dfe1d9;
+  border-radius: 0.75rem;
+  background: #fafaf7;
+  padding: 0 0.75rem;
+  color: var(--ink);
+  font-size: 0.75rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #6f9583;
+  box-shadow: 0 0 0 3px rgba(66, 113, 93, 0.1);
 }

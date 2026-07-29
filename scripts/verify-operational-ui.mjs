@@ -30,11 +30,33 @@ async function journey(name, email, run) {
 }
 
 await journey("teacher", "professora@laco.validacao", async (page) => {
-  await page.getByRole("button", { name: "Marcar turma presente" }).click();
+  await page.getByText("4 crianças previstas").waitFor();
+  await page.getByRole("button", { name: "Marcar grupo presente" }).click();
   await page.getByRole("button", { name: "Atualizar chamada" }).waitFor();
-  await page.getByLabel("Exceção de Cecília").selectOption("Comeu pouco");
-  await page.getByRole("button", { name: "Salvar alimentação" }).click();
-  await page.getByRole("button", { name: /Publicar 4 agendas/ }).click();
+
+  for (const moduleName of ["Alimentação", "Hidratação", "Atividade"]) {
+    const moduleForm = page.locator("form").filter({ has: page.getByRole("heading", { name: moduleName }) });
+    if (moduleName === "Alimentação") {
+      await moduleForm.getByLabel("Exceção de Alimentação para Cecília").selectOption("Comeu pouco");
+    }
+    await moduleForm.getByRole("button", { name: "Aplicar para o grupo" }).click();
+    await moduleForm.getByText("4/4 registrados").waitFor();
+  }
+
+  await page.getByPlaceholder(/Bento precisa trocar/).fill("Bento precisa trocar a roupa após o descanso.");
+  await page.getByRole("button", { name: "Registrar passagem de turno" }).click();
+  await page.getByRole("link", { name: "Tarde" }).click();
+  await page.getByText("3 crianças previstas").waitFor();
+  await page.getByText("Bento precisa trocar a roupa após o descanso.").waitFor();
+  await page.getByRole("button", { name: "Marcar como resolvida" }).click();
+
+  for (const moduleName of ["Alimentação", "Hidratação", "Atividade"]) {
+    const moduleForm = page.locator("form").filter({ has: page.getByRole("heading", { name: moduleName }) });
+    await moduleForm.getByRole("button", { name: "Aplicar para o grupo" }).click();
+    await moduleForm.getByText("3/3 registrados").waitFor();
+  }
+
+  await page.getByRole("button", { name: "Publicar agendas" }).click();
   await page.getByText("Dia publicado").waitFor();
 });
 
@@ -48,6 +70,8 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("O que precisa de atenção.").waitFor();
   await page.getByText("Resumos publicados").waitFor();
   await page.getByText("Visualizações registradas").waitFor();
+  await page.getByText("CRM da rotina").waitFor();
+  await page.getByText("Jornadas das crianças").waitFor();
 });
 
 for (const result of results) {

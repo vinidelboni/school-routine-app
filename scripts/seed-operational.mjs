@@ -170,29 +170,27 @@ const { error: guardianError } = await supabase.from("guardian_links").upsert({
 });
 if (guardianError) throw guardianError;
 
+const routineConfigurations = [
+  ["attendance", true, true, []],
+  ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],
+  ["hydration", true, true, ["Hidratou-se normalmente", "Bebeu pouco", "Recusou água"]],
+  ["sleep", true, false, ["Dormiu bem", "Sono curto", "Não dormiu"]],
+  ["hygiene", true, false, ["Sem observações", "Evacuou", "Precisou de troca extra"]],
+  ["activity", true, true, ["Participou", "Participou com apoio", "Preferiu observar"]],
+  ["note", false, false, ["Sem observações"]],
+];
 const { error: configError } = await supabase
   .from("routine_configurations")
   .upsert(
-    [
-      {
-        school_id: SCHOOL_ID,
-        classroom_id: CLASSROOM_ID,
-        category: "attendance",
-        enabled: true,
-        required: true,
-        position: 1,
-        options: [],
-      },
-      {
-        school_id: SCHOOL_ID,
-        classroom_id: CLASSROOM_ID,
-        category: "meal",
-        enabled: true,
-        required: true,
-        position: 2,
-        options: ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"],
-      },
-    ],
+    routineConfigurations.map(([category, enabled, required, options], index) => ({
+      school_id: SCHOOL_ID,
+      classroom_id: CLASSROOM_ID,
+      category,
+      enabled,
+      required,
+      position: index + 1,
+      options,
+    })),
     { onConflict: "classroom_id,category" },
   );
 if (configError) throw configError;
@@ -211,7 +209,7 @@ if (existingSummaries.length > 0) {
   if (viewCleanupError) throw viewCleanupError;
 }
 
-for (const table of ["daily_summaries", "routine_entries", "attendance_records"]) {
+for (const table of ["shift_handoffs", "daily_summaries", "routine_entries", "attendance_records"]) {
   const { error } = await supabase.from(table).delete().eq("school_day_id", DAY_ID);
   if (error) throw error;
 }
@@ -220,7 +218,7 @@ const { error: dayError } = await supabase.from("school_days").upsert({
   id: DAY_ID,
   school_id: SCHOOL_ID,
   classroom_id: CLASSROOM_ID,
-  day: "2026-07-28",
+  day: "2026-07-29",
   status: "draft",
   published_at: null,
   published_by: null,

@@ -725,6 +725,87 @@ export type Database = {
         }
         Relationships: []
       }
+      shift_handoffs: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          created_by: string
+          from_shift: Database["public"]["Enums"]["shift_key"]
+          id: string
+          note: string
+          resolved_at: string | null
+          resolved_by: string | null
+          school_day_id: string
+          school_id: string
+          status: Database["public"]["Enums"]["handoff_status"]
+          to_shift: Database["public"]["Enums"]["shift_key"]
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          created_by: string
+          from_shift: Database["public"]["Enums"]["shift_key"]
+          id?: string
+          note: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_day_id: string
+          school_id: string
+          status?: Database["public"]["Enums"]["handoff_status"]
+          to_shift: Database["public"]["Enums"]["shift_key"]
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          created_by?: string
+          from_shift?: Database["public"]["Enums"]["shift_key"]
+          id?: string
+          note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_day_id?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["handoff_status"]
+          to_shift?: Database["public"]["Enums"]["shift_key"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_handoffs_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_handoffs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_handoffs_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_handoffs_school_day_id_fkey"
+            columns: ["school_day_id"]
+            isOneToOne: false
+            referencedRelation: "school_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_handoffs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       summary_views: {
         Row: {
           first_viewed_at: string
@@ -799,11 +880,16 @@ export type Database = {
         Args: { target_day_id: string }
         Returns: undefined
       }
+      resolve_shift_handoff: {
+        Args: { target_handoff_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       attendance_status: "present" | "absent" | "late" | "left_early"
       day_status: "draft" | "ready" | "published"
       enrollment_status: "active" | "inactive"
+      handoff_status: "open" | "resolved"
       membership_status: "invited" | "active" | "suspended"
       routine_category:
         | "attendance"
@@ -814,6 +900,7 @@ export type Database = {
         | "activity"
         | "note"
       school_role: "director" | "teacher" | "family"
+      shift_key: "morning" | "afternoon"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -947,6 +1034,7 @@ export const Constants = {
       attendance_status: ["present", "absent", "late", "left_early"],
       day_status: ["draft", "ready", "published"],
       enrollment_status: ["active", "inactive"],
+      handoff_status: ["open", "resolved"],
       membership_status: ["invited", "active", "suspended"],
       routine_category: [
         "attendance",
@@ -958,6 +1046,7 @@ export const Constants = {
         "note",
       ],
       school_role: ["director", "teacher", "family"],
+      shift_key: ["morning", "afternoon"],
     },
   },
 } as const
