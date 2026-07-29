@@ -53,7 +53,15 @@ async function login(page, email) {
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
   await page.getByRole("button", { name: "Entrar com segurança" }).click();
-  await page.waitForURL(/\/app\//);
+  await page.waitForURL(/\/app(?:\/|$)/);
+  if (new URL(page.url()).pathname === "/app") {
+    const destination = email.startsWith("direcao")
+      ? "/app/direction"
+      : email.startsWith("professora")
+        ? "/app/teacher"
+        : "/app/family";
+    await page.goto(`${baseUrl}${destination}`, { waitUntil: "networkidle" });
+  }
 }
 
 async function journey(name, email, run) {
@@ -108,6 +116,29 @@ await journey("family", "familia@laco.validacao", async (page) => {
   await page.getByText("O dia de Alice").waitFor();
   await page.getByRole("button", { name: "Registrar que visualizei" }).click();
   await page.getByRole("button", { name: "Visualização registrada" }).waitFor();
+
+  await page.getByRole("link", { name: "Avisos à escola" }).click();
+  await page.getByText("Avisos à escola", { exact: true }).waitFor();
+  const requestForm = page.locator("form").filter({ hasText: "Informar a escola" });
+  await requestForm.locator('[name="detailPrimary"]').fill("Consulta médica");
+  await requestForm.locator('[name="detailSecondary"]').fill("Retorna amanhã");
+  await requestForm.getByRole("button", { name: "Enviar aviso à direção" }).click();
+  await page.getByText("Aviso enviado para a direção!").waitFor();
+  await page.locator("article").filter({ hasText: "Faltará" }).waitFor();
+
+  const extendedForm = page.locator("form").filter({ hasText: "Informar a escola" });
+  await extendedForm
+    .locator('[name="requestType"]')
+    .selectOption("extended_period");
+  await extendedForm.locator('[name="detailPrimary"]').fill("18:30");
+  await extendedForm
+    .locator('[name="detailSecondary"]')
+    .fill("Compromisso profissional");
+  await extendedForm.getByRole("button", { name: "Enviar aviso à direção" }).click();
+  await page
+    .locator("article")
+    .filter({ hasText: "Período integral excepcional" })
+    .waitFor();
 });
 
 await journey("director", "direcao@laco.validacao", async (page) => {
@@ -203,6 +234,27 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page
     .getByText("Este contato não possui nem receberá acesso ao aplicativo.")
     .waitFor();
+
+  await page.getByRole("link", { name: "Avisos e solicitações" }).click();
+  await page.getByText("Avisos e solicitações", { exact: true }).waitFor();
+  const absenceCard = page.locator("article").filter({ hasText: "Faltará" });
+  await absenceCard
+    .getByRole("button", { name: "Confirmar recebimento" })
+    .click();
+  await page.getByText("Solicitação atualizada!").waitFor();
+  const extendedCard = page
+    .locator("article")
+    .filter({ hasText: "Período integral excepcional" });
+  await extendedCard
+    .getByRole("button", { name: "Aprovar solicitação" })
+    .click();
+  await page.getByText("Aprovado").waitFor();
+});
+
+await journey("family-request-status", "familia@laco.validacao", async (page) => {
+  await page.getByRole("link", { name: "Avisos à escola" }).click();
+  await page.getByText("Recebido pela escola").waitFor();
+  await page.getByText("Aprovado").waitFor();
 });
 
 for (const result of results) {

@@ -792,6 +792,147 @@ export async function updateFamilyAccessStatus(formData: FormData) {
   );
 }
 
+const familyRequestTypeSchema = z.enum([
+  "absence",
+  "late_arrival",
+  "early_departure",
+  "poor_sleep",
+  "toilet_training",
+  "pickup_change",
+  "extended_period",
+]);
+
+export async function createFamilyRequest(formData: FormData) {
+  const parsed = z
+    .object({
+      childId: uuid,
+      requestType: familyRequestTypeSchema,
+      effectiveDate: z.iso.date(),
+      detailPrimary: z.string().trim().min(1).max(160),
+      detailSecondary: z.string().trim().max(160),
+    })
+    .parse({
+      childId: formData.get("childId"),
+      requestType: formData.get("requestType"),
+      effectiveDate: formData.get("effectiveDate"),
+      detailPrimary: formData.get("detailPrimary"),
+      detailSecondary: formData.get("detailSecondary") ?? "",
+    });
+
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+
+  const { data: guardianLink } = await supabase
+    .from("guardian_links")
+    .select("id, school_id")
+    .eq("membership_id", membership.id)
+    .eq("child_id", parsed.childId)
+    .eq("active", true)
+    .maybeSingle();
+  if (!guardianLink || guardianLink.school_id !== membership.school_id) {
+    throw new Error("Vínculo familiar inválido.");
+  }
+
+  const detailKeys = {
+    absence: ["reason", "note"],
+    late_arrival: ["expected_time", "reason"],
+    early_departure: ["departure_time", "pickup_person"],
+    poor_sleep: ["sleep_note", "wake_note"],
+    toilet_training: ["stage", "care_note"],
+    pickup_change: ["pickup_person", "relationship"],
+    extended_period: ["requested_until", "reason"],
+  } as const;
+  const [primaryKey, secondaryKey] = detailKeys[parsed.requestType];
+  const { data: request, error } = await supabase
+    .from("family_requests")
+    .insert({
+      school_id: membership.school_id,
+      child_id: parsed.childId,
+      created_by: user.id,
+      request_type: parsed.requestType,
+      effective_date: parsed.effectiveDate,
+      details: {
+        [primaryKey]: parsed.detailPrimary,
+        [secondaryKey]: parsed.detailSecondary,
+      },
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "family_request.created",
+    entity_type: "family_request",
+    entity_id: request.id,
+    metadata: {
+      request_type: parsed.requestType,
+      effective_date: parsed.effectiveDate,
+    },
+  });
+
+  revalidatePath("/app/family/requests");
+  revalidatePath("/app/direction/requests");
+  redirect(`/app/family/requests?success=request-created`);
+}
+
+export async function handleFamilyRequest(formData: FormData) {
+  const parsed = z
+    .object({
+      requestId: uuid,
+      status: z.enum(["acknowledged", "approved", "declined", "completed"]),
+    })
+    .parse({
+      requestId: formData.get("requestId"),
+      status: formData.get("status"),
+    });
+
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { data: request } = await supabase
+    .from("family_requests")
+    .select("id, request_type")
+    .eq("id", parsed.requestId)
+    .eq("school_id", membership.school_id)
+    .maybeSingle();
+  if (!request) throw new Error("Solicitação inválida.");
+
+  const isApproval = ["approved", "declined"].includes(parsed.status);
+  if (
+    (request.request_type === "extended_period" && !isApproval) ||
+    (request.request_type !== "extended_period" && isApproval)
+  ) {
+    throw new Error("A situação escolhida não se aplica a este aviso.");
+  }
+
+  const { error } = await supabase
+    .from("family_requests")
+    .update({
+      status: parsed.status,
+      handled_by: user.id,
+      handled_at: new Date().toISOString(),
+    })
+    .eq("id", request.id)
+    .eq("school_id", membership.school_id);
+  if (error) throw error;
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "family_request.status_updated",
+    entity_type: "family_request",
+    entity_id: request.id,
+    metadata: { status: parsed.status },
+  });
+
+  revalidatePath("/app/family/requests");
+  revalidatePath("/app/direction/requests");
+  revalidatePath("/app/direction");
+  redirect(`/app/direction/requests?success=request-updated`);
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

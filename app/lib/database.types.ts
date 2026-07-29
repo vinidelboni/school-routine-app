@@ -498,6 +498,80 @@ export type Database = {
           },
         ]
       }
+      family_requests: {
+        Row: {
+          child_id: string
+          created_at: string
+          created_by: string
+          details: Json
+          effective_date: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          request_type: Database["public"]["Enums"]["family_request_type"]
+          school_id: string
+          status: Database["public"]["Enums"]["family_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          created_by: string
+          details?: Json
+          effective_date: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          request_type: Database["public"]["Enums"]["family_request_type"]
+          school_id: string
+          status?: Database["public"]["Enums"]["family_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          created_by?: string
+          details?: Json
+          effective_date?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          request_type?: Database["public"]["Enums"]["family_request_type"]
+          school_id?: string
+          status?: Database["public"]["Enums"]["family_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_requests_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_requests_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_requests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardian_links: {
         Row: {
           active: boolean
@@ -998,6 +1072,20 @@ export type Database = {
         | "additional_guardian"
         | "emergency_contact"
         | "pickup_only"
+      family_request_status:
+        | "submitted"
+        | "acknowledged"
+        | "approved"
+        | "declined"
+        | "completed"
+      family_request_type:
+        | "absence"
+        | "late_arrival"
+        | "early_departure"
+        | "poor_sleep"
+        | "toilet_training"
+        | "pickup_change"
+        | "extended_period"
       handoff_status: "open" | "resolved"
       membership_status: "invited" | "active" | "suspended"
       routine_category:
@@ -1152,6 +1240,22 @@ export const Constants = {
         "additional_guardian",
         "emergency_contact",
         "pickup_only",
+      ],
+      family_request_status: [
+        "submitted",
+        "acknowledged",
+        "approved",
+        "declined",
+        "completed",
+      ],
+      family_request_type: [
+        "absence",
+        "late_arrival",
+        "early_departure",
+        "poor_sleep",
+        "toilet_training",
+        "pickup_change",
+        "extended_period",
       ],
       handoff_status: ["open", "resolved"],
       membership_status: ["invited", "active", "suspended"],

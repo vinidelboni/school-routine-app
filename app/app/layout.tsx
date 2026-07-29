@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, LayoutDashboard, LogOut, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { BookOpen, Inbox, LayoutDashboard, LogOut, MessageSquareText, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 
@@ -74,6 +74,9 @@ export default async function OperationalLayout({
                 <Link href="/app/direction/families" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <UsersRound size={17} /> Famílias e acessos
                 </Link>
+                <Link href="/app/direction/requests" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <Inbox size={17} /> Avisos e solicitações
+                </Link>
               </>
             )}
             {membership.role === "teacher" && (
@@ -82,9 +85,14 @@ export default async function OperationalLayout({
               </Link>
             )}
             {membership.role === "family" && (
-              <Link href="/app/family" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                <BookOpen size={17} /> Resumo da criança
-              </Link>
+              <>
+                <Link href="/app/family" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <BookOpen size={17} /> Resumo da criança
+                </Link>
+                <Link href="/app/family/requests" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <MessageSquareText size={17} /> Avisos à escola
+                </Link>
+              </>
             )}
           </nav>
         </aside>

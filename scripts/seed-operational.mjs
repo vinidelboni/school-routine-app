@@ -241,6 +241,12 @@ const { error: childContactLinkError } = await supabase
   });
 if (childContactLinkError) throw childContactLinkError;
 
+const { error: familyRequestsCleanupError } = await supabase
+  .from("family_requests")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (familyRequestsCleanupError) throw familyRequestsCleanupError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],
