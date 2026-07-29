@@ -110,12 +110,34 @@ await journey("teacher", "professora@laco.validacao", async (page) => {
 
   await page.getByRole("button", { name: "Publicar agendas" }).click();
   await page.getByText("Dia publicado").waitFor();
+
+  await page.getByRole("link", { name: "Fotos da atividade" }).click();
+  await page.getByRole("heading", { name: "Publicar foto" }).waitFor();
+  await page.goto(`${baseUrl}/app/teacher/photos?classroom=20000000-0000-4000-8000-000000000001`);
+  const photoForm = page.locator("form").filter({ hasText: "Quem aparece na foto?" });
+  await photoForm.getByText("Alice Moreira").waitFor();
+  await photoForm.getByText("Publicação bloqueada").first().waitFor();
+  await photoForm.locator('input[name="childId"][value="50000000-0000-4000-8000-000000000001"]').check();
+  await photoForm.locator('[name="activityDate"]').fill("2026-07-29");
+  await photoForm.locator('[name="caption"]').fill("Pintura coletiva no pátio");
+  await photoForm.locator('[name="photo"]').setInputFiles({
+    name: "atividade.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+  });
+  await photoForm.getByRole("button", { name: "Verificar e publicar" }).click();
+  await page.getByText("Foto publicada com segurança!").waitFor();
 });
 
 await journey("family", "familia@laco.validacao", async (page) => {
   await page.getByText("O dia de Alice").waitFor();
+  await page.getByText("FOTO MAIS RECENTE").waitFor();
+  await page.getByText("Pintura coletiva no pátio").waitFor();
   await page.getByRole("button", { name: "Registrar que visualizei" }).click();
   await page.getByRole("button", { name: "Visualização registrada" }).waitFor();
+  await page.getByRole("link", { name: "Fotos", exact: true }).click();
+  await page.getByText("Pintura coletiva no pátio").waitFor();
+  await page.getByRole("link", { name: "Início" }).click();
 
   await page.getByRole("link", { name: "Avisos à escola" }).click();
   await page.getByText("Avisos à escola", { exact: true }).waitFor();
@@ -171,6 +193,10 @@ await journey("director", "direcao@laco.validacao", async (page) => {
   await page.getByText("Visão por professora").waitFor();
   await page.getByRole("article").getByText("Ana Souza").waitFor();
   await page.getByText("Visualizações dos responsáveis não são atribuídas à professora.").waitFor();
+  await page.getByRole("link", { name: "Fotos e autorizações" }).click();
+  await page.getByRole("heading", { name: "Fotos e autorizações" }).waitFor();
+  await page.getByText("Pintura coletiva no pátio").waitFor();
+  await page.getByText("Autorizações verificadas").waitFor();
   await page.getByRole("link", { name: "Pessoas e turmas" }).click();
   await page.getByText("Estrutura da escola").waitFor();
   await page.getByRole("button", { name: /Berçário II 1 a 2 anos/ }).waitFor();

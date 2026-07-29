@@ -903,6 +903,61 @@ export type Database = {
           },
         ]
       }
+      image_consents: {
+        Row: {
+          child_id: string
+          id: string
+          notes: string | null
+          recorded_at: string
+          recorded_by: string
+          school_id: string
+          status: Database["public"]["Enums"]["image_consent_status"]
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by: string
+          school_id: string
+          status?: Database["public"]["Enums"]["image_consent_status"]
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string
+          school_id?: string
+          status?: Database["public"]["Enums"]["image_consent_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_consents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: true
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_consents_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_consents_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_administrations: {
         Row: {
           id: string
@@ -1162,6 +1217,101 @@ export type Database = {
           },
           {
             foreignKeyName: "occurrences_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_children: {
+        Row: {
+          child_id: string
+          photo_id: string
+          school_id: string
+        }
+        Insert: {
+          child_id: string
+          photo_id: string
+          school_id: string
+        }
+        Update: {
+          child_id?: string
+          photo_id?: string
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_children_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_children_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photo_publications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_children_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_publications: {
+        Row: {
+          activity_date: string
+          caption: string
+          classroom_id: string
+          id: string
+          published_at: string
+          published_by: string
+          school_id: string
+          storage_path: string
+        }
+        Insert: {
+          activity_date: string
+          caption: string
+          classroom_id: string
+          id?: string
+          published_at?: string
+          published_by: string
+          school_id: string
+          storage_path: string
+        }
+        Update: {
+          activity_date?: string
+          caption?: string
+          classroom_id?: string
+          id?: string
+          published_at?: string
+          published_by?: string
+          school_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_publications_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_publications_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_publications_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -1637,6 +1787,7 @@ export type Database = {
         | "pickup_change"
         | "extended_period"
       handoff_status: "open" | "resolved"
+      image_consent_status: "pending" | "authorized" | "not_authorized"
       medication_administration_status: "administered" | "not_administered"
       medication_request_status:
         | "submitted"
@@ -1828,6 +1979,7 @@ export const Constants = {
         "extended_period",
       ],
       handoff_status: ["open", "resolved"],
+      image_consent_status: ["pending", "authorized", "not_authorized"],
       medication_administration_status: ["administered", "not_administered"],
       medication_request_status: [
         "submitted",

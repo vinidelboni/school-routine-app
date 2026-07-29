@@ -1554,6 +1554,101 @@ export async function acknowledgeOccurrence(formData: FormData) {
   revalidatePath("/app/direction/occurrences");
 }
 
+export async function updateImageConsent(formData: FormData) {
+  const parsed = z.object({
+    childId: uuid,
+    status: z.enum(["pending", "authorized", "not_authorized"]),
+    notes: z.string().trim().max(500),
+  }).parse({
+    childId: formData.get("childId"),
+    status: formData.get("status"),
+    notes: formData.get("notes") ?? "",
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: child } = await supabase.from("children").select("id")
+    .eq("id", parsed.childId).eq("school_id", membership.school_id).single();
+  if (!child) throw new Error("Criança inválida.");
+  const { error } = await supabase.from("image_consents").upsert({
+    school_id: membership.school_id,
+    child_id: parsed.childId,
+    status: parsed.status,
+    notes: parsed.notes || null,
+    recorded_by: user.id,
+    recorded_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "child_id" });
+  if (error) throw error;
+  revalidatePath("/app/direction/photos");
+  revalidatePath("/app/teacher/photos");
+  redirect("/app/direction/photos?success=consent-updated");
+}
+
+export async function publishActivityPhoto(formData: FormData) {
+  const classroomId = uuid.parse(formData.get("classroomId"));
+  const childIds = z.array(uuid).min(1).parse(formData.getAll("childId"));
+  const caption = z.string().trim().min(3).max(500).parse(formData.get("caption"));
+  const activityDate = z.string().date().parse(formData.get("activityDate"));
+  const file = formData.get("photo");
+  if (!(file instanceof File) || !file.size || file.size > 5_242_880) {
+    throw new Error("Selecione uma imagem de até 5 MB.");
+  }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error("Use uma imagem JPG, PNG ou WebP.");
+  }
+  const { supabase, user, membership } = await getCurrentContext();
+  if (!["teacher", "director"].includes(membership.role)) redirect("/app");
+  const { data: classroom } = await supabase.from("classrooms").select("id")
+    .eq("id", classroomId).eq("school_id", membership.school_id).single();
+  if (!classroom) throw new Error("Turma inválida.");
+  const [{ data: enrollments }, { data: consents }] = await Promise.all([
+    supabase.from("enrollments").select("child_id").eq("classroom_id", classroomId)
+      .eq("status", "active").in("child_id", childIds),
+    supabase.from("image_consents").select("child_id, status").in("child_id", childIds),
+  ]);
+  if (enrollments?.length !== new Set(childIds).size) {
+    throw new Error("Uma criança não pertence à turma.");
+  }
+  const authorized = new Set((consents ?? []).filter((item) => item.status === "authorized").map((item) => item.child_id));
+  const blocked = childIds.filter((id) => !authorized.has(id));
+  if (blocked.length) throw new Error("A publicação foi bloqueada: há criança sem autorização de imagem.");
+  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const storagePath = `${membership.school_id}/${crypto.randomUUID()}.${extension}`;
+  const { error: uploadError } = await supabase.storage.from("school-photos")
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+  if (uploadError) throw uploadError;
+  const { data: photo, error: photoError } = await supabase.from("photo_publications")
+    .insert({
+      school_id: membership.school_id,
+      classroom_id: classroomId,
+      storage_path: storagePath,
+      caption,
+      activity_date: activityDate,
+      published_by: user.id,
+    }).select("id").single();
+  if (photoError) {
+    await supabase.storage.from("school-photos").remove([storagePath]);
+    throw photoError;
+  }
+  const { error: linksError } = await supabase.from("photo_children").insert(
+    childIds.map((childId) => ({ photo_id: photo.id, child_id: childId, school_id: membership.school_id })),
+  );
+  if (linksError) throw linksError;
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "photo.published",
+    entity_type: "photo_publication",
+    entity_id: photo.id,
+    metadata: { child_count: childIds.length },
+  });
+  revalidatePath("/app/teacher/photos");
+  revalidatePath("/app/direction/photos");
+  revalidatePath("/app/family");
+  revalidatePath("/app/family/photos");
+  redirect("/app/teacher/photos?success=photo-published");
+}
+
 export async function publishDay(formData: FormData) {
   const schoolDayId = uuid.parse(formData.get("schoolDayId"));
   const { supabase, membership } = await getCurrentContext();

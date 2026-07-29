@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { AlertTriangle, Bell, CheckCircle2, ChevronRight, Eye, Sparkles, Utensils } from "lucide-react";
 import { getCurrentContext } from "../../lib/auth";
@@ -13,7 +14,7 @@ export default async function FamilyPage() {
   const { supabase, user, membership } = await getCurrentContext();
   if (membership.role !== "family") redirect("/app");
 
-  const [{ data: link, error: linkError }, { data: notifications, error: notificationsError }, { data: occurrenceAlerts, error: occurrenceAlertsError }] =
+  const [{ data: link, error: linkError }, { data: notifications, error: notificationsError }, { data: occurrenceAlerts, error: occurrenceAlertsError }, { data: recentPhotos, error: recentPhotosError }] =
     await Promise.all([
       supabase
         .from("guardian_links")
@@ -37,10 +38,24 @@ export default async function FamilyPage() {
         .eq("membership_id", membership.id)
         .order("created_at", { ascending: false })
         .limit(2),
+      supabase
+        .from("photo_publications")
+        .select("id, storage_path, caption, activity_date")
+        .order("activity_date", { ascending: false })
+        .limit(1),
     ]);
   if (linkError) throw linkError;
   if (notificationsError) throw notificationsError;
   if (occurrenceAlertsError) throw occurrenceAlertsError;
+  if (recentPhotosError) throw recentPhotosError;
+  const recentPhoto = recentPhotos?.[0];
+  const recentPhotoUrl = recentPhoto
+    ? (
+        await supabase.storage
+          .from("school-photos")
+          .createSignedUrl(recentPhoto.storage_path, 3600)
+      ).data?.signedUrl
+    : null;
 
   const child = link
     ? Array.isArray(link.children)
@@ -212,6 +227,34 @@ export default async function FamilyPage() {
           ) : null}
         </div>
       </section>
+
+      {recentPhoto && recentPhotoUrl ? (
+        <section className="mt-4 overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">
+          <div className="relative aspect-[16/9] bg-[#eef0ed]">
+            <Image
+              src={recentPhotoUrl}
+              alt={recentPhoto.caption}
+              fill
+              sizes="(max-width: 768px) 100vw, 672px"
+              className="object-cover"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3 p-4">
+            <span>
+              <small className="text-[9px] font-extrabold tracking-[.1em] text-[#557164]">
+                FOTO MAIS RECENTE
+              </small>
+              <strong className="mt-1 block text-sm">{recentPhoto.caption}</strong>
+            </span>
+            <Link
+              href="/app/family/photos"
+              className="flex shrink-0 items-center gap-1 rounded-xl border border-[#b9c9c0] px-3 py-2 text-[10px] font-bold text-[#315645]"
+            >
+              Ver galeria <ChevronRight size={13} />
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       {summary && child ? (
         <>

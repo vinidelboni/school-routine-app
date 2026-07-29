@@ -313,6 +313,40 @@ const { error: occurrencesCleanupError } = await supabase
   .eq("school_id", SCHOOL_ID);
 if (occurrencesCleanupError) throw occurrencesCleanupError;
 
+const { data: existingPhotos } = await supabase
+  .from("photo_publications")
+  .select("id, storage_path")
+  .eq("school_id", SCHOOL_ID);
+if (existingPhotos?.length) {
+  const { error: photoChildrenCleanupError } = await supabase
+    .from("photo_children")
+    .delete()
+    .in("photo_id", existingPhotos.map((photo) => photo.id));
+  if (photoChildrenCleanupError) throw photoChildrenCleanupError;
+  const { error: photoFilesCleanupError } = await supabase.storage
+    .from("school-photos")
+    .remove(existingPhotos.map((photo) => photo.storage_path));
+  if (photoFilesCleanupError) throw photoFilesCleanupError;
+}
+const { error: photosCleanupError } = await supabase
+  .from("photo_publications")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (photosCleanupError) throw photosCleanupError;
+const { error: consentsCleanupError } = await supabase
+  .from("image_consents")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (consentsCleanupError) throw consentsCleanupError;
+const { error: consentSeedError } = await supabase.from("image_consents").insert({
+  school_id: SCHOOL_ID,
+  child_id: "50000000-0000-4000-8000-000000000001",
+  status: "authorized",
+  notes: "Termo de validação",
+  recorded_by: userMap.get("director").id,
+});
+if (consentSeedError) throw consentSeedError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, BarChart3, BookOpen, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { AlertTriangle, BarChart3, BookOpen, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 
@@ -86,6 +86,9 @@ export default async function OperationalLayout({
                 <Link href="/app/direction/team-engagement" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <BarChart3 size={17} /> Engajamento da equipe
                 </Link>
+                <Link href="/app/direction/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <Camera size={17} /> Fotos e autorizações
+                </Link>
                 <Link href="/app/direction/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Pill size={17} /> Medicamentos
                 </Link>
@@ -95,9 +98,14 @@ export default async function OperationalLayout({
               </>
             )}
             {membership.role === "teacher" && (
-              <Link href="/app/teacher" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                <BookOpen size={17} /> Rotina da turma
-              </Link>
+              <>
+                <Link href="/app/teacher" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <BookOpen size={17} /> Rotina da turma
+                </Link>
+                <Link href="/app/teacher/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <Camera size={17} /> Fotos da atividade
+                </Link>
+              </>
             )}
             {membership.role === "family" && (
               <>
@@ -112,6 +120,9 @@ export default async function OperationalLayout({
                 </Link>
                 <Link href="/app/family/occurrences" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <AlertTriangle size={17} /> Ocorrências
+                </Link>
+                <Link href="/app/family/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <Camera size={17} /> Fotos
                 </Link>
                 <Link href="/app/family/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Pill size={17} /> Medicamentos
