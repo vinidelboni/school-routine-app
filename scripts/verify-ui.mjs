@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises";
 
 const browser = await chromium.launch({ headless: true });
 const outputDir = "workshots";
+const baseUrl = process.env.VERIFY_URL ?? "http://localhost:3000";
 await mkdir(outputDir, { recursive: true });
 
 const results = [];
@@ -15,7 +16,7 @@ async function verify(name, viewport, roleLabel, journey) {
   });
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: roleLabel }).click();
   await journey(page);
 
