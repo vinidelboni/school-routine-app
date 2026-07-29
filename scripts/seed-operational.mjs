@@ -289,6 +289,19 @@ const { error: billingBatchesCleanupError } = await supabase
   .eq("school_id", SCHOOL_ID);
 if (billingBatchesCleanupError) throw billingBatchesCleanupError;
 
+const { error: communicationRecipientsCleanupError } = await supabase
+  .from("communication_recipients")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (communicationRecipientsCleanupError) {
+  throw communicationRecipientsCleanupError;
+}
+const { error: communicationsCleanupError } = await supabase
+  .from("communications")
+  .delete()
+  .eq("school_id", SCHOOL_ID);
+if (communicationsCleanupError) throw communicationsCleanupError;
+
 const routineConfigurations = [
   ["attendance", true, true, []],
   ["meal", true, true, ["Comeu tudo", "Comeu bem", "Comeu pouco", "Recusou"]],

@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       attendance_records: {
@@ -418,6 +443,145 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "classrooms_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_recipients: {
+        Row: {
+          child_id: string
+          communication_id: string
+          created_at: string
+          id: string
+          membership_id: string
+          responded_at: string | null
+          response: string | null
+          school_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          child_id: string
+          communication_id: string
+          created_at?: string
+          id?: string
+          membership_id: string
+          responded_at?: string | null
+          response?: string | null
+          school_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          child_id?: string
+          communication_id?: string
+          created_at?: string
+          id?: string
+          membership_id?: string
+          responded_at?: string | null
+          response?: string | null
+          school_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_recipients_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_recipients_communication_id_fkey"
+            columns: ["communication_id"]
+            isOneToOne: false
+            referencedRelation: "communications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_recipients_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_recipients_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communications: {
+        Row: {
+          body: string
+          child_id: string | null
+          classroom_id: string | null
+          created_at: string
+          created_by: string
+          event_date: string | null
+          id: string
+          kind: Database["public"]["Enums"]["communication_kind"]
+          published_at: string
+          school_id: string
+          scope: Database["public"]["Enums"]["communication_scope"]
+          title: string
+        }
+        Insert: {
+          body: string
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by: string
+          event_date?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["communication_kind"]
+          published_at?: string
+          school_id: string
+          scope: Database["public"]["Enums"]["communication_scope"]
+          title: string
+        }
+        Update: {
+          body?: string
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by?: string
+          event_date?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["communication_kind"]
+          published_at?: string
+          school_id?: string
+          scope?: Database["public"]["Enums"]["communication_scope"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -1314,6 +1478,12 @@ export type Database = {
       attendance_status: "present" | "absent" | "late" | "left_early"
       billing_batch_status: "review" | "distributed"
       billing_document_status: "matched" | "needs_review" | "distributed"
+      communication_kind:
+        | "general"
+        | "important"
+        | "authorization"
+        | "item_request"
+      communication_scope: "school" | "classroom" | "child"
       day_status: "draft" | "ready" | "published"
       enrollment_status: "active" | "inactive"
       family_access_status:
@@ -1484,11 +1654,21 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       attendance_status: ["present", "absent", "late", "left_early"],
       billing_batch_status: ["review", "distributed"],
       billing_document_status: ["matched", "needs_review", "distributed"],
+      communication_kind: [
+        "general",
+        "important",
+        "authorization",
+        "item_request",
+      ],
+      communication_scope: ["school", "classroom", "child"],
       day_status: ["draft", "ready", "published"],
       enrollment_status: ["active", "inactive"],
       family_access_status: [

@@ -310,6 +310,18 @@ await journey("director", "direcao@laco.validacao", async (page) => {
     .getByRole("button", { name: "Distribuir lote às famílias" })
     .click();
   await page.getByText("Lote distribuído às famílias!").waitFor();
+
+  await page.getByRole("link", { name: "Comunicados" }).click();
+  await page.getByText("Comunicados às famílias").waitFor();
+  const communicationForm = page.locator("form").filter({ hasText: "Criar comunicado" });
+  await communicationForm.locator('[name="kind"]').selectOption("authorization");
+  await communicationForm.locator('[name="scope"]').selectOption("child");
+  await communicationForm.locator('[name="childId"]').selectOption({ label: "Alice Moreira" });
+  await communicationForm.locator('[name="title"]').fill("Passeio de validação");
+  await communicationForm.locator('[name="body"]').fill("Autoriza a participação no passeio da turma?");
+  await communicationForm.getByRole("button", { name: "Publicar para as famílias" }).click();
+  await page.getByText("Comunicado publicado com sucesso!").waitFor();
+  await page.getByText("0/1").last().waitFor();
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
@@ -323,6 +335,17 @@ await journey("family-request-status", "familia@laco.validacao", async (page) =>
   await page.getByText("MENS-2026-07-001").waitFor();
   await page.getByRole("button", { name: "Abrir documento" }).click();
   await page.getByRole("button", { name: "Visualizado" }).waitFor();
+  await page.getByRole("link", { name: "Comunicados" }).click();
+  await page.getByText("Passeio de validação").waitFor();
+  await page.getByRole("button", { name: "Autorizo", exact: true }).click();
+  await page.getByText("Sua resposta: Autorizado").waitFor();
+});
+
+await journey("director-communication-status", "direcao@laco.validacao", async (page) => {
+  await page.getByRole("link", { name: "Comunicados" }).click();
+  const communicationCard = page.locator("article").filter({ hasText: "Passeio de validação" });
+  await communicationCard.getByText("1/1").first().waitFor();
+  await communicationCard.getByText(/Autorizado/).waitFor();
 });
 
 for (const result of results) {

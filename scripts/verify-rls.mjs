@@ -69,6 +69,16 @@ for (const testCase of cases) {
     .select("id, child_id");
   if (billingDocumentsError) throw billingDocumentsError;
 
+  const { data: communications, error: communicationsError } = await client
+    .from("communications")
+    .select("id, kind");
+  if (communicationsError) throw communicationsError;
+
+  const { data: communicationRecipients, error: recipientsError } = await client
+    .from("communication_recipients")
+    .select("id, communication_id, membership_id, response");
+  if (recipientsError) throw recipientsError;
+
   const isolatedVisible = children.some(
     (child) => child.first_name === "Criança" && child.school_id.endsWith("0099"),
   );
@@ -81,6 +91,8 @@ for (const testCase of cases) {
     familyRequestsVisible: familyRequests.length,
     medicationRequestsVisible: medicationRequests.length,
     billingDocumentsVisible: billingDocuments.length,
+    communicationsVisible: communications.length,
+    communicationRecipientsVisible: communicationRecipients.length,
     isolatedTenantVisible: isolatedVisible,
   };
 
@@ -110,6 +122,12 @@ for (const testCase of cases) {
   }
   if (testCase.role === "teacher" && billingDocuments.length !== 0) {
     throw new Error("teacher: billing documents were visible");
+  }
+  if (
+    testCase.role === "teacher" &&
+    (communications.length !== 0 || communicationRecipients.length !== 0)
+  ) {
+    throw new Error("teacher: family communications were visible");
   }
 
   if (testCase.role === "family") {
@@ -189,6 +207,29 @@ for (const testCase of cases) {
       });
     if (!forbiddenMedicationError) {
       throw new Error("family: cross-tenant medication write was accepted");
+    }
+    const { error: forbiddenCommunicationError } = await client
+      .from("communications")
+      .insert({
+        school_id: memberships[0].school_id,
+        created_by: currentUser.id,
+        kind: "general",
+        scope: "school",
+        title: "Tentativa não autorizada",
+        body: "A família não pode publicar.",
+      });
+    if (!forbiddenCommunicationError) {
+      throw new Error("family: unauthorized communication publish was accepted");
+    }
+    const ownRecipient = communicationRecipients[0];
+    if (ownRecipient) {
+      const { error: forbiddenRecipientMutationError } = await client
+        .from("communication_recipients")
+        .update({ child_id: "50000000-0000-4000-8000-000000000099" })
+        .eq("id", ownRecipient.id);
+      if (!forbiddenRecipientMutationError) {
+        throw new Error("family: recipient identity mutation was accepted");
+      }
     }
     result.unauthorizedWriteBlocked = true;
     result.handoffsHidden = true;

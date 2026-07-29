@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentContext } from "../lib/auth";
+import {
+  allowedCommunicationResponses,
+  type CommunicationKind,
+  type CommunicationResponse,
+} from "../lib/communications";
 
 const uuid = z.string().uuid();
 const routineCategory = z.enum([
@@ -1252,6 +1257,161 @@ export async function markBillingDocumentViewed(formData: FormData) {
     .eq("status", "distributed");
   if (error) throw error;
   revalidatePath("/app/family/documents");
+}
+
+const communicationInput = z.object({
+  kind: z.enum(["general", "important", "authorization", "item_request"]),
+  scope: z.enum(["school", "classroom", "child"]),
+  classroomId: z.union([uuid, z.literal("")]).optional(),
+  childId: z.union([uuid, z.literal("")]).optional(),
+  title: z.string().trim().min(3).max(120),
+  body: z.string().trim().min(3).max(2000),
+  eventDate: z.union([z.string().date(), z.literal("")]).optional(),
+});
+
+export async function createCommunication(formData: FormData) {
+  const parsed = communicationInput.parse({
+    kind: formData.get("kind"),
+    scope: formData.get("scope"),
+    classroomId: formData.get("classroomId") ?? "",
+    childId: formData.get("childId") ?? "",
+    title: formData.get("title"),
+    body: formData.get("body"),
+    eventDate: formData.get("eventDate") ?? "",
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  let childrenQuery = supabase
+    .from("children")
+    .select("id, enrollments!inner(classroom_id, status)")
+    .eq("school_id", membership.school_id)
+    .eq("enrollments.status", "active");
+  if (parsed.scope === "classroom") {
+    if (!parsed.classroomId) throw new Error("Selecione uma turma.");
+    childrenQuery = childrenQuery.eq(
+      "enrollments.classroom_id",
+      parsed.classroomId,
+    );
+  }
+  if (parsed.scope === "child") {
+    if (!parsed.childId) throw new Error("Selecione uma criança.");
+    childrenQuery = childrenQuery.eq("id", parsed.childId);
+  }
+  const { data: targetedChildren, error: childrenError } = await childrenQuery;
+  if (childrenError) throw childrenError;
+  const childIds = [...new Set((targetedChildren ?? []).map((child) => child.id))];
+  if (!childIds.length) throw new Error("Nenhuma criança ativa nesse público.");
+
+  const { data: guardianLinks, error: linksError } = await supabase
+    .from("guardian_links")
+    .select("child_id, membership_id, school_memberships!inner(role, status)")
+    .in("child_id", childIds)
+    .eq("active", true)
+    .eq("school_memberships.role", "family")
+    .eq("school_memberships.status", "active");
+  if (linksError) throw linksError;
+  if (!guardianLinks?.length) {
+    throw new Error("Nenhum responsável ativo vinculado a esse público.");
+  }
+
+  const { data: communication, error: communicationError } = await supabase
+    .from("communications")
+    .insert({
+      school_id: membership.school_id,
+      created_by: user.id,
+      kind: parsed.kind,
+      scope: parsed.scope,
+      classroom_id:
+        parsed.scope === "classroom" ? parsed.classroomId || null : null,
+      child_id: parsed.scope === "child" ? parsed.childId || null : null,
+      title: parsed.title,
+      body: parsed.body,
+      event_date: parsed.eventDate || null,
+    })
+    .select("id")
+    .single();
+  if (communicationError) throw communicationError;
+
+  const recipients = guardianLinks.map((link) => ({
+    school_id: membership.school_id,
+    communication_id: communication.id,
+    child_id: link.child_id,
+    membership_id: link.membership_id,
+  }));
+  const { error: recipientsError } = await supabase
+    .from("communication_recipients")
+    .insert(recipients);
+  if (recipientsError) {
+    await supabase.from("communications").delete().eq("id", communication.id);
+    throw recipientsError;
+  }
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "communication.published",
+    entity_type: "communication",
+    entity_id: communication.id,
+    metadata: { kind: parsed.kind, scope: parsed.scope, recipients: recipients.length },
+  });
+  revalidatePath("/app/direction/communications");
+  revalidatePath("/app/family/communications");
+  redirect(
+    `/app/direction/communications?communication=${communication.id}&success=communication-created`,
+  );
+}
+
+export async function respondToCommunication(formData: FormData) {
+  const recipientId = uuid.parse(formData.get("recipientId"));
+  const requestedResponse = String(formData.get("response") ?? "");
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+
+  const { data: recipient, error } = await supabase
+    .from("communication_recipients")
+    .select("id, communication_id, communications!inner(kind)")
+    .eq("id", recipientId)
+    .eq("membership_id", membership.id)
+    .single();
+  if (error) throw error;
+  const related = Array.isArray(recipient.communications)
+    ? recipient.communications[0]
+    : recipient.communications;
+  const kind = related.kind as CommunicationKind;
+  const response = requestedResponse as CommunicationResponse;
+  if (
+    requestedResponse &&
+    !allowedCommunicationResponses[kind].includes(response)
+  ) {
+    throw new Error("Resposta inválida para este comunicado.");
+  }
+  if (kind !== "general" && !requestedResponse) {
+    throw new Error("Selecione uma resposta.");
+  }
+
+  const now = new Date().toISOString();
+  const { error: updateError } = await supabase
+    .from("communication_recipients")
+    .update({
+      viewed_at: now,
+      response: requestedResponse || null,
+      responded_at: requestedResponse ? now : null,
+    })
+    .eq("id", recipientId)
+    .eq("membership_id", membership.id);
+  if (updateError) throw updateError;
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: requestedResponse
+      ? "communication.responded"
+      : "communication.viewed",
+    entity_type: "communication",
+    entity_id: recipient.communication_id,
+    metadata: { response: requestedResponse || "viewed" },
+  });
+  revalidatePath("/app/family/communications");
+  revalidatePath("/app/direction/communications");
 }
 
 export async function publishDay(formData: FormData) {
