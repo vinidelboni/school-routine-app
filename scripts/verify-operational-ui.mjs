@@ -34,7 +34,8 @@ async function cleanupValidationClassrooms() {
   if (error) throw error;
 }
 
-await Promise.all([cleanupValidationChildren(), cleanupValidationClassrooms()]);
+await cleanupValidationChildren();
+await cleanupValidationClassrooms();
 
 async function login(page, email) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "networkidle" });
@@ -151,4 +152,5 @@ for (const result of results) {
 
 console.log(JSON.stringify(results, null, 2));
 await browser.close();
-await Promise.all([cleanupValidationChildren(), cleanupValidationClassrooms()]);
+await cleanupValidationChildren();
+await cleanupValidationClassrooms();
