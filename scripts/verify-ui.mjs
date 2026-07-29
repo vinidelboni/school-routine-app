@@ -16,7 +16,7 @@ async function verify(name, viewport, roleLabel, journey) {
   });
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/demo`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: roleLabel }).click();
   await journey(page);
 
