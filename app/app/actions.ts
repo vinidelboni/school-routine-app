@@ -1356,6 +1356,7 @@ export async function createCommunication(formData: FormData) {
   });
   revalidatePath("/app/direction/communications");
   revalidatePath("/app/family/communications");
+  revalidatePath("/app/family");
   redirect(
     `/app/direction/communications?communication=${communication.id}&success=communication-created`,
   );
@@ -1411,6 +1412,7 @@ export async function respondToCommunication(formData: FormData) {
     metadata: { response: requestedResponse || "viewed" },
   });
   revalidatePath("/app/family/communications");
+  revalidatePath("/app/family");
   revalidatePath("/app/direction/communications");
 }
 

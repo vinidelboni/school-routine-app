@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell, Radio, UserRound } from "lucide-react";
 import { useState } from "react";
 import { createCommunication } from "../../actions";
 import { SubmitButton } from "../registry/submit-button";
@@ -68,6 +69,28 @@ export function CommunicationForm({
             </select>
           </label>
         ) : null}
+        <div className="flex items-start gap-3 rounded-xl bg-[#f5f5f0] p-3 text-[10px] leading-4 text-[#56635d]">
+          {scope === "child" ? (
+            <UserRound className="mt-0.5 shrink-0 text-[#315645]" size={16} />
+          ) : (
+            <Radio className="mt-0.5 shrink-0 text-[#9a623b]" size={16} />
+          )}
+          <span>
+            <strong className="block text-[#315645]">
+              {scope === "child"
+                ? "Notificação exclusiva"
+                : scope === "classroom"
+                  ? "Push para a turma"
+                  : "Push geral"}
+            </strong>
+            {scope === "child"
+              ? "Somente os responsáveis vinculados a essa criança serão notificados."
+              : scope === "classroom"
+                ? "Todos os responsáveis com crianças ativas nessa turma receberão a publicação."
+                : "Todas as famílias ativas da escola receberão a publicação."}
+          </span>
+          <Bell className="ml-auto shrink-0 text-[#557164]" size={14} />
+        </div>
         <label className="grid gap-1.5 text-xs font-bold">
           Título
           <input name="title" minLength={3} maxLength={120} className="rounded-xl border border-[#dfe1d9] px-3 py-3 font-normal" placeholder="Ex.: Festa da família" required />

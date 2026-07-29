@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, Eye, Megaphone, MessageCircleReply } from "lucide-react";
+import { Bell, CheckCircle2, Eye, Megaphone, MessageCircleReply, Radio } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 import { communicationKindLabels, communicationResponseLabels, type CommunicationKind, type CommunicationResponse } from "../../../lib/communications";
 import { CommunicationForm } from "./communication-form";
@@ -61,6 +61,10 @@ export default async function DirectionCommunicationsPage({ searchParams }: { se
                       <p className="mt-2 max-w-xl text-xs leading-5 text-[#56635d]">{communication.body}</p>
                     </div>
                     <div className="flex gap-2 text-[9px] font-bold">
+                      <span className="flex items-center gap-1 rounded-full bg-[#f5f5f0] px-2.5 py-1 text-[#56635d]">
+                        {communication.scope === "child" ? <Bell size={11} /> : <Radio size={11} />}
+                        {communication.scope === "child" ? "Exclusivo" : "Push"}
+                      </span>
                       <span className="flex items-center gap-1 rounded-full bg-[#eef3ef] px-2.5 py-1 text-[#315645]"><Eye size={11} /> {viewed}/{recipients.length}</span>
                       {communication.kind !== "general" ? (
                         <span className="flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[#8b5b25]"><MessageCircleReply size={11} /> {responded}/{recipients.length}</span>

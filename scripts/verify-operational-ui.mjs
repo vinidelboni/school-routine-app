@@ -325,6 +325,10 @@ await journey("director", "direcao@laco.validacao", async (page) => {
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
+  await page.getByText("COMUNICADOS DA ESCOLA").waitFor();
+  await page.getByText("Passeio de validação").waitFor();
+  await page.getByRole("button", { name: "Autorizo", exact: true }).click();
+  await page.getByText("Respondido").waitFor();
   await page.getByRole("link", { name: "Avisos à escola" }).click();
   await page.getByText("Recebido pela escola").waitFor();
   await page.getByText("Aprovado").waitFor();
@@ -337,7 +341,6 @@ await journey("family-request-status", "familia@laco.validacao", async (page) =>
   await page.getByRole("button", { name: "Visualizado" }).waitFor();
   await page.getByRole("link", { name: "Comunicados" }).click();
   await page.getByText("Passeio de validação").waitFor();
-  await page.getByRole("button", { name: "Autorizo", exact: true }).click();
   await page.getByText("Sua resposta: Autorizado").waitFor();
 });
 
