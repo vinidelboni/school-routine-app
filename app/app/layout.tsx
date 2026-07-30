@@ -66,6 +66,7 @@ export default async function OperationalLayout({
         childName={childName}
         childInitials={childInitials}
         schoolName={school?.name ?? "Escola"}
+        schoolSlug={school?.slug ?? "escola"}
         notificationCount={
           (communicationCount ?? 0) + (occurrenceCount ?? 0) + (billingCount ?? 0)
         }
