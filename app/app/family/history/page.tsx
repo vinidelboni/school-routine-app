@@ -49,6 +49,14 @@ export default async function FamilyHistoryPage() {
         <p className="mt-2 text-xs leading-5 text-[#69746f]">
           Os resumos publicados pela escola ficam organizados por dia.
         </p>
+        <div className="mt-4 flex rounded-xl bg-[#e9ece7] p-1 text-[10px] font-bold">
+          <Link href="/app/family/calendar" className="flex-1 px-3 py-2 text-center text-[#77827c]">
+            Calendário
+          </Link>
+          <span className="flex-1 rounded-lg bg-white px-3 py-2 text-center text-[#315645] shadow-sm">
+            Histórico
+          </span>
+        </div>
       </header>
 
       <section className="relative mt-6 grid gap-3">

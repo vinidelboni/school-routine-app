@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, BarChart3, BookOpen, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { AlertTriangle, BarChart3, BookOpen, CalendarDays, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 import { FamilyShell } from "./family/family-shell";
@@ -116,6 +116,9 @@ export default async function OperationalLayout({
                 <Link href="/app/direction" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <LayoutDashboard size={17} /> Painel da direção
                 </Link>
+                <Link href="/app/direction/calendar" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <CalendarDays size={17} /> Calendário
+                </Link>
                 <Link href="/app/direction/registry" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Users size={17} /> Pessoas e turmas
                 </Link>
@@ -149,6 +152,9 @@ export default async function OperationalLayout({
               <>
                 <Link href="/app/teacher" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <BookOpen size={17} /> Rotina da turma
+                </Link>
+                <Link href="/app/teacher/calendar" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
+                  <CalendarDays size={17} /> Calendário
                 </Link>
                 <Link href="/app/teacher/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Camera size={17} /> Fotos da atividade

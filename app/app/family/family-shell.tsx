@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
-  BookOpen,
   Building2,
+  CalendarDays,
   Camera,
   ChevronDown,
   Home,
@@ -14,7 +14,7 @@ import {
 
 const navigation = [
   { href: "/app/family", label: "Início", icon: Home, exact: true },
-  { href: "/app/family/history", label: "Agenda", icon: BookOpen },
+  { href: "/app/family/calendar", label: "Calendário", icon: CalendarDays },
   { href: "/app/family/photos", label: "Fotos", icon: Camera },
   { href: "/app/family/school", label: "Escola", icon: Building2, group: true },
   { href: "/app/family/profile", label: "Perfil", icon: UserRound },
@@ -91,7 +91,9 @@ export function FamilyShell({
           className="fixed inset-x-0 bottom-0 z-40 mx-auto grid w-full grid-cols-5 border-t border-[#e3e2dc] bg-[#fffefa]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:bottom-6 md:max-w-[518px] md:rounded-b-[2rem]"
         >
           {navigation.map((item) => {
-            const active = item.group
+            const active = item.href === "/app/family/calendar"
+              ? pathname.startsWith("/app/family/calendar") || pathname.startsWith("/app/family/history")
+              : item.group
               ? schoolRoutes.some((route) => pathname.startsWith(route))
               : item.exact
                 ? pathname === item.href
