@@ -1,61 +1,56 @@
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
-import { AlertTriangle, Bell, CheckCircle2, ChevronRight, Eye, Sparkles, Utensils } from "lucide-react";
-import { getCurrentContext } from "../../lib/auth";
 import {
-  communicationKindLabels,
-  type CommunicationKind,
-} from "../../lib/communications";
+  AlertTriangle,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  ClipboardList,
+  Eye,
+  Megaphone,
+  NotebookPen,
+  ReceiptText,
+  Sparkles,
+  Utensils,
+} from "lucide-react";
+import { getCurrentContext } from "../../lib/auth";
 import { markSummaryViewed } from "../actions";
-import { ResponseActions } from "./communications/response-actions";
 
 export default async function FamilyPage() {
-  const { supabase, user, membership } = await getCurrentContext();
+  const { supabase, user, membership, profile } = await getCurrentContext();
   if (membership.role !== "family") redirect("/app");
 
-  const [{ data: link, error: linkError }, { data: notifications, error: notificationsError }, { data: occurrenceAlerts, error: occurrenceAlertsError }, { data: recentPhotos, error: recentPhotosError }] =
-    await Promise.all([
-      supabase
-        .from("guardian_links")
-        .select("child_id, children(id, first_name, last_name)")
-        .eq("membership_id", membership.id)
-        .eq("active", true)
-        .eq("can_view_routine", true)
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("communication_recipients")
-        .select(
-          "id, viewed_at, response, children(first_name), communications!inner(kind, scope, title, body, published_at)",
-        )
-        .eq("membership_id", membership.id)
-        .order("created_at", { ascending: false })
-        .limit(3),
-      supabase
-        .from("occurrence_recipients")
-        .select("id, acknowledged_at, occurrences!inner(severity, title, occurred_at, children(first_name))")
-        .eq("membership_id", membership.id)
-        .order("created_at", { ascending: false })
-        .limit(2),
-      supabase
-        .from("photo_publications")
-        .select("id, storage_path, caption, activity_date")
-        .order("activity_date", { ascending: false })
-        .limit(1),
-    ]);
+  const [
+    { data: link, error: linkError },
+    { count: unreadCommunications },
+    { count: pendingOccurrences },
+    { count: unreadDocuments },
+  ] = await Promise.all([
+    supabase
+      .from("guardian_links")
+      .select("child_id, children(id, first_name, last_name)")
+      .eq("membership_id", membership.id)
+      .eq("active", true)
+      .eq("can_view_routine", true)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("communication_recipients")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .is("viewed_at", null),
+    supabase
+      .from("occurrence_recipients")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .is("acknowledged_at", null),
+    supabase
+      .from("billing_documents")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "distributed")
+      .is("viewed_at", null),
+  ]);
   if (linkError) throw linkError;
-  if (notificationsError) throw notificationsError;
-  if (occurrenceAlertsError) throw occurrenceAlertsError;
-  if (recentPhotosError) throw recentPhotosError;
-  const recentPhoto = recentPhotos?.[0];
-  const recentPhotoUrl = recentPhoto
-    ? (
-        await supabase.storage
-          .from("school-photos")
-          .createSignedUrl(recentPhoto.storage_path, 3600)
-      ).data?.signedUrl
-    : null;
 
   const child = link
     ? Array.isArray(link.children)
@@ -77,14 +72,12 @@ export default async function FamilyPage() {
     ? (
         await supabase
           .from("summary_views")
-          .select("first_viewed_at, last_viewed_at")
+          .select("first_viewed_at")
           .eq("summary_id", summary.id)
           .eq("viewer_id", user.id)
           .maybeSingle()
       ).data
     : null;
-
-  const unread = notifications?.filter((notification) => !notification.viewed_at).length ?? 0;
   const snapshot =
     summary &&
     typeof summary.snapshot === "object" &&
@@ -97,206 +90,181 @@ export default async function FamilyPage() {
     typeof lunch === "object" && lunch && !Array.isArray(lunch) && "label" in lunch
       ? String(lunch.label)
       : "Registro não informado";
+  const firstName = profile?.full_name?.split(" ")[0] ?? "Família";
+
+  const shortcuts = [
+    {
+      label: "Financeiro",
+      href: "/app/family/documents",
+      icon: ReceiptText,
+      badge: unreadDocuments ?? 0,
+      tone: "bg-[#e7edf4] text-[#4e6b86]",
+    },
+    {
+      label: "Calendário Escolar",
+      href: "/app/family/calendar",
+      icon: CalendarDays,
+      badge: 0,
+      tone: "bg-[#e5efe9] text-[#386d56]",
+    },
+    {
+      label: "Mural de Recados",
+      href: "/app/family/communications",
+      icon: Megaphone,
+      badge: unreadCommunications ?? 0,
+      tone: "bg-[#f6e8d8] text-[#99603a]",
+    },
+    {
+      label: "Ocorrências",
+      href: "/app/family/occurrences",
+      icon: ClipboardList,
+      badge: pendingOccurrences ?? 0,
+      tone: "bg-[#f7e1dc] text-[#a2483c]",
+    },
+    {
+      label: "Alimentação",
+      href: "#alimentacao",
+      icon: Utensils,
+      badge: 0,
+      tone: "bg-[#f3ead8] text-[#8a6938]",
+    },
+    {
+      label: "Diário de Bordo",
+      href: "#diario-de-bordo",
+      icon: NotebookPen,
+      badge: summary && !viewed ? 1 : 0,
+      tone: "bg-[#e9e5f2] text-[#685987]",
+    },
+  ];
+  const attentionCount =
+    (unreadCommunications ?? 0) + (pendingOccurrences ?? 0) + (unreadDocuments ?? 0);
 
   return (
     <div className="mx-auto max-w-2xl">
-      {occurrenceAlerts?.length ? (
-        <section className="mb-4 rounded-2xl border border-[#d99a8d] bg-[#fff6f3] p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-start gap-3">
-              <AlertTriangle className="mt-0.5 shrink-0 text-[#a34336]" size={20} />
-              <div className="min-w-0">
-                <span className="text-[9px] font-extrabold tracking-[.12em] text-[#a34336]">
-                  OCORRÊNCIAS RECENTES
+      <header className="px-1 pb-1 pt-1">
+        <span className="text-[9px] font-extrabold tracking-[.15em] text-[#708078]">
+          BEM-VINDO
+        </span>
+        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em]">
+          Olá, {firstName}!
+        </h1>
+        <p className="mt-1 text-[11px] text-[#7c8680]">
+          O que você quer acompanhar hoje?
+        </p>
+      </header>
+
+      <nav aria-label="Atalhos da família" className="mt-4 grid grid-cols-2 gap-3">
+        {shortcuts.map((shortcut) => {
+          const Icon = shortcut.icon;
+          return (
+            <Link
+              key={shortcut.label}
+              href={shortcut.href}
+              className="relative flex min-h-32 flex-col items-center justify-center gap-3 rounded-3xl border border-[#e0e2dc] bg-white px-3 py-5 text-center shadow-[0_8px_22px_rgba(49,86,69,.06)] transition active:scale-[.98] active:bg-[#f2f4f1]"
+            >
+              <span className={`grid h-12 w-12 place-items-center rounded-2xl ${shortcut.tone}`}>
+                <Icon size={24} strokeWidth={1.8} />
+              </span>
+              <strong className="text-[11px] leading-4 text-[#34433b]">{shortcut.label}</strong>
+              {shortcut.badge ? (
+                <span className="absolute right-3 top-3 grid min-h-5 min-w-5 place-items-center rounded-full bg-[#b85f48] px-1 text-[8px] font-extrabold text-white">
+                  {shortcut.badge > 9 ? "9+" : shortcut.badge}
                 </span>
-                <p className="mt-1 text-[10px] text-[#756459]">
-                  Comunicadas oficialmente pela direção.
-                </p>
-              </div>
-            </div>
-            <Link href="/app/family/occurrences" className="flex shrink-0 items-center gap-1 rounded-xl bg-[#a34336] px-3 py-2 text-[10px] font-bold text-white">
-              Ver todas <ChevronRight size={13} />
+              ) : null}
             </Link>
-          </div>
-          <div className="mt-4 grid gap-2">
-            {occurrenceAlerts.map((alert) => {
-              const occurrence = Array.isArray(alert.occurrences) ? alert.occurrences[0] : alert.occurrences;
-              const relatedChild = Array.isArray(occurrence.children) ? occurrence.children[0] : occurrence.children;
-              return (
-                <Link
-                  key={alert.id}
-                  href="/app/family/occurrences"
-                  className={`flex items-center justify-between gap-3 rounded-xl border p-3 ${
-                    alert.acknowledged_at
-                      ? "border-[#e2d8d2] bg-white"
-                      : "border-[#d99a8d] bg-[#fff0eb]"
-                  }`}
-                >
-                  <span>
-                    <strong className="block text-xs">{occurrence.title} · {relatedChild?.first_name}</strong>
-                    <small className="mt-1 block text-[9px] text-[#7c8680]">
-                      {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(occurrence.occurred_at))}
-                    </small>
-                  </span>
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold ${
-                    alert.acknowledged_at
-                      ? "bg-[#e6efe9] text-[#315645]"
-                      : "bg-[#a34336] text-white"
-                  }`}>
-                    {alert.acknowledged_at ? "Ciente" : "Requer ciência"}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+          );
+        })}
+      </nav>
+
+      {attentionCount ? (
+        <Link
+          href={(pendingOccurrences ?? 0) ? "/app/family/occurrences" : "/app/family/communications"}
+          className="mt-4 flex items-center gap-3 rounded-2xl border border-[#e5c8b8] bg-[#fff8ef] p-4"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#f5dfd3] text-[#a2543f]">
+            <AlertTriangle size={19} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <small className="text-[8px] font-extrabold tracking-[.12em] text-[#9a623b]">
+              REQUER SUA ATENÇÃO
+            </small>
+            <strong className="mt-1 block text-xs">
+              {attentionCount} item{attentionCount > 1 ? "s" : ""} aguardando você
+            </strong>
+          </span>
+          <ChevronRight size={16} className="text-[#a28777]" />
+        </Link>
       ) : null}
-      <section className="rounded-3xl border border-[#d9ded8] bg-[#fffefa] p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <span className="flex items-center gap-2 text-[10px] font-extrabold tracking-[.14em] text-[#557164]">
-              <Bell size={14} /> COMUNICADOS DA ESCOLA
-            </span>
-            <h1 className="mt-2 font-[var(--font-display)] text-3xl font-semibold tracking-[-.04em]">
-              {unread ? `${unread} novidade${unread > 1 ? "s" : ""}` : "Tudo acompanhado"}
-            </h1>
-          </div>
-          <Link href="/app/family/communications" className="flex items-center gap-1 rounded-xl bg-[#315645] px-3 py-2 text-[10px] font-bold text-white">
-            Ver todos <ChevronRight size={13} />
-          </Link>
-        </div>
-        <div className="mt-4 grid gap-3">
-          {notifications?.map((notification) => {
-            const communication = Array.isArray(notification.communications)
-              ? notification.communications[0]
-              : notification.communications;
-            const relatedChild = Array.isArray(notification.children)
-              ? notification.children[0]
-              : notification.children;
-            const kind = communication.kind as CommunicationKind;
-            return (
-              <article
-                key={notification.id}
-                className={`rounded-2xl border p-4 ${
-                  notification.viewed_at
-                    ? "border-[#e5e5df] bg-white"
-                    : "border-[#e4c6ac] bg-[#fff8ed]"
-                }`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <span className="text-[9px] font-extrabold tracking-[.1em] text-[#9a623b]">
-                      {communicationKindLabels[kind].toUpperCase()}
-                    </span>
-                    <strong className="mt-1 block text-sm">{communication.title}</strong>
-                    {communication.scope === "child" ? (
-                      <small className="mt-1 block text-[#7c8680]">
-                        Exclusivo para a família de {relatedChild?.first_name}
-                      </small>
-                    ) : (
-                      <small className="mt-1 block text-[#7c8680]">Comunicado geral da escola</small>
-                    )}
-                  </div>
-                  {!notification.viewed_at ? (
-                    <span className="rounded-full bg-[#f4dfc8] px-2.5 py-1 text-[9px] font-bold text-[#80512f]">
-                      Novo
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-3 text-xs leading-5 text-[#56635d]">{communication.body}</p>
-                {!notification.response ? (
-                  <div className="mt-3 border-t border-[#e8ded3] pt-3">
-                    <ResponseActions
-                      recipientId={notification.id}
-                      kind={kind}
-                      viewed={Boolean(notification.viewed_at)}
-                    />
-                  </div>
-                ) : (
-                  <span className="mt-3 flex items-center gap-1 text-[10px] font-bold text-[#315645]">
-                    <CheckCircle2 size={14} /> Respondido
-                  </span>
-                )}
-              </article>
-            );
-          })}
-          {!notifications?.length ? (
-            <p className="rounded-xl border border-dashed border-[#dfe1d9] p-5 text-center text-xs text-[#7c8680]">
-              Nenhum comunicado disponível.
-            </p>
-          ) : null}
+
+      <section
+        id="alimentacao"
+        className="mt-5 scroll-mt-36 rounded-3xl border border-[#e0e2dc] bg-white p-5"
+      >
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f3ead8] text-[#8a6938]">
+            <Utensils size={21} />
+          </span>
+          <span>
+            <small className="text-[8px] font-extrabold tracking-[.12em] text-[#8a6938]">
+              ALIMENTAÇÃO DO DIA
+            </small>
+            <strong className="mt-1 block text-sm">Almoço · {lunchLabel}</strong>
+          </span>
         </div>
       </section>
 
-      {recentPhoto && recentPhotoUrl ? (
-        <section className="mt-4 overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">
-          <div className="relative aspect-[16/9] bg-[#eef0ed]">
-            <Image
-              src={recentPhotoUrl}
-              alt={recentPhoto.caption}
-              fill
-              sizes="(max-width: 768px) 100vw, 672px"
-              className="object-cover"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-3 p-4">
-            <span>
-              <small className="text-[9px] font-extrabold tracking-[.1em] text-[#557164]">
-                FOTO MAIS RECENTE
+      <section
+        id="diario-de-bordo"
+        className="mt-4 scroll-mt-36 overflow-hidden rounded-3xl bg-[#315645] text-white"
+      >
+        {summary && child ? (
+          <>
+            <div className="p-6">
+              <span className="text-[8px] font-extrabold tracking-[.15em] text-[#c4d6cc]">
+                DIÁRIO DE BORDO
+              </span>
+              <h2 className="mt-2 font-[var(--font-display)] text-2xl font-semibold tracking-[-.04em]">
+                O dia de {child.first_name}
+              </h2>
+              <p className="mt-3 text-xs leading-5 text-[#d8e5de]">{summary.narrative}</p>
+              <small className="mt-4 block text-[9px] text-[#b8cbc1]">
+                {new Intl.DateTimeFormat("pt-BR", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                }).format(new Date(summary.published_at))}
               </small>
-              <strong className="mt-1 block text-sm">{recentPhoto.caption}</strong>
-            </span>
-            <Link
-              href="/app/family/photos"
-              className="flex shrink-0 items-center gap-1 rounded-xl border border-[#b9c9c0] px-3 py-2 text-[10px] font-bold text-[#315645]"
-            >
-              Ver galeria <ChevronRight size={13} />
-            </Link>
+            </div>
+            <div className="border-t border-white/10 bg-white/5 p-4">
+              <form action={markSummaryViewed}>
+                <input type="hidden" name="summaryId" value={summary.id} />
+                <input type="hidden" name="schoolId" value={summary.school_id} />
+                <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-[10px] font-bold text-[#315645]">
+                  {viewed ? <CheckCircle2 size={16} /> : <Eye size={16} />}
+                  {viewed ? "Visualização confirmada" : "Confirmo que visualizei"}
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="p-7">
+            <NotebookPen size={23} className="text-[#c4d6cc]" />
+            <h2 className="mt-3 text-lg font-bold">Diário ainda não publicado</h2>
+            <p className="mt-1 text-xs text-[#d8e5de]">
+              O resumo aparecerá após a saída da criança.
+            </p>
           </div>
-        </section>
-      ) : null}
+        )}
+      </section>
 
-      {summary && child ? (
-        <>
-          <header className="mt-5 rounded-3xl bg-[#315645] p-7 text-white">
-            <span className="text-[9px] font-extrabold tracking-[.16em] text-[#c4d6cc]">RESUMO PUBLICADO</span>
-            <h2 className="mt-3 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">O dia de {child.first_name}</h2>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-[#d8e5de]">{summary.narrative}</p>
-            <span className="mt-6 block text-[10px] text-[#b8cbc1]">
-              Publicado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(new Date(summary.published_at))}
-            </span>
-          </header>
-          <section className="mt-4 rounded-2xl border border-[#dfe1d9] bg-white p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#f4e6d8] text-[#986d4e]"><Utensils size={21} /></span>
-              <div><strong className="block text-sm">Alimentação</strong><span className="text-[10px] text-[#858d88]">Almoço</span></div>
-              <strong className="ml-auto rounded-full bg-[#e6efe9] px-3 py-1.5 text-[10px] text-[#47705d]">{lunchLabel}</strong>
-            </div>
-          </section>
-          <section className="mt-4 rounded-2xl border border-[#dfe1d9] bg-white p-6">
-            <div className="flex items-start gap-3">
-              <Sparkles size={19} className="mt-0.5 text-[#42715d]" />
-              <div><strong className="block text-sm">Como este texto foi criado</strong><p className="mt-2 text-xs leading-5 text-[#69746f]">O resumo utiliza regras previsíveis e somente os registros feitos pela escola. Nenhuma interpretação sobre humor ou saúde foi inventada.</p></div>
-            </div>
-          </section>
-          <form action={markSummaryViewed} className="mt-4">
-            <input type="hidden" name="summaryId" value={summary.id} />
-            <input type="hidden" name="schoolId" value={summary.school_id} />
-            <button className={`flex w-full items-center justify-center gap-2 rounded-xl py-4 text-xs font-bold ${viewed ? "bg-[#e3ede7] text-[#42705a]" : "bg-[#315645] text-white"}`}>
-              {viewed ? <CheckCircle2 size={18} /> : <Eye size={18} />}
-              {viewed ? "Visualização registrada" : "Registrar que visualizei"}
-            </button>
-          </form>
-          <p className="mt-3 text-center text-[9px] text-[#858d88]">A escola vê apenas que o resumo foi acessado, nunca utiliza isso para avaliar a professora.</p>
-        </>
-      ) : (
-        <section className="mt-5 rounded-2xl border border-[#dfe1d9] bg-white p-8">
-          <h2 className="font-[var(--font-display)] text-2xl font-bold">Ainda não há resumo</h2>
-          <p className="mt-2 text-sm text-[#69746f]">
-            {child ? "A escola ainda não publicou nenhum resumo." : "Nenhuma criança está vinculada a este acesso."}
+      <section className="mt-4 rounded-2xl border border-[#dfe1d9] bg-white p-4">
+        <div className="flex items-start gap-3">
+          <Sparkles size={17} className="mt-0.5 text-[#42715d]" />
+          <p className="text-[10px] leading-4 text-[#69746f]">
+            O Diário de Bordo utiliza somente registros feitos pela escola, sem
+            inventar interpretações sobre humor ou saúde.
           </p>
-        </section>
-      )}
+        </div>
+      </section>
     </div>
   );
 }

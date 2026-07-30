@@ -39,7 +39,7 @@ export default async function FamilyOccurrencesPage() {
               {!recipient.acknowledged_at ? (
                 <form action={acknowledgeOccurrence} className="mt-4">
                   <input type="hidden" name="recipientId" value={recipient.id} />
-                  <SubmitButton idleLabel={<><ShieldCheck size={15} /> Li e estou ciente</>} pendingLabel="Registrando..." className="flex items-center gap-2 rounded-xl bg-[#315645] px-4 py-3 text-xs font-bold text-white" />
+                  <SubmitButton idleLabel={<><ShieldCheck size={15} /> Confirmo que visualizei</>} pendingLabel="Registrando..." className="flex items-center gap-2 rounded-xl bg-[#315645] px-4 py-3 text-xs font-bold text-white" />
                 </form>
               ) : null}
             </article>

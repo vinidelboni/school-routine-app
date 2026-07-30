@@ -13,7 +13,7 @@ export function ResponseActions({
 }) {
   const actions =
     kind === "important"
-      ? [{ value: "acknowledged", label: "Li e estou ciente" }]
+      ? [{ value: "acknowledged", label: "Confirmo que visualizei" }]
       : kind === "authorization"
         ? [
             { value: "authorized", label: "Autorizo" },
@@ -25,7 +25,7 @@ export function ResponseActions({
               { value: "sent", label: "Já enviei" },
               { value: "cannot_send", label: "Não consigo enviar" },
             ]
-          : [{ value: "", label: viewed ? "Visualizado" : "Registrar visualização" }];
+          : [{ value: "", label: viewed ? "Visualizado" : "Confirmo que visualizei" }];
   if (kind === "general" && viewed) {
     return <span className="text-xs text-[#557164]">Visualização registrada.</span>;
   }

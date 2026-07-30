@@ -131,11 +131,16 @@ await journey("teacher", "professora@laco.validacao", async (page) => {
 
 await journey("family", "familia@laco.validacao", async (page) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("navigation", { name: "Atalhos da família" }).waitFor();
+  await page.getByRole("link", { name: "Financeiro" }).waitFor();
+  await page.getByRole("link", { name: "Calendário Escolar" }).waitFor();
+  await page.getByRole("link", { name: "Mural de Recados" }).waitFor();
+  await page.getByRole("link", { name: "Ocorrências" }).waitFor();
+  await page.getByRole("link", { name: "Alimentação" }).waitFor();
+  await page.getByRole("link", { name: "Diário de Bordo" }).waitFor();
   await page.getByText("O dia de Alice").waitFor();
-  await page.getByText("FOTO MAIS RECENTE").waitFor();
-  await page.getByText("Pintura coletiva no pátio").waitFor();
-  await page.getByRole("button", { name: "Registrar que visualizei" }).click();
-  await page.getByRole("button", { name: "Visualização registrada" }).waitFor();
+  await page.getByRole("button", { name: "Confirmo que visualizei" }).click();
+  await page.getByRole("button", { name: "Visualização confirmada" }).waitFor();
   await page.getByRole("link", { name: "Fotos", exact: true }).click();
   await page.getByText("Pintura coletiva no pátio").waitFor();
   await page.getByRole("link", { name: "Início" }).click();
@@ -375,18 +380,16 @@ await journey("director", "direcao@laco.validacao", async (page) => {
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByText("COMUNICADOS DA ESCOLA").waitFor();
+  await page.getByRole("link", { name: "Mural de Recados" }).click();
   await page.getByText("Passeio de validação").waitFor();
-  await page.getByText("OCORRÊNCIAS RECENTES").waitFor();
+  await page.getByRole("button", { name: "Autorizo", exact: true }).click();
+  await page.getByText("Sua resposta: Autorizado").waitFor();
+  await page.getByRole("link", { name: "Início" }).click();
+  await page.getByRole("link", { name: "Ocorrências" }).click();
   await page.getByText("Queda de validação").waitFor();
-  await page.getByRole("link", { name: "Ver todas", exact: true }).click();
-  await page.getByRole("button", { name: "Li e estou ciente" }).click();
+  await page.getByRole("button", { name: "Confirmo que visualizei" }).click();
   await page.getByText("Ciente").waitFor();
   await page.getByRole("link", { name: "Início" }).click();
-  await page.getByText("Queda de validação").waitFor();
-  await page.getByText("Ciente").first().waitFor();
-  await page.getByRole("button", { name: "Autorizo", exact: true }).click();
-  await page.getByText("Respondido").waitFor();
   await page.getByRole("link", { name: "Escola" }).click();
   await page.getByRole("link", { name: /Avisos à escola/ }).click();
   await page.getByText("Recebido pela escola").waitFor();
