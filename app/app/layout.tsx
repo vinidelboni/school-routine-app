@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { AlertTriangle, BarChart3, BookOpen, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, MessageSquareText, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { AlertTriangle, BarChart3, BookOpen, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
+import { FamilyShell } from "./family/family-shell";
 
 const roleLabels = {
   director: "Direção",
@@ -14,10 +15,57 @@ export default async function OperationalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { membership, profile } = await getCurrentContext();
+  const { supabase, membership, profile } = await getCurrentContext();
   const school = Array.isArray(membership.schools)
     ? membership.schools[0]
     : membership.schools;
+
+  if (membership.role === "family") {
+    const [
+      { data: guardianLink },
+      { count: communicationCount },
+      { count: occurrenceCount },
+    ] = await Promise.all([
+      supabase
+        .from("guardian_links")
+        .select("children(first_name, last_name)")
+        .eq("membership_id", membership.id)
+        .eq("active", true)
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("communication_recipients")
+        .select("*", { count: "exact", head: true })
+        .eq("membership_id", membership.id)
+        .is("viewed_at", null),
+      supabase
+        .from("occurrence_recipients")
+        .select("*", { count: "exact", head: true })
+        .eq("membership_id", membership.id)
+        .is("acknowledged_at", null),
+    ]);
+    const linkedChild = guardianLink
+      ? Array.isArray(guardianLink.children)
+        ? guardianLink.children[0]
+        : guardianLink.children
+      : null;
+    const childName = linkedChild
+      ? `${linkedChild.first_name} ${linkedChild.last_name}`
+      : "Criança";
+    const childInitials = linkedChild
+      ? `${linkedChild.first_name[0] ?? ""}${linkedChild.last_name[0] ?? ""}`
+      : "CR";
+    return (
+      <FamilyShell
+        childName={childName}
+        childInitials={childInitials}
+        schoolName={school?.name ?? "Escola"}
+        notificationCount={(communicationCount ?? 0) + (occurrenceCount ?? 0)}
+      >
+        {children}
+      </FamilyShell>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f5f0] text-[#24312b]">
@@ -104,31 +152,6 @@ export default async function OperationalLayout({
                 </Link>
                 <Link href="/app/teacher/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
                   <Camera size={17} /> Fotos da atividade
-                </Link>
-              </>
-            )}
-            {membership.role === "family" && (
-              <>
-                <Link href="/app/family" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <BookOpen size={17} /> Resumo da criança
-                </Link>
-                <Link href="/app/family/requests" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <MessageSquareText size={17} /> Avisos à escola
-                </Link>
-                <Link href="/app/family/communications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Megaphone size={17} /> Comunicados
-                </Link>
-                <Link href="/app/family/occurrences" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <AlertTriangle size={17} /> Ocorrências
-                </Link>
-                <Link href="/app/family/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Camera size={17} /> Fotos
-                </Link>
-                <Link href="/app/family/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Pill size={17} /> Medicamentos
-                </Link>
-                <Link href="/app/family/documents" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <FileText size={17} /> Boletos e documentos
                 </Link>
               </>
             )}

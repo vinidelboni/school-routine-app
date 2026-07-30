@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   title: "Laço — Rotina escolar, mais leve",
   description:
     "Protótipo demonstrativo da plataforma de rotina e comunicação para educação infantil.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Laço",
+  },
+};
+
+export const viewport = {
+  themeColor: "#315645",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

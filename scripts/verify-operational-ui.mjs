@@ -130,6 +130,7 @@ await journey("teacher", "professora@laco.validacao", async (page) => {
 });
 
 await journey("family", "familia@laco.validacao", async (page) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByText("O dia de Alice").waitFor();
   await page.getByText("FOTO MAIS RECENTE").waitFor();
   await page.getByText("Pintura coletiva no pátio").waitFor();
@@ -139,7 +140,9 @@ await journey("family", "familia@laco.validacao", async (page) => {
   await page.getByText("Pintura coletiva no pátio").waitFor();
   await page.getByRole("link", { name: "Início" }).click();
 
-  await page.getByRole("link", { name: "Avisos à escola" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("heading", { name: "Central da família" }).waitFor();
+  await page.getByRole("link", { name: /Avisos à escola/ }).click();
   await page.getByText("Avisos à escola", { exact: true }).waitFor();
   const requestForm = page.locator("form").filter({ hasText: "Informar a escola" });
   await requestForm.locator('[name="detailPrimary"]').fill("Consulta médica");
@@ -162,7 +165,8 @@ await journey("family", "familia@laco.validacao", async (page) => {
     .filter({ hasText: "Período integral excepcional" })
     .waitFor();
 
-  await page.getByRole("link", { name: "Medicamentos" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("link", { name: /Medicamentos/ }).click();
   await page.getByText("Solicitar administração").waitFor();
   const medicationForm = page
     .locator("form")
@@ -370,6 +374,7 @@ await journey("director", "direcao@laco.validacao", async (page) => {
 });
 
 await journey("family-request-status", "familia@laco.validacao", async (page) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByText("COMUNICADOS DA ESCOLA").waitFor();
   await page.getByText("Passeio de validação").waitFor();
   await page.getByText("OCORRÊNCIAS RECENTES").waitFor();
@@ -382,17 +387,21 @@ await journey("family-request-status", "familia@laco.validacao", async (page) =>
   await page.getByText("Ciente").first().waitFor();
   await page.getByRole("button", { name: "Autorizo", exact: true }).click();
   await page.getByText("Respondido").waitFor();
-  await page.getByRole("link", { name: "Avisos à escola" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("link", { name: /Avisos à escola/ }).click();
   await page.getByText("Recebido pela escola").waitFor();
   await page.getByText("Aprovado").waitFor();
-  await page.getByRole("link", { name: "Medicamentos" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("link", { name: /Medicamentos/ }).click();
   await page.getByText("Administração confirmada pela escola").waitFor();
-  await page.getByRole("link", { name: "Boletos e documentos" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("link", { name: /Boletos e documentos/ }).click();
   await page.getByText("Mensalidades da escola").waitFor();
   await page.getByText("MENS-2026-07-001").waitFor();
   await page.getByRole("button", { name: "Abrir documento" }).click();
   await page.getByRole("button", { name: "Visualizado" }).waitFor();
-  await page.getByRole("link", { name: "Comunicados" }).click();
+  await page.getByRole("link", { name: "Escola" }).click();
+  await page.getByRole("link", { name: /Comunicados/ }).click();
   await page.getByText("Passeio de validação").waitFor();
   await page.getByText("Sua resposta: Autorizado").waitFor();
 });
