@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, ListFilter } from "lucide-react";
 
 export type CalendarEvent = {
   id: string;
@@ -54,6 +54,7 @@ export function CalendarView({
   compact?: boolean;
 }) {
   const [selectedKind, setSelectedKind] = useState<"all" | CalendarEvent["kind"]>("all");
+  const [filterOpen, setFilterOpen] = useState(false);
   const firstDay = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const previous = new Date(year, month - 1, 1);
@@ -152,11 +153,33 @@ export function CalendarView({
       <section className="mt-5">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-xs font-extrabold text-[#4d5e55]">Neste mês</h2>
-          <span className="text-[9px] text-[#8c948f]">{monthEvents.length} registros</span>
+          <span className="flex items-center gap-2">
+            <small className="text-[9px] text-[#8c948f]">{monthEvents.length} registros</small>
+            {availableKinds.size ? (
+              <button
+                type="button"
+                aria-label="Filtrar registros"
+                aria-expanded={filterOpen}
+                aria-controls="calendar-filter-options"
+                onClick={() => setFilterOpen((open) => !open)}
+                className={`relative grid h-9 w-9 place-items-center rounded-full border transition ${
+                  effectiveKind === "all"
+                    ? "border-[#d9ddd8] bg-white text-[#557164] active:bg-[#eef1ee]"
+                    : "border-[#315645] bg-[#315645] text-white"
+                }`}
+              >
+                <ListFilter size={17} />
+                {effectiveKind !== "all" ? (
+                  <i className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#f7f5ef] bg-[#d78c62]" />
+                ) : null}
+              </button>
+            ) : null}
+          </span>
         </div>
-        {availableKinds.size ? (
+        {availableKinds.size && filterOpen ? (
           <div
-            className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none]"
+            id="calendar-filter-options"
+            className="mt-3 rounded-2xl border border-[#dfe2dc] bg-white p-2 shadow-[0_10px_30px_rgba(49,86,69,.09)]"
             role="group"
             aria-label="Filtrar registros do calendário"
           >
@@ -164,7 +187,10 @@ export function CalendarView({
               active={effectiveKind === "all"}
               label="Todos"
               count={monthEventsUnfiltered.length}
-              onClick={() => setSelectedKind("all")}
+              onClick={() => {
+                setSelectedKind("all");
+                setFilterOpen(false);
+              }}
             />
             {kindOrder
               .filter((kind) => availableKinds.has(kind))
@@ -174,7 +200,10 @@ export function CalendarView({
                   active={effectiveKind === kind}
                   label={kindLabels[kind]}
                   count={monthEventsUnfiltered.filter((event) => event.kind === kind).length}
-                  onClick={() => setSelectedKind(kind)}
+                  onClick={() => {
+                    setSelectedKind(kind);
+                    setFilterOpen(false);
+                  }}
                   dotClass={kindStyles[kind].split(" ")[0]}
                 />
               ))}
@@ -236,15 +265,20 @@ function FilterButton({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[9px] font-bold transition ${
+      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[10px] font-bold transition ${
         active
-          ? "border-[#315645] bg-[#315645] text-white"
-          : "border-[#dfe2dc] bg-white text-[#64716a] active:bg-[#f0f2ef]"
+          ? "bg-[#e6eee9] text-[#315645]"
+          : "text-[#64716a] active:bg-[#f0f2ef]"
       }`}
     >
-      {dotClass && !active ? <i className={`h-2 w-2 rounded-full ${dotClass}`} /> : null}
-      {label}
-      <span className={active ? "text-white/70" : "text-[#9aa19d]"}>{count}</span>
+      {dotClass ? (
+        <i className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
+      ) : (
+        <i className="h-2.5 w-2.5 rounded-full bg-[#a9b0ac]" />
+      )}
+      <span className="flex-1">{label}</span>
+      <span className="text-[#9aa19d]">{count}</span>
+      {active ? <Check size={15} /> : <span className="w-[15px]" />}
     </button>
   );
 }
