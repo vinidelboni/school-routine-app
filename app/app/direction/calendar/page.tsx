@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { CalendarView, parseCalendarMonth, type CalendarEvent } from "../../../components/calendar-view";
+import { CalendarView, type CalendarEvent } from "../../../components/calendar-view";
 import { getCurrentContext } from "../../../lib/auth";
+import { parseCalendarMonth } from "../../../lib/calendar";
 
 export default async function DirectionCalendarPage({
   searchParams,

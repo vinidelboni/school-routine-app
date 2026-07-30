@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type CalendarEvent = {
@@ -20,6 +23,22 @@ const kindStyles = {
 } as const;
 
 const weekdayLabels = ["D", "S", "T", "Q", "Q", "S", "S"];
+const kindLabels = {
+  routine: "Rotina",
+  communication: "Comunicados",
+  request: "Solicitações",
+  occurrence: "Ocorrências",
+  medication: "Medicamentos",
+  photo: "Atividades",
+} as const;
+const kindOrder: CalendarEvent["kind"][] = [
+  "routine",
+  "communication",
+  "request",
+  "occurrence",
+  "medication",
+  "photo",
+];
 
 export function CalendarView({
   year,
@@ -34,13 +53,27 @@ export function CalendarView({
   basePath: string;
   compact?: boolean;
 }) {
+  const [selectedKind, setSelectedKind] = useState<"all" | CalendarEvent["kind"]>("all");
   const firstDay = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const previous = new Date(year, month - 1, 1);
   const next = new Date(year, month + 1, 1);
   const todayKey = toDateKey(new Date());
+  const monthEventsUnfiltered = events
+    .filter((event) => {
+      const date = new Date(`${event.date}T12:00:00`);
+      return date.getFullYear() === year && date.getMonth() === month;
+    })
+    .toSorted((a, b) => a.date.localeCompare(b.date));
+  const availableKinds = new Set(monthEventsUnfiltered.map((event) => event.kind));
+  const effectiveKind =
+    selectedKind === "all" || availableKinds.has(selectedKind) ? selectedKind : "all";
+  const filteredEvents =
+    effectiveKind === "all"
+      ? events
+      : events.filter((event) => event.kind === effectiveKind);
   const eventsByDate = new Map<string, CalendarEvent[]>();
-  for (const event of events) {
+  for (const event of filteredEvents) {
     const current = eventsByDate.get(event.date) ?? [];
     current.push(event);
     eventsByDate.set(event.date, current);
@@ -54,12 +87,10 @@ export function CalendarView({
     month: "long",
     year: "numeric",
   }).format(firstDay);
-  const monthEvents = events
-    .filter((event) => {
-      const date = new Date(`${event.date}T12:00:00`);
-      return date.getFullYear() === year && date.getMonth() === month;
-    })
-    .toSorted((a, b) => a.date.localeCompare(b.date));
+  const monthEvents =
+    effectiveKind === "all"
+      ? monthEventsUnfiltered
+      : monthEventsUnfiltered.filter((event) => event.kind === effectiveKind);
 
   return (
     <>
@@ -123,6 +154,32 @@ export function CalendarView({
           <h2 className="text-xs font-extrabold text-[#4d5e55]">Neste mês</h2>
           <span className="text-[9px] text-[#8c948f]">{monthEvents.length} registros</span>
         </div>
+        {availableKinds.size ? (
+          <div
+            className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none]"
+            role="group"
+            aria-label="Filtrar registros do calendário"
+          >
+            <FilterButton
+              active={effectiveKind === "all"}
+              label="Todos"
+              count={monthEventsUnfiltered.length}
+              onClick={() => setSelectedKind("all")}
+            />
+            {kindOrder
+              .filter((kind) => availableKinds.has(kind))
+              .map((kind) => (
+                <FilterButton
+                  key={kind}
+                  active={effectiveKind === kind}
+                  label={kindLabels[kind]}
+                  count={monthEventsUnfiltered.filter((event) => event.kind === kind).length}
+                  onClick={() => setSelectedKind(kind)}
+                  dotClass={kindStyles[kind].split(" ")[0]}
+                />
+              ))}
+          </div>
+        ) : null}
         <div className="mt-2 grid gap-2">
           {monthEvents.map((event) => {
             const content = (
@@ -161,15 +218,35 @@ export function CalendarView({
   );
 }
 
-export function parseCalendarMonth(value?: string) {
-  const match = value?.match(/^(\d{4})-(\d{2})$/);
-  if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]) - 1;
-    if (year >= 2020 && year <= 2100 && month >= 0 && month <= 11) return { year, month };
-  }
-  const today = new Date();
-  return { year: today.getFullYear(), month: today.getMonth() };
+function FilterButton({
+  active,
+  label,
+  count,
+  onClick,
+  dotClass,
+}: {
+  active: boolean;
+  label: string;
+  count: number;
+  onClick: () => void;
+  dotClass?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[9px] font-bold transition ${
+        active
+          ? "border-[#315645] bg-[#315645] text-white"
+          : "border-[#dfe2dc] bg-white text-[#64716a] active:bg-[#f0f2ef]"
+      }`}
+    >
+      {dotClass && !active ? <i className={`h-2 w-2 rounded-full ${dotClass}`} /> : null}
+      {label}
+      <span className={active ? "text-white/70" : "text-[#9aa19d]"}>{count}</span>
+    </button>
+  );
 }
 
 function toDateKey(date: Date) {
