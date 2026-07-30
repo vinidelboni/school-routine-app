@@ -9,8 +9,6 @@ import {
   Camera,
   ChevronDown,
   Home,
-  School,
-  TreePine,
   UserRound,
 } from "lucide-react";
 
@@ -37,41 +35,31 @@ export function FamilyShell({
   childName,
   childInitials,
   schoolName,
-  schoolSlug,
   notificationCount,
 }: {
   children: React.ReactNode;
   childName: string;
   childInitials: string;
   schoolName: string;
-  schoolSlug: string;
   notificationCount: number;
 }) {
   const pathname = usePathname();
-  const SchoolMark = schoolSlug.toLowerCase().includes("ipe") ? TreePine : School;
 
   return (
     <div className="min-h-dvh bg-[#e9edf4] text-[#172b4d] md:px-5 md:py-6">
       <div className="relative mx-auto min-h-dvh w-full overflow-hidden bg-[#f7f8fa] md:min-h-[calc(100vh-3rem)] md:max-w-[520px] md:rounded-[2.25rem] md:border md:border-[#d5dce7] md:shadow-[0_32px_80px_rgba(28,54,94,.22)]">
-        <header className="sticky top-0 z-30 overflow-hidden bg-gradient-to-br from-[#326cc0] via-[#2a5fb2] to-[#204d9a] px-4 pb-4 pt-[max(14px,env(safe-area-inset-top))] text-white shadow-[0_8px_28px_rgba(34,78,150,.22)]">
-          <span className="pointer-events-none absolute -right-16 -top-24 h-52 w-52 rounded-full border border-white/10" />
-          <span className="pointer-events-none absolute -right-5 top-8 h-28 w-28 rounded-full bg-[#76a8ed]/20 blur-2xl" />
-          <div className="relative flex items-center gap-3">
-            <Link
-              href="/app/family"
-              aria-label={`${schoolName} · início`}
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/30 bg-white text-[#2a5fb2] shadow-[0_7px_20px_rgba(13,42,91,.2)]"
-            >
-              <SchoolMark size={29} strokeWidth={1.9} />
-            </Link>
-            <span className="min-w-0 flex-1">
-              <small className="block text-[8px] font-extrabold uppercase tracking-[.15em] text-[#c9dcf7]">
-                Sua escola
-              </small>
-              <strong className="mt-0.5 block truncate font-[var(--font-display)] text-lg font-semibold tracking-[-.03em] text-white">
-                {schoolName}
-              </strong>
-            </span>
+        <header
+          aria-label={schoolName}
+          className="sticky top-0 z-30 flex min-h-[184px] flex-col justify-between overflow-hidden bg-[#2459aa] px-4 pb-4 pt-[max(14px,env(safe-area-inset-top))] text-white shadow-[0_8px_28px_rgba(34,78,150,.22)]"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, rgba(43, 98, 180, .72), rgba(24, 65, 148, .94)), url('/demo/escola-cni-logo.png')",
+            backgroundPosition: "center, center",
+            backgroundRepeat: "no-repeat, no-repeat",
+            backgroundSize: "cover, 70% auto",
+          }}
+        >
+          <div className="relative flex justify-end">
             <Link
               href="/app/family/notifications"
               aria-label={`${notificationCount} notificações pendentes`}
@@ -85,7 +73,7 @@ export function FamilyShell({
               ) : null}
             </Link>
           </div>
-          <div className="relative mt-4 flex items-center gap-3 border-t border-white/15 pt-3">
+          <div className="relative mt-10 flex items-center gap-3 rounded-2xl border border-white/15 bg-[#153f8c]/45 p-3 backdrop-blur-[2px]">
             <span className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white text-[10px] font-extrabold text-[#2a5fb2] shadow-sm">
               {childInitials}
             </span>
