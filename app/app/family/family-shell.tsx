@@ -53,12 +53,17 @@ export function FamilyShell({
           className="sticky top-0 z-30 flex min-h-[184px] flex-col justify-between overflow-hidden bg-[#2459aa] px-4 pb-4 pt-[max(14px,env(safe-area-inset-top))] text-white shadow-[0_8px_28px_rgba(34,78,150,.22)]"
           style={{
             backgroundImage:
-              "linear-gradient(180deg, rgba(43, 98, 180, .62), rgba(24, 65, 148, .88)), url('/demo/escola-cni-logo-transparent.png')",
-            backgroundPosition: "center, center",
-            backgroundRepeat: "no-repeat, no-repeat",
-            backgroundSize: "cover, 94% auto",
+              "linear-gradient(180deg, rgb(43, 98, 180), rgb(24, 65, 148))",
           }}
         >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-40"
+            style={{
+              backgroundImage: "url('/demo/escola-cni-logo-transparent.png')",
+              backgroundSize: "94% auto",
+            }}
+          />
           <div className="relative flex justify-end">
             <Link
               href="/app/family/notifications"
