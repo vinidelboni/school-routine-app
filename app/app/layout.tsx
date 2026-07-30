@@ -25,6 +25,7 @@ export default async function OperationalLayout({
       { data: guardianLink },
       { count: communicationCount },
       { count: occurrenceCount },
+      { count: billingCount },
     ] = await Promise.all([
       supabase
         .from("guardian_links")
@@ -43,6 +44,11 @@ export default async function OperationalLayout({
         .select("*", { count: "exact", head: true })
         .eq("membership_id", membership.id)
         .is("acknowledged_at", null),
+      supabase
+        .from("billing_documents")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "distributed")
+        .is("viewed_at", null),
     ]);
     const linkedChild = guardianLink
       ? Array.isArray(guardianLink.children)
@@ -60,7 +66,9 @@ export default async function OperationalLayout({
         childName={childName}
         childInitials={childInitials}
         schoolName={school?.name ?? "Escola"}
-        notificationCount={(communicationCount ?? 0) + (occurrenceCount ?? 0)}
+        notificationCount={
+          (communicationCount ?? 0) + (occurrenceCount ?? 0) + (billingCount ?? 0)
+        }
       >
         {children}
       </FamilyShell>

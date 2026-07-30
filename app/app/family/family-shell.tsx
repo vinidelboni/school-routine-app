@@ -27,6 +27,7 @@ const schoolRoutes = [
   "/app/family/medications",
   "/app/family/documents",
   "/app/family/occurrences",
+  "/app/family/notifications",
 ];
 
 export function FamilyShell({
@@ -45,40 +46,42 @@ export function FamilyShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-dvh bg-[#e7e4da] text-[#24312b] md:px-5 md:py-6">
-      <div className="relative mx-auto min-h-dvh w-full overflow-hidden bg-[#f7f5ef] md:min-h-[calc(100vh-3rem)] md:max-w-[520px] md:rounded-[2rem] md:border md:border-[#d9d8d0] md:shadow-[0_28px_80px_rgba(40,55,48,.16)]">
-        <header className="sticky top-0 z-30 border-b border-[#e6e4dc] bg-[#fffefa]/95 px-4 pb-3 pt-[max(14px,env(safe-area-inset-top))] backdrop-blur">
-          <div className="flex items-center justify-between">
+    <div className="min-h-dvh bg-[#061a36] text-[#102f52] md:px-5 md:py-6">
+      <div className="relative mx-auto min-h-dvh w-full overflow-hidden bg-[#f5f9ff] md:min-h-[calc(100vh-3rem)] md:max-w-[520px] md:rounded-[2.25rem] md:border md:border-white/20 md:shadow-[0_32px_90px_rgba(0,16,45,.5)]">
+        <header className="sticky top-0 z-30 overflow-hidden bg-gradient-to-br from-[#0b67d1] via-[#0757ba] to-[#063f94] px-4 pb-4 pt-[max(14px,env(safe-area-inset-top))] text-white shadow-[0_8px_28px_rgba(6,63,148,.2)]">
+          <span className="pointer-events-none absolute -right-16 -top-24 h-52 w-52 rounded-full border border-white/10" />
+          <span className="pointer-events-none absolute -right-5 top-8 h-28 w-28 rounded-full bg-[#38a0ff]/20 blur-2xl" />
+          <div className="relative flex items-center justify-between">
             <Link
               href="/app/family"
-              className="font-[var(--font-display)] text-2xl font-extrabold tracking-[-.06em] text-[#315645]"
+              className="font-[var(--font-display)] text-2xl font-extrabold tracking-[-.06em] text-white"
             >
               laço
             </Link>
             <Link
-              href="/app/family/school"
+              href="/app/family/notifications"
               aria-label={`${notificationCount} notificações pendentes`}
-              className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e0e1da] bg-white text-[#557164]"
+              className="relative grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white/12 text-white backdrop-blur transition hover:bg-white/20"
             >
               <Bell size={19} />
               {notificationCount ? (
-                <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-white bg-[#b85f48] px-1 text-[9px] font-extrabold text-white">
+                <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-[#0b60c7] bg-[#ff4d63] px-1 text-[9px] font-extrabold text-white">
                   {notificationCount > 9 ? "9+" : notificationCount}
                 </span>
               ) : null}
             </Link>
           </div>
-          <div className="mt-3 flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-[#d9e8df] text-[10px] font-extrabold text-[#315645]">
+          <div className="relative mt-3 flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white text-[10px] font-extrabold text-[#0860c5] shadow-sm">
               {childInitials}
             </span>
             <span className="min-w-0 flex-1">
-              <small className="block truncate text-[9px] text-[#858d88]">
+              <small className="block truncate text-[9px] text-[#c8e0ff]">
                 Acompanhando em {schoolName}
               </small>
-              <strong className="block truncate text-sm">{childName}</strong>
+              <strong className="block truncate text-sm text-white">{childName}</strong>
             </span>
-            <ChevronDown size={16} className="text-[#7c8680]" />
+            <ChevronDown size={16} className="text-[#c8e0ff]" />
           </div>
         </header>
 
@@ -88,27 +91,29 @@ export function FamilyShell({
 
         <nav
           aria-label="Navegação da família"
-          className="fixed inset-x-0 bottom-0 z-40 mx-auto grid w-full grid-cols-5 border-t border-[#e3e2dc] bg-[#fffefa]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:bottom-6 md:max-w-[518px] md:rounded-b-[2rem]"
+          className="fixed inset-x-0 bottom-0 z-40 mx-auto grid w-full grid-cols-5 border-t border-[#dce9f8] bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_26px_rgba(16,72,134,.08)] backdrop-blur md:bottom-6 md:max-w-[518px] md:rounded-b-[2.25rem]"
         >
           {navigation.map((item) => {
-            const active = item.href === "/app/family/calendar"
-              ? pathname.startsWith("/app/family/calendar") || pathname.startsWith("/app/family/history")
-              : item.group
-              ? schoolRoutes.some((route) => pathname.startsWith(route))
-              : item.exact
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
+            const active =
+              item.href === "/app/family/calendar"
+                ? pathname.startsWith("/app/family/calendar") ||
+                  pathname.startsWith("/app/family/history")
+                : item.group
+                  ? schoolRoutes.some((route) => pathname.startsWith(route))
+                  : item.exact
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`relative flex h-[66px] flex-col items-center justify-center gap-1 text-[9px] font-bold transition ${
-                  active ? "text-[#315645]" : "text-[#8b928e]"
+                  active ? "text-[#0864ca]" : "text-[#8195aa]"
                 }`}
               >
                 {active ? (
-                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#315645]" />
+                  <span className="absolute top-0 h-0.5 w-9 rounded-full bg-[#0870dc]" />
                 ) : null}
                 <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
                 {item.label}

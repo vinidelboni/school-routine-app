@@ -68,7 +68,7 @@ export default async function FamilyHistoryPage() {
           return (
             <Link
               key={summary.id}
-              href="/app/family"
+              href="/app/family/diary"
               className="group flex gap-3 rounded-2xl border border-[#e1e2dc] bg-white p-4 shadow-[0_5px_18px_rgba(49,86,69,.05)] transition active:scale-[.99]"
             >
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#e5efe9] text-center text-[#315645]">
