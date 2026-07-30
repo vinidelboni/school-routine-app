@@ -10,15 +10,6 @@ import {
 } from "lucide-react";
 import { getCurrentContext } from "../../lib/auth";
 
-const blueTones = [
-  "from-[#e8f2ff] to-[#d9eaff] text-[#1265c8]",
-  "from-[#edf6ff] to-[#e1efff] text-[#2178d7]",
-  "from-[#e6f1ff] to-[#d7e9ff] text-[#0f69cc]",
-  "from-[#edf5ff] to-[#dcecff] text-[#2674c8]",
-  "from-[#e7f3ff] to-[#d9edff] text-[#1474cf]",
-  "from-[#eef6ff] to-[#dfedff] text-[#235fbb]",
-];
-
 export default async function FamilyPage() {
   const { supabase, user, membership, profile } = await getCurrentContext();
   if (membership.role !== "family") redirect("/app");
@@ -120,33 +111,30 @@ export default async function FamilyPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <header className="px-1 pb-2 pt-2">
-        <span className="text-[9px] font-extrabold tracking-[.18em] text-[#7aa8da]">
+        <span className="text-[9px] font-extrabold tracking-[.18em] text-[#6f91c3]">
           BEM-VINDO
         </span>
-        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#082a57]">
+        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#172b4d]">
           Olá, {firstName}!
         </h1>
-        <p className="mt-1 text-xs text-[#6e89a8]">
+        <p className="mt-1 text-xs text-[#77869d]">
           O que você quer acompanhar hoje?
         </p>
       </header>
 
       <nav aria-label="Atalhos da família" className="mt-5 grid grid-cols-2 gap-3">
-        {shortcuts.map((shortcut, index) => {
+        {shortcuts.map((shortcut) => {
           const Icon = shortcut.icon;
           return (
             <Link
               key={shortcut.label}
               href={shortcut.href}
-              className="group relative flex min-h-36 flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.65rem] border border-[#dce9f8] bg-white px-3 py-5 text-center shadow-[0_12px_30px_rgba(18,91,170,.09)] transition hover:-translate-y-0.5 hover:border-[#bad7f6] hover:shadow-[0_16px_35px_rgba(18,91,170,.14)] active:scale-[.98]"
+              className="group relative flex min-h-36 flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.65rem] border border-[#e5e9ef] bg-white px-3 py-5 text-center shadow-[0_10px_26px_rgba(35,73,128,.07)] transition hover:-translate-y-0.5 hover:border-[#cad6e7] hover:shadow-[0_15px_32px_rgba(35,73,128,.12)] active:scale-[.98]"
             >
-              <span className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-[#9fc9f4] to-transparent opacity-70" />
-              <span
-                className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${blueTones[index]} shadow-[inset_0_1px_0_rgba(255,255,255,.9)] transition group-hover:scale-105`}
-              >
-                <Icon size={27} strokeWidth={1.8} />
+              <span className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-gradient-to-b from-[#f7f8fa] to-[#eceff3] text-[#2d62b4] shadow-[inset_0_1px_0_white,0_5px_14px_rgba(42,91,167,.08)] ring-1 ring-[#e6e9ee] transition group-hover:scale-105">
+                <Icon size={31} strokeWidth={1.85} />
               </span>
-              <strong className="text-[11px] leading-4 text-[#15395f]">
+              <strong className="text-[11px] leading-4 text-[#27364c]">
                 {shortcut.label}
               </strong>
               {shortcut.badge ? (
