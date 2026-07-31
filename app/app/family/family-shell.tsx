@@ -72,7 +72,7 @@ export function FamilyShell({
                 type="submit"
                 aria-label="Sair da conta"
                 title="Sair"
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#ff8a94]/35 bg-[#7b2440]/25 text-[#ff9aa3] backdrop-blur transition hover:border-[#ff9aa3]/55 hover:bg-[#8b2947]/40 hover:text-[#ffc0c5] focus:outline-none focus:ring-4 focus:ring-[#ff8a94]/20"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white/12 text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/15"
               >
                 <LogOut size={18} strokeWidth={2} />
               </button>
