@@ -122,26 +122,33 @@ export default async function FamilyPage() {
         </p>
       </header>
 
-      <nav aria-label="Atalhos da família" className="mt-5 grid grid-cols-2 gap-3">
+      <nav
+        aria-label="Atalhos da família"
+        className="mt-7 grid grid-cols-3 gap-x-3 gap-y-8 px-1"
+      >
         {shortcuts.map((shortcut) => {
           const Icon = shortcut.icon;
           return (
             <Link
               key={shortcut.label}
               href={shortcut.href}
-              className="group relative flex min-h-36 flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.65rem] border border-[#e5e9ef] bg-white px-3 py-5 text-center shadow-[0_10px_26px_rgba(35,73,128,.07)] transition hover:-translate-y-0.5 hover:border-[#cad6e7] hover:shadow-[0_15px_32px_rgba(35,73,128,.12)] active:scale-[.98]"
+              className="group flex min-w-0 flex-col items-center gap-3 rounded-2xl text-center outline-none transition hover:-translate-y-1 focus-visible:ring-4 focus-visible:ring-[#2d83e6]/20 active:scale-[.97]"
             >
-              <span className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-gradient-to-b from-[#f7f8fa] to-[#eceff3] text-[#2d62b4] shadow-[inset_0_1px_0_white,0_5px_14px_rgba(42,91,167,.08)] ring-1 ring-[#e6e9ee] transition group-hover:scale-105">
-                <Icon size={31} strokeWidth={1.85} />
+              <span className="relative grid h-[4.85rem] w-[4.85rem] place-items-center rounded-full border border-white/50 bg-gradient-to-b from-[#14abe4] via-[#086dcc] to-[#092a9c] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.45),0_12px_24px_rgba(17,70,157,.2)] transition duration-300 group-hover:scale-105 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,.5),0_16px_28px_rgba(17,70,157,.27)]">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-[5px] rounded-full border border-white/10"
+                />
+                <Icon className="relative" size={33} strokeWidth={1.75} />
+                {shortcut.badge ? (
+                  <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-[#f7f8fa] bg-[#ff4d63] px-1 text-[8px] font-extrabold text-white shadow-sm">
+                    {shortcut.badge > 9 ? "9+" : shortcut.badge}
+                  </span>
+                ) : null}
               </span>
-              <strong className="text-[11px] leading-4 text-[#27364c]">
+              <strong className="max-w-[7rem] text-[11px] leading-4 text-[#27364c]">
                 {shortcut.label}
               </strong>
-              {shortcut.badge ? (
-                <span className="absolute right-3 top-3 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-white bg-[#ff4d63] px-1 text-[8px] font-extrabold text-white shadow-sm">
-                  {shortcut.badge > 9 ? "9+" : shortcut.badge}
-                </span>
-              ) : null}
             </Link>
           );
         })}

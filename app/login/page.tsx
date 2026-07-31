@@ -59,14 +59,14 @@ export default async function LoginPage({
         </header>
 
         <div className="relative mt-auto flex flex-col items-center pt-12 text-center">
-          <div className="grid h-40 w-40 place-items-center rounded-full border border-white/20 bg-white/95 p-4 shadow-[0_22px_55px_rgba(3,38,117,.24)]">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-[0_22px_55px_rgba(3,38,117,.24)]">
             <Image
               src="/demo/escola-cni-logo.png"
               alt="Escola CNI Infantil"
-              width={136}
-              height={136}
+              fill
+              sizes="160px"
               priority
-              className="h-auto w-full"
+              className="scale-[1.04] rounded-full object-cover"
             />
           </div>
           <p className="mt-5 text-[11px] font-bold uppercase tracking-[.22em] text-[#7edbff]">
