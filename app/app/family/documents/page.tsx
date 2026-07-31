@@ -18,17 +18,15 @@ export default async function FamilyDocumentsPage() {
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
-          DOCUMENTOS
+        <span className="text-[9px] font-extrabold tracking-[.18em] text-[#6f91c3]">
+          FINANCEIRO
         </span>
-        <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
-          Boletos e mensalidades
+        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#172b4d]">
+          Boletos
         </h1>
-        <p className="mt-2 text-sm text-[#69746f]">
-          A visualização não representa confirmação de pagamento.
-        </p>
+        <p className="mt-1 text-xs text-[#77869d]">Documentos enviados pela escola.</p>
       </header>
-      <section className="mt-7 grid gap-3">
+      <section className="mt-5 grid gap-3">
         {documents?.map((document) => {
           const child = Array.isArray(document.children)
             ? document.children[0]
@@ -39,7 +37,7 @@ export default async function FamilyDocumentsPage() {
           return (
             <article
               key={document.id}
-              className="rounded-2xl border border-[#dfe1d9] bg-white p-5"
+              className="rounded-2xl bg-white p-4 shadow-[0_8px_24px_rgba(35,73,128,.06)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <span className="flex items-start gap-3">
@@ -47,8 +45,8 @@ export default async function FamilyDocumentsPage() {
                     <FileText size={19} />
                   </span>
                   <span>
-                    <strong className="block text-sm">{batch?.title}</strong>
-                    <small className="mt-1 block text-[#7c8680]">
+                    <strong className="block text-sm text-[#27364c]">{batch?.title}</strong>
+                    <small className="mt-1 block text-[9px] text-[#7c8680]">
                       {child?.first_name} · vence em {document.due_date}
                     </small>
                     <code className="mt-2 block text-[10px] text-[#557164]">
@@ -73,7 +71,7 @@ export default async function FamilyDocumentsPage() {
                       )
                     }
                     pendingLabel="Abrindo..."
-                    className="rounded-xl bg-[#315645] px-4 py-2.5 text-[10px] font-bold text-white"
+                    className="rounded-xl bg-[#1768c5] px-4 py-2.5 text-[10px] font-bold text-white"
                   />
                 </form>
               </div>

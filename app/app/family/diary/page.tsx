@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, Clock3, Eye, NotebookPen, Sparkles } from "lucide-react";
+import { CheckCircle2, Clock3, Eye, NotebookPen } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 import { markSummaryViewed } from "../../actions";
 
@@ -44,21 +44,19 @@ export default async function FamilyDiaryPage() {
         <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#082a57]">
           Como foi o dia
         </h1>
-        <p className="mt-2 text-xs leading-5 text-[#6e89a8]">
-          Resumos publicados pela escola após a saída.
-        </p>
+        <p className="mt-1 text-xs text-[#6e89a8]">O resumo mais recente aparece primeiro.</p>
       </header>
 
       {latest ? (
-        <section className="mt-6 overflow-hidden rounded-[1.8rem] bg-gradient-to-br from-[#086bd5] via-[#0759bd] to-[#063e91] text-white shadow-[0_18px_42px_rgba(7,77,164,.28)]">
-          <div className="p-6">
+        <section className="mt-5 overflow-hidden rounded-[1.8rem] bg-gradient-to-br from-[#086bd5] via-[#0759bd] to-[#063e91] text-white shadow-[0_18px_42px_rgba(7,77,164,.28)]">
+          <div className="p-5">
             <span className="text-[8px] font-extrabold tracking-[.15em] text-[#b9dcff]">
               MAIS RECENTE
             </span>
             <h2 className="mt-2 font-[var(--font-display)] text-2xl font-semibold tracking-[-.04em]">
               O dia de {latestChild?.first_name}
             </h2>
-            <p className="mt-3 text-xs leading-5 text-[#e0efff]">{latest.narrative}</p>
+            <p className="mt-3 text-sm leading-6 text-[#e0efff]">{latest.narrative}</p>
             <small className="mt-4 flex items-center gap-1.5 text-[9px] text-[#b9d8f8]">
               <Clock3 size={12} />
               {new Intl.DateTimeFormat("pt-BR", {
@@ -90,7 +88,7 @@ export default async function FamilyDiaryPage() {
           <h2 className="text-xs font-extrabold tracking-[.12em] text-[#51789f]">
             DIAS ANTERIORES
           </h2>
-          <div className="mt-3 grid gap-3">
+          <div className="mt-2 divide-y divide-[#e5eaf1] overflow-hidden rounded-2xl bg-white px-3">
             {history.map((summary) => {
               const child = Array.isArray(summary.children)
                 ? summary.children[0]
@@ -99,7 +97,7 @@ export default async function FamilyDiaryPage() {
               return (
                 <article
                   key={summary.id}
-                  className="flex gap-3 rounded-2xl border border-[#dce9f8] bg-white p-4 shadow-[0_7px_22px_rgba(18,91,170,.06)]"
+                  className="flex gap-3 py-3"
                 >
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#e7f2ff] text-center text-[#0864ca]">
                     <strong className="block text-sm leading-3">{date.getDate()}</strong>
@@ -122,13 +120,6 @@ export default async function FamilyDiaryPage() {
         </section>
       ) : null}
 
-      <div className="mt-5 flex items-start gap-3 rounded-2xl border border-[#d9e9fa] bg-[#eef6ff] p-4">
-        <Sparkles size={17} className="mt-0.5 shrink-0 text-[#1874d1]" />
-        <p className="text-[10px] leading-4 text-[#587694]">
-          Os textos utilizam somente os registros feitos pela escola, sem inventar
-          interpretações sobre humor ou saúde.
-        </p>
-      </div>
     </div>
   );
 }

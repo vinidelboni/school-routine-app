@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   CalendarDays,
+  ChevronRight,
   ClipboardList,
   Megaphone,
   NotebookPen,
@@ -76,13 +77,13 @@ export default async function FamilyPage() {
       badge: unreadDocuments ?? 0,
     },
     {
-      label: "Calendário Escolar",
+      label: "Calendário",
       href: "/app/family/calendar",
       icon: CalendarDays,
       badge: 0,
     },
     {
-      label: "Mural de Recados",
+      label: "Recados",
       href: "/app/family/communications",
       icon: Megaphone,
       badge: unreadCommunications ?? 0,
@@ -100,12 +101,46 @@ export default async function FamilyPage() {
       badge: 0,
     },
     {
-      label: "Diário de Bordo",
+      label: "Diário",
       href: "/app/family/diary",
       icon: NotebookPen,
       badge: summary && !summaryViewed ? 1 : 0,
     },
   ];
+  const attentionItems = [
+    pendingOccurrences
+      ? {
+          label: `${pendingOccurrences} ocorrência${pendingOccurrences > 1 ? "s" : ""} para confirmar`,
+          href: "/app/family/occurrences",
+          icon: ClipboardList,
+          urgent: true,
+        }
+      : null,
+    unreadCommunications
+      ? {
+          label: `${unreadCommunications} recado${unreadCommunications > 1 ? "s" : ""} novo${unreadCommunications > 1 ? "s" : ""}`,
+          href: "/app/family/communications",
+          icon: Megaphone,
+          urgent: false,
+        }
+      : null,
+    unreadDocuments
+      ? {
+          label: `${unreadDocuments} boleto${unreadDocuments > 1 ? "s" : ""} disponível${unreadDocuments > 1 ? "is" : ""}`,
+          href: "/app/family/documents",
+          icon: ReceiptText,
+          urgent: false,
+        }
+      : null,
+    summary && !summaryViewed
+      ? {
+          label: "O diário de hoje está disponível",
+          href: "/app/family/diary",
+          icon: NotebookPen,
+          urgent: false,
+        }
+      : null,
+  ].filter((item) => item !== null);
   const firstName = profile?.full_name?.split(" ")[0] ?? "Família";
 
   return (
@@ -122,9 +157,46 @@ export default async function FamilyPage() {
         </p>
       </header>
 
+      {attentionItems.length ? (
+        <section className="mt-5">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-extrabold text-[#27364c]">Para você</h2>
+            <small className="text-[9px] font-bold text-[#7b8ba2]">
+              {attentionItems.length} pendência{attentionItems.length > 1 ? "s" : ""}
+            </small>
+          </div>
+          <div className="mt-2 divide-y divide-[#e5eaf1] overflow-hidden rounded-2xl bg-white px-3 shadow-[0_8px_24px_rgba(35,73,128,.06)]">
+            {attentionItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex min-h-14 items-center gap-3 py-3 active:bg-[#f4f7fb]"
+                >
+                  <span
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
+                      item.urgent
+                        ? "bg-[#fff0f1] text-[#d94b5c]"
+                        : "bg-[#e8f1ff] text-[#2d69be]"
+                    }`}
+                  >
+                    <Icon size={17} />
+                  </span>
+                  <strong className="min-w-0 flex-1 text-[11px] text-[#27364c]">
+                    {item.label}
+                  </strong>
+                  <ChevronRight size={15} className="text-[#9aa7b8]" />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
       <nav
         aria-label="Atalhos da família"
-        className="mt-7 grid grid-cols-3 gap-x-3 gap-y-8 px-1"
+        className={`${attentionItems.length ? "mt-7" : "mt-8"} grid grid-cols-3 gap-x-3 gap-y-8 px-1`}
       >
         {shortcuts.map((shortcut) => {
           const Icon = shortcut.icon;

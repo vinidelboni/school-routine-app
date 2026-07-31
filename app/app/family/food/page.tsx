@@ -74,20 +74,18 @@ export default async function FamilyFoodPage() {
         <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#082a57]">
           Alimentação do dia
         </h1>
-        <p className="mt-2 text-xs leading-5 text-[#6e89a8]">
-          Registros de {child?.first_name ?? "sua criança"} publicados pela escola.
-        </p>
+        <p className="mt-1 text-xs text-[#6e89a8]">Hoje · {child?.first_name ?? "sua criança"}</p>
       </header>
 
-      <section className="mt-6 grid gap-3">
+      <section className="mt-5 divide-y divide-[#e5eaf1] overflow-hidden rounded-2xl bg-white px-3 shadow-[0_8px_24px_rgba(35,73,128,.06)]">
         {meals.map(({ type, label }) => {
           const Icon = mealIcons[type] ?? Utensils;
           return (
             <article
               key={type}
-              className="flex items-center gap-4 rounded-3xl border border-[#dce9f8] bg-white p-5 shadow-[0_10px_28px_rgba(18,91,170,.08)]"
+              className="flex items-center gap-4 py-4"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#e4f1ff] text-[#0968cc]">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#e4f1ff] text-[#0968cc]">
                 <Icon size={23} strokeWidth={1.8} />
               </span>
               <span>
@@ -100,14 +98,11 @@ export default async function FamilyFoodPage() {
           );
         })}
         {!meals.length ? (
-          <div className="rounded-3xl border border-dashed border-[#cbdff4] bg-white px-6 py-12 text-center">
+          <div className="px-6 py-12 text-center">
             <Baby className="mx-auto text-[#6ba4dd]" size={30} />
             <strong className="mt-3 block text-sm text-[#15395f]">
               Alimentação ainda não publicada
             </strong>
-            <p className="mt-1 text-[11px] leading-5 text-[#7890aa]">
-              Os registros ficam disponíveis depois que a escola publica o Diário de Bordo.
-            </p>
           </div>
         ) : null}
       </section>

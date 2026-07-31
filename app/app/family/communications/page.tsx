@@ -17,24 +17,22 @@ export default async function FamilyCommunicationsPage() {
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">CAIXA DE ENTRADA</span>
-        <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">Comunicados da escola</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
-          Informações organizadas e respostas objetivas, sem chat aberto ou atendimento permanente da professora.
-        </p>
+        <span className="text-[9px] font-extrabold tracking-[.18em] text-[#6f91c3]">RECADOS</span>
+        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#172b4d]">Mural da escola</h1>
+        <p className="mt-1 text-xs text-[#77869d]">Leia e responda quando solicitado.</p>
       </header>
-      <section className="mt-7 grid max-w-3xl gap-4">
+      <section className="mt-5 grid max-w-3xl gap-3">
         {recipients?.map((recipient) => {
           const communication = Array.isArray(recipient.communications) ? recipient.communications[0] : recipient.communications;
           const child = Array.isArray(recipient.children) ? recipient.children[0] : recipient.children;
           const kind = communication.kind as CommunicationKind;
           return (
-            <article key={recipient.id} className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
+            <article key={recipient.id} className="rounded-2xl bg-white p-4 shadow-[0_8px_24px_rgba(35,73,128,.06)]">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <span className="text-[9px] font-extrabold tracking-[.1em] text-[#9a623b]">{communicationKindLabels[kind].toUpperCase()}</span>
-                  <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">{communication.title}</h2>
-                  <small className="mt-1 block text-[#7c8680]">Para a família de {child?.first_name}</small>
+                  <h2 className="mt-1 text-sm font-bold text-[#27364c]">{communication.title}</h2>
+                  <small className="mt-1 block text-[9px] text-[#7c8680]">Para {child?.first_name}</small>
                 </div>
                 {recipient.viewed_at ? (
                   <span className="flex items-center gap-1 rounded-full bg-[#eef3ef] px-2.5 py-1 text-[9px] font-bold text-[#315645]"><Eye size={11} /> Visualizado</span>
@@ -42,7 +40,7 @@ export default async function FamilyCommunicationsPage() {
                   <span className="rounded-full bg-[#fff1dc] px-2.5 py-1 text-[9px] font-bold text-[#8b5b25]">Novo</span>
                 )}
               </div>
-              <p className="mt-4 text-sm leading-6 text-[#4e5c55]">{communication.body}</p>
+              <p className="mt-3 text-xs leading-5 text-[#56657a]">{communication.body}</p>
               {communication.event_date ? (
                 <p className="mt-2 text-xs font-bold text-[#557164]">
                   Data: {new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${communication.event_date}T12:00:00Z`))}
