@@ -9,8 +9,10 @@ import {
   Camera,
   ChevronDown,
   Home,
+  LogOut,
   UserRound,
 } from "lucide-react";
+import { logout } from "../../login/actions";
 
 const navigation = [
   { href: "/app/family", label: "Início", icon: Home, exact: true },
@@ -64,7 +66,17 @@ export function FamilyShell({
               backgroundSize: "94% auto",
             }}
           />
-          <div className="relative flex justify-end">
+          <div className="relative flex items-center justify-between">
+            <form action={logout}>
+              <button
+                type="submit"
+                aria-label="Sair da conta"
+                title="Sair"
+                className="grid h-10 w-10 place-items-center rounded-full border border-[#ff8a94]/35 bg-[#7b2440]/25 text-[#ff9aa3] backdrop-blur transition hover:border-[#ff9aa3]/55 hover:bg-[#8b2947]/40 hover:text-[#ffc0c5] focus:outline-none focus:ring-4 focus:ring-[#ff8a94]/20"
+              >
+                <LogOut size={18} strokeWidth={2} />
+              </button>
+            </form>
             <Link
               href="/app/family/notifications"
               aria-label={`${notificationCount} notificações pendentes`}
