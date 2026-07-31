@@ -49,11 +49,24 @@ export default async function FamilyCalendarPage({
   return (
     <div>
       <header className="px-1 pt-1">
-        <span className="text-[9px] font-extrabold tracking-[.16em] text-[#557164]">CALENDÁRIO</span>
-        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em]">A vida escolar em um só lugar</h1>
-        <div className="mt-4 flex rounded-xl bg-[#e9ece7] p-1 text-[10px] font-bold">
-          <span className="flex-1 rounded-lg bg-white px-3 py-2 text-center text-[#315645] shadow-sm">Calendário</span>
-          <Link href="/app/family/history" className="flex-1 px-3 py-2 text-center text-[#77827c]">Histórico</Link>
+        <span className="text-[9px] font-extrabold tracking-[.18em] text-[#6f91c3]">
+          CALENDÁRIO
+        </span>
+        <div className="mt-1 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] text-[#172b4d]">
+              Calendário escolar
+            </h1>
+            <p className="mt-1 text-xs text-[#77869d]">
+              Selecione um dia para ver os detalhes.
+            </p>
+          </div>
+          <Link
+            href="/app/family/history"
+            className="shrink-0 rounded-full bg-[#e7effb] px-3 py-2 text-[9px] font-extrabold text-[#2d62b4]"
+          >
+            Histórico
+          </Link>
         </div>
       </header>
       <CalendarView year={year} month={month} events={events} basePath="/app/family/calendar" compact />

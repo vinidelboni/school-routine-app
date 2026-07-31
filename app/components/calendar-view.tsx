@@ -55,6 +55,7 @@ export function CalendarView({
 }) {
   const [selectedKind, setSelectedKind] = useState<"all" | CalendarEvent["kind"]>("all");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const firstDay = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const previous = new Date(year, month - 1, 1);
@@ -92,23 +93,59 @@ export function CalendarView({
     effectiveKind === "all"
       ? monthEventsUnfiltered
       : monthEventsUnfiltered.filter((event) => event.kind === effectiveKind);
+  const visibleEvents =
+    compact && selectedDate
+      ? monthEvents.filter((event) => event.date === selectedDate)
+      : compact
+        ? []
+        : monthEvents;
+  const selectedDateLabel = selectedDate
+    ? new Intl.DateTimeFormat("pt-BR", {
+        day: "numeric",
+        month: "long",
+      }).format(new Date(`${selectedDate}T12:00:00`))
+    : null;
 
   return (
     <>
-      <section className="mt-5 overflow-hidden rounded-3xl border border-[#dfe2dc] bg-white">
-        <div className="flex items-center justify-between border-b border-[#e9eae5] px-3 py-3">
+      <section
+        className={
+          compact
+            ? "mt-6 overflow-hidden"
+            : "mt-5 overflow-hidden rounded-3xl border border-[#dfe2dc] bg-white"
+        }
+      >
+        <div
+          className={`flex items-center justify-between px-3 py-3 ${
+            compact ? "" : "border-b border-[#e9eae5]"
+          }`}
+        >
           <Link
             href={`${basePath}?month=${previous.getFullYear()}-${String(previous.getMonth() + 1).padStart(2, "0")}`}
             aria-label="Mês anterior"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#557164] active:bg-[#edf1ee]"
+            className={`grid h-9 w-9 place-items-center rounded-full ${
+              compact
+                ? "bg-[#e7effb] text-[#2d62b4] active:bg-[#dbe8f9]"
+                : "text-[#557164] active:bg-[#edf1ee]"
+            }`}
           >
             <ChevronLeft size={19} />
           </Link>
-          <strong className="capitalize text-sm">{monthLabel}</strong>
+          <strong
+            className={`capitalize ${
+              compact ? "text-base text-[#172b4d]" : "text-sm"
+            }`}
+          >
+            {monthLabel}
+          </strong>
           <Link
             href={`${basePath}?month=${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`}
             aria-label="Próximo mês"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#557164] active:bg-[#edf1ee]"
+            className={`grid h-9 w-9 place-items-center rounded-full ${
+              compact
+                ? "bg-[#e7effb] text-[#2d62b4] active:bg-[#dbe8f9]"
+                : "text-[#557164] active:bg-[#edf1ee]"
+            }`}
           >
             <ChevronRight size={19} />
           </Link>
@@ -124,37 +161,62 @@ export function CalendarView({
             const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const dayEvents = eventsByDate.get(dateKey) ?? [];
             return (
-              <div
+              <button
+                type="button"
                 key={dateKey}
-                className={`flex ${compact ? "h-12" : "h-16"} flex-col items-center border-t border-[#f0f0ec] pt-1.5`}
+                aria-label={`${day} de ${monthLabel}${dayEvents.length ? `, ${dayEvents.length} registros` : ""}`}
+                aria-pressed={compact ? selectedDate === dateKey : undefined}
+                disabled={!compact}
+                onClick={compact ? () => setSelectedDate(dateKey) : undefined}
+                className={`flex ${compact ? "h-14 cursor-pointer rounded-xl" : "h-16 border-t border-[#f0f0ec]"} flex-col items-center pt-1.5 transition ${
+                  compact && selectedDate === dateKey ? "bg-[#e7effb]" : ""
+                }`}
               >
-                <span className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-bold ${
-                  dateKey === todayKey ? "bg-[#315645] text-white" : "text-[#4f5c55]"
-                }`}>
+                <span
+                  className={`grid h-8 w-8 place-items-center rounded-full text-[11px] font-bold ${
+                    compact && selectedDate === dateKey
+                      ? "bg-gradient-to-b from-[#169fe0] to-[#1253b5] text-white shadow-[0_5px_12px_rgba(18,83,181,.25)]"
+                      : dateKey === todayKey
+                        ? compact
+                          ? "ring-1 ring-[#2d83e6] text-[#2d62b4]"
+                          : "bg-[#315645] text-white"
+                        : compact
+                          ? "text-[#4a5b74]"
+                          : "text-[#4f5c55]"
+                  }`}
+                >
                   {day}
                 </span>
                 {dayEvents.length ? (
-                  <span className="mt-1 flex max-w-full gap-0.5">
-                    {dayEvents.slice(0, 3).map((event) => (
-                      <i
-                        key={event.id}
-                        title={event.title}
-                        className={`h-1.5 w-1.5 rounded-full ${kindStyles[event.kind].split(" ")[0]}`}
-                      />
-                    ))}
+                  <span className="mt-1 flex max-w-full gap-0.5" aria-hidden="true">
+                    {compact ? (
+                      <i className="h-1.5 w-1.5 rounded-full bg-[#2386df]" />
+                    ) : (
+                      dayEvents.slice(0, 3).map((event) => (
+                        <i
+                          key={event.id}
+                          title={event.title}
+                          className={`h-1.5 w-1.5 rounded-full ${kindStyles[event.kind].split(" ")[0]}`}
+                        />
+                      ))
+                    )}
                   </span>
                 ) : null}
-              </div>
+              </button>
             );
           })}
         </div>
       </section>
 
-      <section className="mt-5">
+      <section className={compact ? "mt-7" : "mt-5"}>
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs font-extrabold text-[#4d5e55]">Neste mês</h2>
+          <h2 className={`font-extrabold ${compact ? "text-sm text-[#172b4d]" : "text-xs text-[#4d5e55]"}`}>
+            {compact ? selectedDateLabel ?? "Detalhes do dia" : "Neste mês"}
+          </h2>
           <span className="flex items-center gap-2">
-            <small className="text-[9px] text-[#8c948f]">{monthEvents.length} registros</small>
+            <small className="text-[9px] text-[#8c948f]">
+              {compact ? visibleEvents.length : monthEvents.length} registros
+            </small>
             {availableKinds.size ? (
               <button
                 type="button"
@@ -209,8 +271,14 @@ export function CalendarView({
               ))}
           </div>
         ) : null}
-        <div className="mt-2 grid gap-2">
-          {monthEvents.map((event) => {
+        <div
+          className={
+            compact && visibleEvents.length
+              ? "mt-3 divide-y divide-[#e5eaf1] rounded-2xl bg-white px-3"
+              : "mt-2 grid gap-2"
+          }
+        >
+          {visibleEvents.map((event) => {
             const content = (
               <>
                 <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${kindStyles[event.kind]}`}>
@@ -227,16 +295,26 @@ export function CalendarView({
               </>
             );
             return event.href ? (
-              <Link key={event.id} href={event.href} className="flex items-center gap-3 rounded-2xl border border-[#e2e3de] bg-white p-3 active:bg-[#f3f4f1]">
+              <Link key={event.id} href={event.href} className={`flex items-center gap-3 p-3 active:bg-[#f3f4f1] ${compact ? "" : "rounded-2xl border border-[#e2e3de] bg-white"}`}>
                 {content}
               </Link>
             ) : (
-              <article key={event.id} className="flex items-center gap-3 rounded-2xl border border-[#e2e3de] bg-white p-3">
+              <article key={event.id} className={`flex items-center gap-3 p-3 ${compact ? "" : "rounded-2xl border border-[#e2e3de] bg-white"}`}>
                 {content}
               </article>
             );
           })}
-          {!monthEvents.length ? (
+          {compact && !selectedDate ? (
+            <div className="py-8 text-center text-[11px] text-[#8794a8]">
+              Toque em uma data para consultar a rotina, os eventos e os avisos.
+            </div>
+          ) : null}
+          {selectedDate && !visibleEvents.length ? (
+            <div className="py-8 text-center text-[11px] text-[#8794a8]">
+              Nenhum registro para este dia.
+            </div>
+          ) : null}
+          {!compact && !monthEvents.length ? (
             <div className="rounded-2xl border border-dashed border-[#d8ddd8] bg-white p-8 text-center text-[11px] text-[#7c8680]">
               Nenhum registro neste mês.
             </div>
