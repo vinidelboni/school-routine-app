@@ -7,7 +7,7 @@ export default function Home() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col rounded-[2rem] border border-[#dfded6] bg-[#fffefa] p-8 shadow-[0_28px_80px_rgba(40,55,48,.08)] md:p-14">
         <div className="flex items-center justify-between">
           <span className="font-[var(--font-display)] text-3xl font-extrabold text-[#315645]">
-            laço
+            SomaMais
           </span>
           <span className="rounded-full border border-[#dce3dd] px-3 py-1.5 text-xs font-bold text-[#557164]">
             Produto em validação

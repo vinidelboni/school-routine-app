@@ -102,7 +102,7 @@ export function FamilyShell({
             </span>
             <span className="flex shrink-0 items-center gap-1 text-[8px] font-bold text-[#c9dcf7]">
               utilizado por
-              <strong className="font-[var(--font-display)] text-[11px] text-white">laço</strong>
+              <strong className="font-[var(--font-display)] text-[11px] text-white">SomaMais</strong>
             </span>
             <ChevronDown size={15} className="text-[#c8e0ff]" />
           </div>

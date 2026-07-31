@@ -100,7 +100,7 @@ export default async function DirectionPage({
           O que precisa de atenção.
         </h1>
         <p className="mt-2 text-sm text-[#69746f]">
-          Dados reais do projeto Laço, protegidos pelas políticas da escola.
+          Dados reais do projeto SomaMais, protegidos pelas políticas da escola.
         </p>
       </header>
 

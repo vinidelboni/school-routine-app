@@ -13,14 +13,14 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Laço — Rotina escolar, mais leve",
+  title: "SomaMais — Escola e família",
   description:
     "Protótipo demonstrativo da plataforma de rotina e comunicação para educação infantil.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Laço",
+    title: "SomaMais",
   },
 };
 

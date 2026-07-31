@@ -101,7 +101,7 @@ export default function DemoGuidePage() {
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-[#d8e5de]">
             Siga as etapas na ordem. Cada uma mostra um problema real, a ação no
-            Laço e a evidência que vale validar com a escola.
+            SomaMais e a evidência que vale validar com a escola.
           </p>
         </header>
 

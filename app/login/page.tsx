@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, LockKeyhole, Mail } from "lucide-react";
 import { login } from "./actions";
+import { LoginIntro } from "./login-intro";
 
 const errors: Record<string, string> = {
   "invalid-fields": "Confira o e-mail e a senha.",
@@ -18,6 +19,7 @@ export default async function LoginPage({
 
   return (
     <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-[#e8eef8] p-0 text-white sm:p-5">
+      <LoginIntro />
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-40"
@@ -137,7 +139,7 @@ export default async function LoginPage({
             Nenhum dado real deve ser usado nesta demonstração.
           </p>
           <p className="mt-5 text-[10px] font-semibold tracking-[.08em] text-white/45">
-            TECNOLOGIA LAÇO
+            TECNOLOGIA SOMAMAIS
           </p>
         </footer>
       </section>

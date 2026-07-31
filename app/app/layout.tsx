@@ -81,7 +81,7 @@ export default async function OperationalLayout({
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <div className="flex items-center gap-6">
             <Link href="/app" className="font-[var(--font-display)] text-2xl font-extrabold text-[#315645]">
-              laço
+              SomaMais
             </Link>
             <span className="hidden h-6 w-px bg-[#dfe1d9] sm:block" />
             <div className="hidden sm:block">

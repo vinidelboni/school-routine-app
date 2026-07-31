@@ -124,7 +124,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
         <span />
         <span />
       </span>
-      {!compact && <span>laço</span>}
+      {!compact && <span>SomaMais</span>}
     </div>
   );
 }
@@ -192,7 +192,7 @@ function EntryScreen({ onChoose }: { onChoose: (role: Role) => void }) {
         </div>
       </section>
       <footer className={styles.entryFooter}>
-        <span>Laço · conceito em validação</span>
+        <span>SomaMais · conceito em validação</span>
         <span>Dados inteiramente fictícios</span>
       </footer>
     </main>
