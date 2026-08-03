@@ -1394,6 +1394,76 @@ export async function publishSchoolDocument(formData: FormData) {
   return document.id;
 }
 
+const mealPlanInput = z.object({
+  scope: z.enum(["school", "classroom"]),
+  classroomId: z.union([uuid, z.literal("")]),
+  serviceDate: z.iso.date(),
+  mealType: z.enum(["breakfast", "morning_snack", "lunch", "afternoon_snack", "bottle", "dinner"]),
+  title: z.string().trim().min(2).max(120),
+  description: z.string().trim().max(1000),
+  allergenNotes: z.string().trim().max(500),
+});
+
+export async function saveMealPlan(formData: FormData) {
+  const parsed = mealPlanInput.parse({
+    scope: formData.get("scope"),
+    classroomId: formData.get("classroomId") ?? "",
+    serviceDate: formData.get("serviceDate"),
+    mealType: formData.get("mealType"),
+    title: formData.get("title"),
+    description: formData.get("description") ?? "",
+    allergenNotes: formData.get("allergenNotes") ?? "",
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  if (parsed.scope === "classroom" && !parsed.classroomId) throw new Error("Selecione uma turma.");
+  if (parsed.scope === "classroom") {
+    const { data: classroom } = await supabase.from("classrooms").select("id").eq("id", parsed.classroomId).eq("school_id", membership.school_id).maybeSingle();
+    if (!classroom) throw new Error("Turma inválida.");
+  }
+  let existingQuery = supabase
+    .from("meal_plans")
+    .select("id")
+    .eq("school_id", membership.school_id)
+    .eq("scope", parsed.scope)
+    .eq("service_date", parsed.serviceDate)
+    .eq("meal_type", parsed.mealType);
+  existingQuery = parsed.scope === "classroom"
+    ? existingQuery.eq("classroom_id", parsed.classroomId)
+    : existingQuery.is("classroom_id", null);
+  const { data: existing } = await existingQuery.maybeSingle();
+  const values = {
+    school_id: membership.school_id,
+    scope: parsed.scope,
+    classroom_id: parsed.scope === "classroom" ? parsed.classroomId : null,
+    service_date: parsed.serviceDate,
+    meal_type: parsed.mealType,
+    title: parsed.title,
+    description: parsed.description || null,
+    allergen_notes: parsed.allergenNotes || null,
+    created_by: user.id,
+  };
+  const { data: saved, error } = existing
+    ? await supabase.from("meal_plans").update(values).eq("id", existing.id).select("id").single()
+    : await supabase.from("meal_plans").insert(values).select("id").single();
+  if (error) throw error;
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: existing ? "meal_plan.updated" : "meal_plan.created", entity_type: "meal_plan", entity_id: saved.id, metadata: { date: parsed.serviceDate, mealType: parsed.mealType, scope: parsed.scope } });
+  revalidatePath("/app/direction/menu");
+  revalidatePath("/app/family/food");
+  redirect("/app/direction/menu?success=meal-saved");
+}
+
+export async function deleteMealPlan(formData: FormData) {
+  const mealPlanId = uuid.parse(formData.get("mealPlanId"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { error } = await supabase.from("meal_plans").delete().eq("id", mealPlanId).eq("school_id", membership.school_id);
+  if (error) throw error;
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: "meal_plan.deleted", entity_type: "meal_plan", entity_id: mealPlanId });
+  revalidatePath("/app/direction/menu");
+  revalidatePath("/app/family/food");
+}
+
 const schoolEventInput = z.object({
   kind: z.enum(["event", "meeting", "trip"]),
   scope: z.enum(["school", "classroom", "child"]),

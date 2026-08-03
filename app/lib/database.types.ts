@@ -961,6 +961,73 @@ export type Database = {
           },
         ]
       }
+      meal_plans: {
+        Row: {
+          allergen_notes: string | null
+          classroom_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          meal_type: Database["public"]["Enums"]["meal_plan_type"]
+          school_id: string
+          scope: Database["public"]["Enums"]["meal_plan_scope"]
+          service_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allergen_notes?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          meal_type: Database["public"]["Enums"]["meal_plan_type"]
+          school_id: string
+          scope: Database["public"]["Enums"]["meal_plan_scope"]
+          service_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allergen_notes?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          meal_type?: Database["public"]["Enums"]["meal_plan_type"]
+          school_id?: string
+          scope?: Database["public"]["Enums"]["meal_plan_scope"]
+          service_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plans_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_administrations: {
         Row: {
           id: string
@@ -2153,6 +2220,14 @@ export type Database = {
         | "extended_period"
       handoff_status: "open" | "resolved"
       image_consent_status: "pending" | "authorized" | "not_authorized"
+      meal_plan_scope: "school" | "classroom"
+      meal_plan_type:
+        | "breakfast"
+        | "morning_snack"
+        | "lunch"
+        | "afternoon_snack"
+        | "bottle"
+        | "dinner"
       medication_administration_status: "administered" | "not_administered"
       medication_request_status:
         | "submitted"
@@ -2357,6 +2432,15 @@ export const Constants = {
       ],
       handoff_status: ["open", "resolved"],
       image_consent_status: ["pending", "authorized", "not_authorized"],
+      meal_plan_scope: ["school", "classroom"],
+      meal_plan_type: [
+        "breakfast",
+        "morning_snack",
+        "lunch",
+        "afternoon_snack",
+        "bottle",
+        "dinner",
+      ],
       medication_administration_status: ["administered", "not_administered"],
       medication_request_status: [
         "submitted",

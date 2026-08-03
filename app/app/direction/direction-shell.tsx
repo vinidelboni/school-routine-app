@@ -18,6 +18,7 @@ import {
   Menu,
   Pill,
   ShieldCheck,
+  Soup,
   Users,
   UsersRound,
   X,
@@ -36,6 +37,7 @@ const navigation = [
   { href: "/app/direction/team-engagement", label: "Engajamento da equipe", icon: BarChart3 },
   { href: "/app/direction/photos", label: "Fotos e autorizações", icon: Camera },
   { href: "/app/direction/medications", label: "Medicamentos", icon: Pill },
+  { href: "/app/direction/menu", label: "Cardápio planejado", icon: Soup },
   { href: "/app/direction/documents", label: "Biblioteca de documentos", icon: LibraryBig },
   { href: "/app/direction/billing", label: "Boletos em lote", icon: FileText },
 ] as const;
