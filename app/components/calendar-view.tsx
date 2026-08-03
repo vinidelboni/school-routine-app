@@ -9,7 +9,7 @@ export type CalendarEvent = {
   date: string;
   title: string;
   detail?: string;
-  kind: "routine" | "communication" | "request" | "occurrence" | "medication" | "photo";
+  kind: "routine" | "communication" | "request" | "occurrence" | "medication" | "photo" | "schoolEvent";
   href?: string;
 };
 
@@ -20,6 +20,7 @@ const kindStyles = {
   occurrence: "bg-[#f5ded8] text-[#9b4035]",
   medication: "bg-[#eae3f2] text-[#67557e]",
   photo: "bg-[#e7eee8] text-[#557164]",
+  schoolEvent: "bg-[#dcecff] text-[#1768c5]",
 } as const;
 
 const weekdayLabels = ["D", "S", "T", "Q", "Q", "S", "S"];
@@ -30,6 +31,7 @@ const kindLabels = {
   occurrence: "Ocorrências",
   medication: "Medicamentos",
   photo: "Atividades",
+  schoolEvent: "Eventos escolares",
 } as const;
 const kindOrder: CalendarEvent["kind"][] = [
   "routine",
@@ -38,6 +40,7 @@ const kindOrder: CalendarEvent["kind"][] = [
   "occurrence",
   "medication",
   "photo",
+  "schoolEvent",
 ];
 
 export function CalendarView({

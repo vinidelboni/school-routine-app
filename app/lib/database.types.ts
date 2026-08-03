@@ -1656,6 +1656,160 @@ export type Database = {
           },
         ]
       }
+      school_event_recipients: {
+        Row: {
+          child_id: string
+          created_at: string
+          event_id: string
+          id: string
+          membership_id: string
+          responded_at: string | null
+          response: Database["public"]["Enums"]["school_event_response"]
+          school_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+          membership_id: string
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["school_event_response"]
+          school_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          membership_id?: string
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["school_event_response"]
+          school_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_event_recipients_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_recipients_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "school_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_recipients_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_recipients_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_events: {
+        Row: {
+          child_id: string | null
+          classroom_id: string | null
+          created_at: string
+          created_by: string
+          description: string
+          ends_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["school_event_kind"]
+          location: string | null
+          requires_response: boolean
+          response_deadline: string | null
+          school_id: string
+          scope: Database["public"]["Enums"]["school_event_scope"]
+          starts_at: string
+          status: Database["public"]["Enums"]["school_event_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          ends_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["school_event_kind"]
+          location?: string | null
+          requires_response?: boolean
+          response_deadline?: string | null
+          school_id: string
+          scope: Database["public"]["Enums"]["school_event_scope"]
+          starts_at: string
+          status?: Database["public"]["Enums"]["school_event_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          ends_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["school_event_kind"]
+          location?: string | null
+          requires_response?: boolean
+          response_deadline?: string | null
+          school_id?: string
+          scope?: Database["public"]["Enums"]["school_event_scope"]
+          starts_at?: string
+          status?: Database["public"]["Enums"]["school_event_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_events_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_events_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_memberships: {
         Row: {
           created_at: string
@@ -1952,6 +2106,10 @@ export type Database = {
         | "health"
         | "other"
       school_document_scope: "school" | "classroom" | "child"
+      school_event_kind: "event" | "meeting" | "trip"
+      school_event_response: "pending" | "attending" | "not_attending"
+      school_event_scope: "school" | "classroom" | "child"
+      school_event_status: "published" | "cancelled"
       school_role: "director" | "teacher" | "family"
       shift_key: "morning" | "afternoon"
     }
@@ -2155,6 +2313,10 @@ export const Constants = {
         "other",
       ],
       school_document_scope: ["school", "classroom", "child"],
+      school_event_kind: ["event", "meeting", "trip"],
+      school_event_response: ["pending", "attending", "not_attending"],
+      school_event_scope: ["school", "classroom", "child"],
+      school_event_status: ["published", "cancelled"],
       school_role: ["director", "teacher", "family"],
       shift_key: ["morning", "afternoon"],
     },

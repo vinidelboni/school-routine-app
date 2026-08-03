@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell, ChevronRight, ClipboardList, LibraryBig, Megaphone, ReceiptText } from "lucide-react";
+import { Bell, CalendarDays, ChevronRight, ClipboardList, LibraryBig, Megaphone, ReceiptText } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 
 export default async function FamilyNotificationsPage() {
@@ -12,6 +12,7 @@ export default async function FamilyNotificationsPage() {
     { count: occurrences },
     { count: documents },
     { count: library },
+    { count: events },
   ] = await Promise.all([
     supabase
       .from("communication_recipients")
@@ -32,6 +33,12 @@ export default async function FamilyNotificationsPage() {
       .from("school_document_recipients")
       .select("*", { count: "exact", head: true })
       .eq("membership_id", membership.id)
+      .is("viewed_at", null),
+    supabase
+      .from("school_event_recipients")
+      .select("*, school_events!inner(status)", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .eq("school_events.status", "published")
       .is("viewed_at", null),
   ]);
 
@@ -63,6 +70,13 @@ export default async function FamilyNotificationsPage() {
       href: "/app/family/library",
       count: library ?? 0,
       icon: LibraryBig,
+    },
+    {
+      label: "Calendário",
+      description: "Eventos, reuniões e passeios novos",
+      href: "/app/family/calendar",
+      count: events ?? 0,
+      icon: CalendarDays,
     },
   ];
   const total = items.reduce((sum, item) => sum + item.count, 0);

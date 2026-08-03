@@ -20,6 +20,7 @@ export default async function FamilyPage() {
     { count: unreadCommunications },
     { count: pendingOccurrences },
     { count: unreadDocuments },
+    { count: unreadEvents },
   ] = await Promise.all([
     supabase
       .from("guardian_links")
@@ -43,6 +44,12 @@ export default async function FamilyPage() {
       .from("billing_documents")
       .select("*", { count: "exact", head: true })
       .eq("status", "distributed")
+      .is("viewed_at", null),
+    supabase
+      .from("school_event_recipients")
+      .select("*, school_events!inner(status)", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .eq("school_events.status", "published")
       .is("viewed_at", null),
   ]);
   if (linkError) throw linkError;
@@ -80,7 +87,7 @@ export default async function FamilyPage() {
       label: "Calendário",
       href: "/app/family/calendar",
       icon: CalendarDays,
-      badge: 0,
+      badge: unreadEvents ?? 0,
     },
     {
       label: "Recados",
@@ -129,6 +136,14 @@ export default async function FamilyPage() {
           label: `${unreadDocuments} boleto${unreadDocuments > 1 ? "s" : ""} disponível${unreadDocuments > 1 ? "is" : ""}`,
           href: "/app/family/documents",
           icon: ReceiptText,
+          urgent: false,
+        }
+      : null,
+    unreadEvents
+      ? {
+          label: `${unreadEvents} compromisso${unreadEvents > 1 ? "s" : ""} novo${unreadEvents > 1 ? "s" : ""}`,
+          href: "/app/family/calendar",
+          icon: CalendarDays,
           urgent: false,
         }
       : null,

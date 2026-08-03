@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentContext } from "../lib/auth";
+import { createSupabaseAdminClient } from "../lib/supabase/admin";
 import {
   allowedCommunicationResponses,
   type CommunicationKind,
@@ -1391,6 +1392,153 @@ export async function publishSchoolDocument(formData: FormData) {
   revalidatePath("/app/family/library");
   revalidatePath("/app/family/notifications");
   return document.id;
+}
+
+const schoolEventInput = z.object({
+  kind: z.enum(["event", "meeting", "trip"]),
+  scope: z.enum(["school", "classroom", "child"]),
+  classroomId: z.union([uuid, z.literal("")]),
+  childId: z.union([uuid, z.literal("")]),
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(3).max(2000),
+  location: z.string().trim().max(160),
+  startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/),
+  endsAt: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/), z.literal("")]),
+  requiresResponse: z.boolean(),
+  responseDeadline: z.union([z.iso.date(), z.literal("")]),
+});
+
+export async function createSchoolEvent(formData: FormData) {
+  const parsed = schoolEventInput.parse({
+    kind: formData.get("kind"),
+    scope: formData.get("scope"),
+    classroomId: formData.get("classroomId") ?? "",
+    childId: formData.get("childId") ?? "",
+    title: formData.get("title"),
+    description: formData.get("description"),
+    location: formData.get("location") ?? "",
+    startsAt: formData.get("startsAt"),
+    endsAt: formData.get("endsAt") ?? "",
+    requiresResponse: formData.get("requiresResponse") === "on",
+    responseDeadline: formData.get("responseDeadline") ?? "",
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  if (parsed.scope === "classroom" && !parsed.classroomId) throw new Error("Selecione uma turma.");
+  if (parsed.scope === "child" && !parsed.childId) throw new Error("Selecione uma criança.");
+  if (parsed.requiresResponse && !parsed.responseDeadline) throw new Error("Informe o prazo para resposta.");
+
+  const startsAt = new Date(`${parsed.startsAt}:00-03:00`);
+  const endsAt = parsed.endsAt ? new Date(`${parsed.endsAt}:00-03:00`) : null;
+  if (endsAt && endsAt < startsAt) throw new Error("O encerramento deve acontecer após o início.");
+
+  let childrenQuery = supabase
+    .from("children")
+    .select("id, enrollments!inner(classroom_id, status)")
+    .eq("school_id", membership.school_id)
+    .eq("active", true)
+    .eq("enrollments.status", "active");
+  if (parsed.scope === "classroom") childrenQuery = childrenQuery.eq("enrollments.classroom_id", parsed.classroomId);
+  if (parsed.scope === "child") childrenQuery = childrenQuery.eq("id", parsed.childId);
+  const { data: targetedChildren, error: childrenError } = await childrenQuery;
+  if (childrenError) throw childrenError;
+  const childIds = [...new Set((targetedChildren ?? []).map((child) => child.id))];
+  if (!childIds.length) throw new Error("Nenhuma criança ativa foi encontrada nesse público.");
+
+  const { data: guardianLinks, error: linksError } = await supabase
+    .from("guardian_links")
+    .select("child_id, membership_id, school_memberships!inner(role, status)")
+    .eq("active", true)
+    .eq("school_memberships.role", "family")
+    .eq("school_memberships.status", "active")
+    .in("child_id", childIds);
+  if (linksError) throw linksError;
+  if (!guardianLinks?.length) throw new Error("Nenhum responsável ativo foi encontrado nesse público.");
+
+  const { data: event, error: eventError } = await supabase.from("school_events").insert({
+    school_id: membership.school_id,
+    kind: parsed.kind,
+    scope: parsed.scope,
+    classroom_id: parsed.scope === "classroom" ? parsed.classroomId : null,
+    child_id: parsed.scope === "child" ? parsed.childId : null,
+    title: parsed.title,
+    description: parsed.description,
+    location: parsed.location || null,
+    starts_at: startsAt.toISOString(),
+    ends_at: endsAt?.toISOString() ?? null,
+    requires_response: parsed.requiresResponse,
+    response_deadline: parsed.requiresResponse ? parsed.responseDeadline : null,
+    created_by: user.id,
+  }).select("id").single();
+  if (eventError) throw eventError;
+
+  const { error: recipientsError } = await supabase.from("school_event_recipients").insert(
+    guardianLinks.map((link) => ({
+      school_id: membership.school_id,
+      event_id: event.id,
+      membership_id: link.membership_id,
+      child_id: link.child_id,
+    })),
+  );
+  if (recipientsError) {
+    await supabase.from("school_events").delete().eq("id", event.id);
+    throw recipientsError;
+  }
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "school_event.published",
+    entity_type: "school_event",
+    entity_id: event.id,
+    metadata: { kind: parsed.kind, scope: parsed.scope, recipients: guardianLinks.length },
+  });
+  revalidatePath("/app/direction/calendar");
+  revalidatePath("/app/family/calendar");
+  revalidatePath("/app/family/notifications");
+  revalidatePath("/app/teacher/calendar");
+  redirect("/app/direction/calendar?success=event-created");
+}
+
+export async function respondToSchoolEvent(formData: FormData) {
+  const recipientId = uuid.parse(formData.get("recipientId"));
+  const response = z.enum(["viewed", "attending", "not_attending"]).parse(formData.get("response"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+  const { data: recipient } = await supabase
+    .from("school_event_recipients")
+    .select("id, school_events!inner(requires_response, response_deadline, status)")
+    .eq("id", recipientId)
+    .eq("membership_id", membership.id)
+    .maybeSingle();
+  const event = recipient ? (Array.isArray(recipient.school_events) ? recipient.school_events[0] : recipient.school_events) : null;
+  if (!recipient || !event || event.status !== "published") throw new Error("Compromisso indisponível.");
+  if (event.requires_response && response === "viewed") throw new Error("Informe se poderá participar.");
+  if (!event.requires_response && response !== "viewed") throw new Error("Este compromisso não solicita presença.");
+  if (event.response_deadline && event.response_deadline < new Date().toISOString().slice(0, 10)) throw new Error("O prazo para resposta terminou.");
+
+  const now = new Date().toISOString();
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin.from("school_event_recipients").update({
+    viewed_at: now,
+    response: response === "viewed" ? "pending" : response,
+    responded_at: response === "viewed" ? null : now,
+  }).eq("id", recipient.id).eq("membership_id", membership.id);
+  if (error) throw error;
+  revalidatePath("/app/family/calendar");
+  revalidatePath("/app/family/notifications");
+  revalidatePath("/app/direction/calendar");
+}
+
+export async function cancelSchoolEvent(formData: FormData) {
+  const eventId = uuid.parse(formData.get("eventId"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { error } = await supabase.from("school_events").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", eventId).eq("school_id", membership.school_id);
+  if (error) throw error;
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: "school_event.cancelled", entity_type: "school_event", entity_id: eventId });
+  revalidatePath("/app/direction/calendar");
+  revalidatePath("/app/family/calendar");
+  revalidatePath("/app/teacher/calendar");
 }
 
 const communicationInput = z.object({
