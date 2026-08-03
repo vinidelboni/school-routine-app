@@ -17,7 +17,7 @@ import { logout } from "../../login/actions";
 const navigation = [
   { href: "/app/family", label: "Início", icon: Home, exact: true },
   { href: "/app/family/calendar", label: "Calendário", icon: CalendarDays },
-  { href: "/app/family/photos", label: "Fotos", icon: Camera },
+  { href: "/app/family/photos", label: "Galeria", icon: Camera },
   { href: "/app/family/school", label: "Escola", icon: Building2, group: true },
   { href: "/app/family/profile", label: "Perfil", icon: UserRound },
 ];

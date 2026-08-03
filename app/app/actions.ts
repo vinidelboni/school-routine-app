@@ -1955,6 +1955,47 @@ export async function updateImageConsent(formData: FormData) {
   redirect("/app/direction/photos?success=consent-updated");
 }
 
+export async function publishActivityMedia(formData: FormData) {
+  const classroomId = uuid.parse(formData.get("classroomId"));
+  const childIds = z.array(uuid).min(1).parse(formData.getAll("childId"));
+  const caption = z.string().trim().min(3).max(500).parse(formData.get("caption"));
+  const activityDate = z.string().date().parse(formData.get("activityDate"));
+  const mediaType = z.enum(["image", "video"]).parse(formData.get("mediaType"));
+  const mimeType = z.enum(["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime", "video/webm"]).parse(formData.get("mimeType"));
+  const fileSize = z.coerce.number().int().positive().max(52_428_800).parse(formData.get("fileSize"));
+  const storagePath = z.string().min(40).max(240).parse(formData.get("storagePath"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (!["teacher", "director"].includes(membership.role)) redirect("/app");
+  if (!storagePath.startsWith(`${membership.school_id}/`)) throw new Error("Arquivo inválido.");
+  if ((mediaType === "image") !== mimeType.startsWith("image/")) throw new Error("Tipo de arquivo inconsistente.");
+  const filename = storagePath.slice(storagePath.indexOf("/") + 1);
+  const admin = createSupabaseAdminClient();
+  const { data: storedFiles, error: storageError } = await admin.storage.from("school-photos").list(membership.school_id, { search: filename, limit: 2 });
+  const storedFile = storedFiles?.find((item) => item.name === filename);
+  if (storageError || !storedFile || storedFile.metadata?.mimetype !== mimeType || Number(storedFile.metadata?.size) !== fileSize) throw new Error("Não foi possível confirmar o arquivo enviado.");
+  const { data: classroom } = await supabase.from("classrooms").select("id").eq("id", classroomId).eq("school_id", membership.school_id).single();
+  if (!classroom) throw new Error("Turma inválida.");
+  const [{ data: enrollments }, { data: consents }] = await Promise.all([
+    supabase.from("enrollments").select("child_id").eq("classroom_id", classroomId).eq("status", "active").in("child_id", childIds),
+    supabase.from("image_consents").select("child_id, status").in("child_id", childIds),
+  ]);
+  const authorized = new Set((consents ?? []).filter((item) => item.status === "authorized").map((item) => item.child_id));
+  if (enrollments?.length !== new Set(childIds).size || childIds.some((id) => !authorized.has(id))) {
+    await admin.storage.from("school-photos").remove([storagePath]);
+    throw new Error("Publicação bloqueada: revise a turma e as autorizações de imagem.");
+  }
+  const { data: publication, error: publicationError } = await supabase.from("photo_publications").insert({ school_id: membership.school_id, classroom_id: classroomId, storage_path: storagePath, caption, activity_date: activityDate, published_by: user.id, media_type: mediaType, mime_type: mimeType, file_size_bytes: fileSize }).select("id").single();
+  if (publicationError) { await admin.storage.from("school-photos").remove([storagePath]); throw publicationError; }
+  const { error: linksError } = await supabase.from("photo_children").insert(childIds.map((childId) => ({ photo_id: publication.id, child_id: childId, school_id: membership.school_id })));
+  if (linksError) { await admin.from("photo_publications").delete().eq("id", publication.id); await admin.storage.from("school-photos").remove([storagePath]); throw linksError; }
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: `${mediaType}.published`, entity_type: "photo_publication", entity_id: publication.id, metadata: { child_count: childIds.length, media_type: mediaType, mime_type: mimeType, file_size: fileSize } });
+  revalidatePath("/app/teacher/photos");
+  revalidatePath("/app/direction/photos");
+  revalidatePath("/app/family");
+  revalidatePath("/app/family/photos");
+  redirect("/app/teacher/photos?success=media-published");
+}
+
 export async function publishActivityPhoto(formData: FormData) {
   const classroomId = uuid.parse(formData.get("classroomId"));
   const childIds = z.array(uuid).min(1).parse(formData.getAll("childId"));

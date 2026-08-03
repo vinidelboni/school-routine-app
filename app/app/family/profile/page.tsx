@@ -73,7 +73,7 @@ export default async function FamilyProfilePage() {
                     </small>
                     <span className="mt-2 flex flex-wrap gap-1">
                       {link.can_view_routine ? <Permission label="Agenda" /> : null}
-                      <Permission label="Fotos autorizadas" />
+                      <Permission label="Galeria autorizada" />
                       <Permission label="Documentos vinculados" />
                     </span>
                   </span>

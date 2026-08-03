@@ -1339,7 +1339,10 @@ export type Database = {
           activity_date: string
           caption: string
           classroom_id: string
+          file_size_bytes: number
           id: string
+          media_type: Database["public"]["Enums"]["gallery_media_type"]
+          mime_type: string
           published_at: string
           published_by: string
           school_id: string
@@ -1349,7 +1352,10 @@ export type Database = {
           activity_date: string
           caption: string
           classroom_id: string
+          file_size_bytes?: number
           id?: string
+          media_type?: Database["public"]["Enums"]["gallery_media_type"]
+          mime_type?: string
           published_at?: string
           published_by: string
           school_id: string
@@ -1359,7 +1365,10 @@ export type Database = {
           activity_date?: string
           caption?: string
           classroom_id?: string
+          file_size_bytes?: number
           id?: string
+          media_type?: Database["public"]["Enums"]["gallery_media_type"]
+          mime_type?: string
           published_at?: string
           published_by?: string
           school_id?: string
@@ -2219,6 +2228,7 @@ export type Database = {
         | "pickup_change"
         | "extended_period"
       handoff_status: "open" | "resolved"
+      gallery_media_type: "image" | "video"
       image_consent_status: "pending" | "authorized" | "not_authorized"
       meal_plan_scope: "school" | "classroom"
       meal_plan_type:
@@ -2431,6 +2441,7 @@ export const Constants = {
         "extended_period",
       ],
       handoff_status: ["open", "resolved"],
+      gallery_media_type: ["image", "video"],
       image_consent_status: ["pending", "authorized", "not_authorized"],
       meal_plan_scope: ["school", "classroom"],
       meal_plan_type: [

@@ -159,7 +159,7 @@ export default async function OperationalLayout({
                   <CalendarDays size={17} /> Calendário
                 </Link>
                 <Link href="/app/teacher/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Camera size={17} /> Fotos da atividade
+                  <Camera size={17} /> Galeria da atividade
                 </Link>
               </>
             )}

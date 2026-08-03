@@ -109,7 +109,7 @@ export function ContactForm({ childOptions }: { childOptions: ChildOption[] }) {
         </legend>
         <div className="grid gap-3 sm:grid-cols-2">
           <Permission name="canViewRoutine" label="Rotina diária" />
-          <Permission name="canViewPhotos" label="Fotos autorizadas" />
+          <Permission name="canViewPhotos" label="Galeria autorizada" />
           <Permission name="canViewCommunications" label="Comunicados" />
           <Permission name="canViewDocuments" label="Documentos e boletos" />
         </div>

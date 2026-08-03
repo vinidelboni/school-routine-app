@@ -33,7 +33,7 @@ const statusLabels = {
 
 const permissionLabels = {
   can_view_routine: "Rotina",
-  can_view_photos: "Fotos",
+  can_view_photos: "Galeria",
   can_view_communications: "Comunicados",
   can_view_documents: "Documentos",
 } as const;

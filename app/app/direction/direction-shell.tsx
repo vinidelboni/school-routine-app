@@ -35,7 +35,7 @@ const navigation = [
   { href: "/app/direction/communications", label: "Comunicados", icon: Megaphone },
   { href: "/app/direction/occurrences", label: "Ocorrências", icon: AlertTriangle },
   { href: "/app/direction/team-engagement", label: "Engajamento da equipe", icon: BarChart3 },
-  { href: "/app/direction/photos", label: "Fotos e autorizações", icon: Camera },
+  { href: "/app/direction/photos", label: "Galeria e autorizações", icon: Camera },
   { href: "/app/direction/medications", label: "Medicamentos", icon: Pill },
   { href: "/app/direction/menu", label: "Cardápio planejado", icon: Soup },
   { href: "/app/direction/documents", label: "Biblioteca de documentos", icon: LibraryBig },
