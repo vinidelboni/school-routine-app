@@ -7,8 +7,22 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Rotina, comunicação e cuidado entre escola e família.",
     start_url: "/app/family",
     display: "standalone",
-    background_color: "#f7f5ef",
-    theme_color: "#315645",
+    background_color: "#020f32",
+    theme_color: "#0759bd",
     orientation: "portrait",
+    icons: [
+      {
+        src: "/icons/somamais-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/somamais-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+    ],
   };
 }
