@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowLeft, LockKeyhole, Mail } from "lucide-react";
 import { login } from "./actions";
 import { LoginIntro } from "./login-intro";
+import { LoginSubmitButton } from "./login-submit-button";
 
 const errors: Record<string, string> = {
   "invalid-fields": "Confira o e-mail e a senha.",
@@ -127,9 +128,7 @@ export default async function LoginPage({
             />
           </label>
 
-          <button className="mt-1 h-14 rounded-2xl bg-gradient-to-r from-[#13c8f2] to-[#1687f3] text-sm font-extrabold uppercase tracking-[.08em] text-white shadow-[0_16px_36px_rgba(0,31,112,.4)] transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#55dfff]/25 active:translate-y-px">
-            Entrar
-          </button>
+          <LoginSubmitButton />
         </form>
 
         <footer className="relative mt-auto pt-8 text-center">
