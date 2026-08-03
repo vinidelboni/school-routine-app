@@ -1656,6 +1656,74 @@ export type Database = {
           },
         ]
       }
+      school_event_reminders: {
+        Row: {
+          created_at: string
+          delivered_at: string
+          event_id: string
+          id: string
+          membership_id: string
+          offset_minutes: number
+          recipient_id: string
+          scheduled_for: string
+          school_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string
+          event_id: string
+          id?: string
+          membership_id: string
+          offset_minutes: number
+          recipient_id: string
+          scheduled_for: string
+          school_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string
+          event_id?: string
+          id?: string
+          membership_id?: string
+          offset_minutes?: number
+          recipient_id?: string
+          scheduled_for?: string
+          school_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_event_reminders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "school_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_reminders_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_reminders_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "school_event_recipients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_event_reminders_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_event_recipients: {
         Row: {
           child_id: string
@@ -1732,6 +1800,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["school_event_kind"]
           location: string | null
+          reminder_offsets_minutes: number[]
           requires_response: boolean
           response_deadline: string | null
           school_id: string
@@ -1751,6 +1820,7 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["school_event_kind"]
           location?: string | null
+          reminder_offsets_minutes?: number[]
           requires_response?: boolean
           response_deadline?: string | null
           school_id: string
@@ -1770,6 +1840,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["school_event_kind"]
           location?: string | null
+          reminder_offsets_minutes?: number[]
           requires_response?: boolean
           response_deadline?: string | null
           school_id?: string
@@ -2029,6 +2100,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      generate_school_event_reminders: { Args: never; Returns: number }
       is_active_school_member: {
         Args: { target_school_id: string }
         Returns: boolean

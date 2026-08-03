@@ -31,6 +31,7 @@ const schoolRoutes = [
   "/app/family/library",
   "/app/family/occurrences",
   "/app/family/notifications",
+  "/app/family/reminders",
 ];
 
 export function FamilyShell({

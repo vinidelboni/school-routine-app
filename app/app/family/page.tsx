@@ -21,6 +21,7 @@ export default async function FamilyPage() {
     { count: pendingOccurrences },
     { count: unreadDocuments },
     { count: unreadEvents },
+    { count: unreadReminders },
   ] = await Promise.all([
     supabase
       .from("guardian_links")
@@ -50,6 +51,11 @@ export default async function FamilyPage() {
       .select("*, school_events!inner(status)", { count: "exact", head: true })
       .eq("membership_id", membership.id)
       .eq("school_events.status", "published")
+      .is("viewed_at", null),
+    supabase
+      .from("school_event_reminders")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
       .is("viewed_at", null),
   ]);
   if (linkError) throw linkError;
@@ -115,6 +121,14 @@ export default async function FamilyPage() {
     },
   ];
   const attentionItems = [
+    unreadReminders
+      ? {
+          label: `${unreadReminders} lembrete${unreadReminders > 1 ? "s" : ""} de compromisso`,
+          href: "/app/family/reminders",
+          icon: CalendarDays,
+          urgent: false,
+        }
+      : null,
     pendingOccurrences
       ? {
           label: `${pendingOccurrences} ocorrência${pendingOccurrences > 1 ? "s" : ""} para confirmar`,

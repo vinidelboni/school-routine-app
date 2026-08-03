@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell, CalendarDays, ChevronRight, ClipboardList, LibraryBig, Megaphone, ReceiptText } from "lucide-react";
+import { Bell, BellRing, CalendarDays, ChevronRight, ClipboardList, LibraryBig, Megaphone, ReceiptText } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 
 export default async function FamilyNotificationsPage() {
@@ -13,6 +13,7 @@ export default async function FamilyNotificationsPage() {
     { count: documents },
     { count: library },
     { count: events },
+    { count: reminders },
   ] = await Promise.all([
     supabase
       .from("communication_recipients")
@@ -40,9 +41,21 @@ export default async function FamilyNotificationsPage() {
       .eq("membership_id", membership.id)
       .eq("school_events.status", "published")
       .is("viewed_at", null),
+    supabase
+      .from("school_event_reminders")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .is("viewed_at", null),
   ]);
 
   const items = [
+    {
+      label: "Lembretes",
+      description: "Compromissos que estão se aproximando",
+      href: "/app/family/reminders",
+      count: reminders ?? 0,
+      icon: BellRing,
+    },
     {
       label: "Mural de Recados",
       description: "Comunicados novos da escola",

@@ -28,6 +28,14 @@ export function EventForm({ classrooms, childOptions }: { classrooms: Option[]; 
       </div>
       <label className="mt-4 flex items-start gap-3 rounded-xl border border-[#dce6f2] bg-[#f7fbff] p-3 text-xs"><input name="requiresResponse" type="checkbox" checked={requiresResponse} onChange={(event) => setRequiresResponse(event.target.checked)} className="mt-0.5" /><span><strong className="block">Solicitar confirmação de presença</strong><small className="mt-1 block text-[10px] text-[#61758d]">A família responderá “Participarei” ou “Não participarei”.</small></span></label>
       {requiresResponse ? <label className="mt-3 block"><span className="field-label">Prazo para resposta</span><input name="responseDeadline" type="date" required className="input" /></label> : <input type="hidden" name="responseDeadline" value="" />}
+      <fieldset className="mt-3 rounded-xl border border-[#dce6f2] bg-[#f7fbff] p-3">
+        <legend className="px-1 text-[9px] font-extrabold uppercase tracking-[.08em] text-[#386b9f]">Lembretes automáticos</legend>
+        <p className="mb-3 text-[10px] leading-4 text-[#61758d]">Aparecem no sino da família sem gerar notificações duplicadas.</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <label className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold"><input name="reminders" type="checkbox" value="1440" defaultChecked /> 24 horas antes</label>
+          <label className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold"><input name="reminders" type="checkbox" value="120" defaultChecked /> 2 horas antes</label>
+        </div>
+      </fieldset>
       <SubmitButton idleLabel="Publicar compromisso" pendingLabel="Publicando..." className="mt-4 rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white" />
     </form>
   );

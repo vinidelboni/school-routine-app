@@ -1406,6 +1406,7 @@ const schoolEventInput = z.object({
   endsAt: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/), z.literal("")]),
   requiresResponse: z.boolean(),
   responseDeadline: z.union([z.iso.date(), z.literal("")]),
+  reminders: z.array(z.enum(["1440", "120"])).max(2),
 });
 
 export async function createSchoolEvent(formData: FormData) {
@@ -1421,6 +1422,7 @@ export async function createSchoolEvent(formData: FormData) {
     endsAt: formData.get("endsAt") ?? "",
     requiresResponse: formData.get("requiresResponse") === "on",
     responseDeadline: formData.get("responseDeadline") ?? "",
+    reminders: formData.getAll("reminders"),
   });
   const { supabase, user, membership } = await getCurrentContext();
   if (membership.role !== "director") redirect("/app");
@@ -1468,6 +1470,7 @@ export async function createSchoolEvent(formData: FormData) {
     ends_at: endsAt?.toISOString() ?? null,
     requires_response: parsed.requiresResponse,
     response_deadline: parsed.requiresResponse ? parsed.responseDeadline : null,
+    reminder_offsets_minutes: parsed.reminders.map(Number),
     created_by: user.id,
   }).select("id").single();
   if (eventError) throw eventError;
@@ -1539,6 +1542,22 @@ export async function cancelSchoolEvent(formData: FormData) {
   revalidatePath("/app/direction/calendar");
   revalidatePath("/app/family/calendar");
   revalidatePath("/app/teacher/calendar");
+}
+
+export async function acknowledgeEventReminder(formData: FormData) {
+  const reminderId = uuid.parse(formData.get("reminderId"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "family") redirect("/app");
+  const { error } = await supabase
+    .from("school_event_reminders")
+    .update({ viewed_at: new Date().toISOString() })
+    .eq("id", reminderId)
+    .eq("membership_id", membership.id)
+    .is("viewed_at", null);
+  if (error) throw error;
+  revalidatePath("/app/family/reminders");
+  revalidatePath("/app/family/notifications");
+  revalidatePath("/app/family");
 }
 
 const communicationInput = z.object({

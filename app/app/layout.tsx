@@ -29,6 +29,7 @@ export default async function OperationalLayout({
       { count: billingCount },
       { count: libraryCount },
       { count: eventCount },
+      { count: reminderCount },
     ] = await Promise.all([
       supabase
         .from("guardian_links")
@@ -63,6 +64,11 @@ export default async function OperationalLayout({
         .eq("membership_id", membership.id)
         .eq("school_events.status", "published")
         .is("viewed_at", null),
+      supabase
+        .from("school_event_reminders")
+        .select("*", { count: "exact", head: true })
+        .eq("membership_id", membership.id)
+        .is("viewed_at", null),
     ]);
     const linkedChild = guardianLink
       ? Array.isArray(guardianLink.children)
@@ -81,7 +87,7 @@ export default async function OperationalLayout({
         childInitials={childInitials}
         schoolName={school?.name ?? "Escola"}
         notificationCount={
-          (communicationCount ?? 0) + (occurrenceCount ?? 0) + (billingCount ?? 0) + (libraryCount ?? 0) + (eventCount ?? 0)
+          (communicationCount ?? 0) + (occurrenceCount ?? 0) + (billingCount ?? 0) + (libraryCount ?? 0) + (eventCount ?? 0) + (reminderCount ?? 0)
         }
       >
         {children}
