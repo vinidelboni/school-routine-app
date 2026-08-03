@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -205,8 +205,8 @@ export type Database = {
           original_filename: string
           payment_reference: string
           school_id: string
-          storage_path: string | null
           status: Database["public"]["Enums"]["billing_document_status"]
+          storage_path: string | null
           viewed_at: string | null
         }
         Insert: {
@@ -219,8 +219,8 @@ export type Database = {
           original_filename: string
           payment_reference: string
           school_id: string
-          storage_path?: string | null
           status?: Database["public"]["Enums"]["billing_document_status"]
+          storage_path?: string | null
           viewed_at?: string | null
         }
         Update: {
@@ -233,8 +233,8 @@ export type Database = {
           original_filename?: string
           payment_reference?: string
           school_id?: string
-          storage_path?: string | null
           status?: Database["public"]["Enums"]["billing_document_status"]
+          storage_path?: string | null
           viewed_at?: string | null
         }
         Relationships: [
@@ -1520,6 +1520,142 @@ export type Database = {
           },
         ]
       }
+      school_document_recipients: {
+        Row: {
+          child_id: string
+          created_at: string
+          document_id: string
+          id: string
+          membership_id: string
+          school_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          document_id: string
+          id?: string
+          membership_id: string
+          school_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          membership_id?: string
+          school_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_document_recipients_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_document_recipients_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "school_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_document_recipients_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_document_recipients_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_documents: {
+        Row: {
+          category: Database["public"]["Enums"]["school_document_category"]
+          child_id: string | null
+          classroom_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          original_filename: string
+          published_at: string
+          school_id: string
+          scope: Database["public"]["Enums"]["school_document_scope"]
+          storage_path: string
+          title: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["school_document_category"]
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          original_filename: string
+          published_at?: string
+          school_id: string
+          scope: Database["public"]["Enums"]["school_document_scope"]
+          storage_path: string
+          title: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["school_document_category"]
+          child_id?: string | null
+          classroom_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          original_filename?: string
+          published_at?: string
+          school_id?: string
+          scope?: Database["public"]["Enums"]["school_document_scope"]
+          storage_path?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_documents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_documents_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_documents_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_memberships: {
         Row: {
           created_at: string
@@ -1808,6 +1944,14 @@ export type Database = {
         | "hygiene"
         | "activity"
         | "note"
+      school_document_category:
+        | "circular"
+        | "policy"
+        | "calendar"
+        | "pedagogical"
+        | "health"
+        | "other"
+      school_document_scope: "school" | "classroom" | "child"
       school_role: "director" | "teacher" | "family"
       shift_key: "morning" | "afternoon"
     }
@@ -2002,6 +2146,15 @@ export const Constants = {
         "activity",
         "note",
       ],
+      school_document_category: [
+        "circular",
+        "policy",
+        "calendar",
+        "pedagogical",
+        "health",
+        "other",
+      ],
+      school_document_scope: ["school", "classroom", "child"],
       school_role: ["director", "teacher", "family"],
       shift_key: ["morning", "afternoon"],
     },

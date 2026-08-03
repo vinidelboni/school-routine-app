@@ -1275,6 +1275,124 @@ export async function markBillingDocumentViewed(formData: FormData) {
   revalidatePath("/app/family/documents");
 }
 
+const schoolDocumentInput = z.object({
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().max(1000),
+  category: z.enum(["circular", "policy", "calendar", "pedagogical", "health", "other"]),
+  scope: z.enum(["school", "classroom", "child"]),
+  classroomId: z.union([uuid, z.literal("")]),
+  childId: z.union([uuid, z.literal("")]),
+  filename: z.string().trim().min(1).max(240),
+  storagePath: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/),
+});
+
+export async function publishSchoolDocument(formData: FormData) {
+  const parsed = schoolDocumentInput.parse({
+    title: formData.get("title"),
+    description: formData.get("description") ?? "",
+    category: formData.get("category"),
+    scope: formData.get("scope"),
+    classroomId: formData.get("classroomId") ?? "",
+    childId: formData.get("childId") ?? "",
+    filename: formData.get("filename"),
+    storagePath: formData.get("storagePath"),
+  });
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  if (!parsed.storagePath.startsWith(`${membership.school_id}/`)) {
+    throw new Error("O arquivo não pertence a esta escola.");
+  }
+  if (parsed.scope === "classroom" && !parsed.classroomId) {
+    throw new Error("Selecione a turma que receberá o documento.");
+  }
+  if (parsed.scope === "child" && !parsed.childId) {
+    throw new Error("Selecione a criança que receberá o documento.");
+  }
+
+  const { data: storedFiles, error: storageError } = await supabase.storage
+    .from("school-documents")
+    .list(membership.school_id, { limit: 1000 });
+  if (storageError) throw storageError;
+  const storedName = parsed.storagePath.split("/")[1];
+  if (!(storedFiles ?? []).some((file) => file.name === storedName)) {
+    throw new Error("O PDF não foi armazenado corretamente.");
+  }
+
+  let childrenQuery = supabase
+    .from("children")
+    .select("id, enrollments!inner(classroom_id, status)")
+    .eq("school_id", membership.school_id)
+    .eq("active", true)
+    .eq("enrollments.status", "active");
+  if (parsed.scope === "classroom") {
+    childrenQuery = childrenQuery.eq("enrollments.classroom_id", parsed.classroomId);
+  }
+  if (parsed.scope === "child") {
+    childrenQuery = childrenQuery.eq("id", parsed.childId);
+  }
+  const { data: targetedChildren, error: childrenError } = await childrenQuery;
+  if (childrenError) throw childrenError;
+  const childIds = [...new Set((targetedChildren ?? []).map((child) => child.id))];
+  if (!childIds.length) throw new Error("Nenhuma criança ativa foi encontrada nesse público.");
+
+  const { data: guardianLinks, error: linksError } = await supabase
+    .from("guardian_links")
+    .select("child_id, membership_id, school_memberships!inner(role, status)")
+    .eq("active", true)
+    .eq("school_memberships.role", "family")
+    .eq("school_memberships.status", "active")
+    .in("child_id", childIds);
+  if (linksError) throw linksError;
+  if (!guardianLinks?.length) {
+    throw new Error("Nenhum responsável ativo foi encontrado nesse público.");
+  }
+
+  const { data: document, error: documentError } = await supabase
+    .from("school_documents")
+    .insert({
+      school_id: membership.school_id,
+      title: parsed.title,
+      description: parsed.description || null,
+      category: parsed.category,
+      scope: parsed.scope,
+      classroom_id: parsed.scope === "classroom" ? parsed.classroomId : null,
+      child_id: parsed.scope === "child" ? parsed.childId : null,
+      original_filename: parsed.filename,
+      storage_path: parsed.storagePath,
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
+  if (documentError) throw documentError;
+
+  const recipients = guardianLinks.map((link) => ({
+    school_id: membership.school_id,
+    document_id: document.id,
+    membership_id: link.membership_id,
+    child_id: link.child_id,
+  }));
+  const { error: recipientsError } = await supabase
+    .from("school_document_recipients")
+    .insert(recipients);
+  if (recipientsError) {
+    await supabase.from("school_documents").delete().eq("id", document.id);
+    throw recipientsError;
+  }
+
+  await supabase.from("audit_logs").insert({
+    school_id: membership.school_id,
+    actor_id: user.id,
+    action: "school_document.published",
+    entity_type: "school_document",
+    entity_id: document.id,
+    metadata: { scope: parsed.scope, category: parsed.category, recipients: recipients.length },
+  });
+  revalidatePath("/app/direction/documents");
+  revalidatePath("/app/family/library");
+  revalidatePath("/app/family/notifications");
+  return document.id;
+}
+
 const communicationInput = z.object({
   kind: z.enum(["general", "important", "authorization", "item_request"]),
   scope: z.enum(["school", "classroom", "child"]),

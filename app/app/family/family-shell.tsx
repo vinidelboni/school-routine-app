@@ -28,6 +28,7 @@ const schoolRoutes = [
   "/app/family/requests",
   "/app/family/medications",
   "/app/family/documents",
+  "/app/family/library",
   "/app/family/occurrences",
   "/app/family/notifications",
 ];

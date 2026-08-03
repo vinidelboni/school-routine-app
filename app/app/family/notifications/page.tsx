@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell, ChevronRight, ClipboardList, Megaphone, ReceiptText } from "lucide-react";
+import { Bell, ChevronRight, ClipboardList, LibraryBig, Megaphone, ReceiptText } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 
 export default async function FamilyNotificationsPage() {
@@ -11,6 +11,7 @@ export default async function FamilyNotificationsPage() {
     { count: communications },
     { count: occurrences },
     { count: documents },
+    { count: library },
   ] = await Promise.all([
     supabase
       .from("communication_recipients")
@@ -26,6 +27,11 @@ export default async function FamilyNotificationsPage() {
       .from("billing_documents")
       .select("*", { count: "exact", head: true })
       .eq("status", "distributed")
+      .is("viewed_at", null),
+    supabase
+      .from("school_document_recipients")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
       .is("viewed_at", null),
   ]);
 
@@ -50,6 +56,13 @@ export default async function FamilyNotificationsPage() {
       href: "/app/family/documents",
       count: documents ?? 0,
       icon: ReceiptText,
+    },
+    {
+      label: "Biblioteca",
+      description: "Novos documentos da escola",
+      href: "/app/family/library",
+      count: library ?? 0,
+      icon: LibraryBig,
     },
   ];
   const total = items.reduce((sum, item) => sum + item.count, 0);
@@ -103,7 +116,7 @@ export default async function FamilyNotificationsPage() {
             <Bell className="mx-auto text-[#6ba4dd]" size={28} />
             <strong className="mt-3 block text-sm text-[#15395f]">Tudo acompanhado</strong>
             <p className="mt-1 text-[11px] text-[#7890aa]">
-              Novos recados, ocorrências e boletos aparecerão aqui.
+              Novos recados, ocorrências, documentos e boletos aparecerão aqui.
             </p>
           </div>
         ) : null}

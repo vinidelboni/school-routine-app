@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   ChevronRight,
   FileText,
+  LibraryBig,
   Megaphone,
   MessageSquareText,
   Pill,
@@ -45,11 +46,19 @@ const items = [
   },
   {
     href: "/app/family/documents",
-    label: "Boletos e documentos",
-    description: "Mensalidades disponibilizadas pela escola",
+    label: "Financeiro",
+    description: "Boletos disponibilizados pela escola",
     icon: FileText,
     tone: "bg-[#e7edf4] text-[#4f6680]",
     countKey: "documents",
+  },
+  {
+    href: "/app/family/library",
+    label: "Biblioteca",
+    description: "Circulares, normas e materiais da escola",
+    icon: LibraryBig,
+    tone: "bg-[#e5f1ff] text-[#1768c5]",
+    countKey: "library",
   },
 ] as const;
 
@@ -62,6 +71,7 @@ export default async function FamilySchoolPage() {
     { count: occurrences },
     { count: medications },
     { count: documents },
+    { count: library },
   ] = await Promise.all([
     supabase
       .from("communication_recipients")
@@ -83,12 +93,18 @@ export default async function FamilySchoolPage() {
       .select("*", { count: "exact", head: true })
       .eq("status", "distributed")
       .is("viewed_at", null),
+    supabase
+      .from("school_document_recipients")
+      .select("*", { count: "exact", head: true })
+      .eq("membership_id", membership.id)
+      .is("viewed_at", null),
   ]);
   const counts = {
     communications: communications ?? 0,
     occurrences: occurrences ?? 0,
     medications: medications ?? 0,
     documents: documents ?? 0,
+    library: library ?? 0,
   };
   const pending = Object.values(counts).reduce((total, count) => total + count, 0);
 
