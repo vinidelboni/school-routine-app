@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   AlertTriangle,
-  ChevronRight,
   FileText,
   LibraryBig,
   Megaphone,
@@ -17,7 +16,6 @@ const items = [
     label: "Comunicados",
     description: "Recados, eventos e autorizações",
     icon: Megaphone,
-    tone: "bg-[#f4e6d8] text-[#986d4e]",
     countKey: "communications",
   },
   {
@@ -25,7 +23,6 @@ const items = [
     label: "Ocorrências",
     description: "Informações oficiais da direção",
     icon: AlertTriangle,
-    tone: "bg-[#f8e2dc] text-[#a34336]",
     countKey: "occurrences",
   },
   {
@@ -33,7 +30,6 @@ const items = [
     label: "Avisos à escola",
     description: "Falta, atraso, retirada e período",
     icon: MessageSquareText,
-    tone: "bg-[#e3ece8] text-[#3e705a]",
     countKey: null,
   },
   {
@@ -41,7 +37,6 @@ const items = [
     label: "Medicamentos",
     description: "Solicitações estruturadas e retornos",
     icon: Pill,
-    tone: "bg-[#ebe6f3] text-[#685885]",
     countKey: "medications",
   },
   {
@@ -49,7 +44,6 @@ const items = [
     label: "Financeiro",
     description: "Boletos disponibilizados pela escola",
     icon: FileText,
-    tone: "bg-[#e7edf4] text-[#4f6680]",
     countKey: "documents",
   },
   {
@@ -57,7 +51,6 @@ const items = [
     label: "Biblioteca",
     description: "Circulares, normas e materiais da escola",
     icon: LibraryBig,
-    tone: "bg-[#e5f1ff] text-[#1768c5]",
     countKey: "library",
   },
 ] as const;
@@ -110,53 +103,60 @@ export default async function FamilySchoolPage() {
 
   return (
     <div>
-      <header className="rounded-3xl bg-[#315645] p-5 text-white">
-        <span className="text-[9px] font-extrabold tracking-[.16em] text-[#c6d8ce]">
+      <header className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b78d4] via-[#0759bd] to-[#063b8f] p-5 text-white shadow-[0_16px_34px_rgba(7,89,189,.2)]">
+        <span
+          aria-hidden="true"
+          className="absolute -right-8 -top-12 h-36 w-36 rounded-full border-[26px] border-white/[.07]"
+        />
+        <span className="relative text-[9px] font-extrabold tracking-[.16em] text-[#bdddff]">
           ESCOLA
         </span>
-        <h1 className="mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em]">
+        <h1 className="relative mt-1 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em]">
           Central da família
         </h1>
-        <p className="mt-2 text-xs leading-5 text-[#d6e3dc]">
+        <p className="relative mt-2 text-xs leading-5 text-[#d9ebff]">
           {pending
             ? `Você tem ${pending} item${pending > 1 ? "s" : ""} que precisa${pending > 1 ? "m" : ""} de atenção.`
             : "Tudo acompanhado por aqui."}
         </p>
       </header>
 
-      <section className="mt-4 overflow-hidden rounded-3xl border border-[#e0e2dc] bg-white">
-        {items.map((item, index) => {
+      <nav
+        aria-label="Serviços da escola"
+        className="mt-7 grid grid-cols-3 gap-x-3 gap-y-8 px-1"
+      >
+        {items.map((item) => {
           const Icon = item.icon;
           const count = item.countKey ? counts[item.countKey] : 0;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 p-4 transition active:bg-[#f2f3ef] ${
-                index ? "border-t border-[#ecece7]" : ""
-              }`}
+              title={item.description}
+              className="group flex min-w-0 flex-col items-center gap-3 rounded-2xl text-center outline-none transition hover:-translate-y-1 focus-visible:ring-4 focus-visible:ring-[#2d83e6]/20 active:scale-[.97]"
             >
-              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${item.tone}`}>
-                <Icon size={20} />
+              <span className="relative grid h-[4.85rem] w-[4.85rem] place-items-center rounded-full border border-white/50 bg-gradient-to-b from-[#14abe4] via-[#086dcc] to-[#092a9c] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.45),0_12px_24px_rgba(17,70,157,.2)] transition duration-300 group-hover:scale-105 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,.5),0_16px_28px_rgba(17,70,157,.27)]">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-[5px] rounded-full border border-white/10"
+                />
+                <Icon className="relative" size={33} strokeWidth={1.75} />
+                {count ? (
+                  <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-[#f7f8fa] bg-[#ff4d63] px-1 text-[8px] font-extrabold text-white shadow-sm">
+                    {count > 9 ? "9+" : count}
+                  </span>
+                ) : null}
               </span>
-              <span className="min-w-0 flex-1">
-                <strong className="block text-sm">{item.label}</strong>
-                <small className="mt-0.5 block truncate text-[10px] text-[#7c8680]">
-                  {item.description}
-                </small>
-              </span>
-              {count ? (
-                <span className="grid min-h-6 min-w-6 place-items-center rounded-full bg-[#b85f48] px-1.5 text-[9px] font-extrabold text-white">
-                  {count > 9 ? "9+" : count}
-                </span>
-              ) : null}
-              <ChevronRight size={17} className="shrink-0 text-[#a3aaa6]" />
+              <strong className="max-w-[7rem] text-[11px] leading-4 text-[#27364c]">
+                {item.label}
+              </strong>
+              <span className="sr-only">{item.description}</span>
             </Link>
           );
         })}
-      </section>
+      </nav>
 
-      <p className="mt-4 px-3 text-center text-[9px] leading-4 text-[#8a928d]">
+      <p className="mt-8 rounded-2xl bg-[#eef5fd] px-4 py-3 text-center text-[9px] leading-4 text-[#61758d]">
         A comunicação acontece por fluxos estruturados. Nenhum canal cria conversa
         direta ou atendimento permanente com a professora.
       </p>
