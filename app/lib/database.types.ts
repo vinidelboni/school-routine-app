@@ -205,6 +205,7 @@ export type Database = {
           original_filename: string
           payment_reference: string
           school_id: string
+          storage_path: string | null
           status: Database["public"]["Enums"]["billing_document_status"]
           viewed_at: string | null
         }
@@ -218,6 +219,7 @@ export type Database = {
           original_filename: string
           payment_reference: string
           school_id: string
+          storage_path?: string | null
           status?: Database["public"]["Enums"]["billing_document_status"]
           viewed_at?: string | null
         }
@@ -231,6 +233,7 @@ export type Database = {
           original_filename?: string
           payment_reference?: string
           school_id?: string
+          storage_path?: string | null
           status?: Database["public"]["Enums"]["billing_document_status"]
           viewed_at?: string | null
         }

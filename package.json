@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test:ui": "node scripts/verify-ui.mjs",
     "test:operational": "node scripts/verify-operational-ui.mjs",
+    "test:billing": "node scripts/verify-billing-pdf-ui.mjs",
     "test:rls": "node scripts/verify-rls.mjs"
   },
   "dependencies": {

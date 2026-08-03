@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, FileText } from "lucide-react";
+import { CheckCircle2, Download, FileText } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
-import { markBillingDocumentViewed } from "../../actions";
-import { SubmitButton } from "../../direction/registry/submit-button";
+import { CopyBarcodeButton } from "./copy-barcode-button";
 
 export default async function FamilyDocumentsPage() {
   const { supabase, membership } = await getCurrentContext();
@@ -10,7 +9,7 @@ export default async function FamilyDocumentsPage() {
   const { data: documents } = await supabase
     .from("billing_documents")
     .select(
-      "id, original_filename, due_date, payment_reference, viewed_at, children(first_name, last_name), billing_batches(title, reference_month)",
+      "id, original_filename, storage_path, due_date, payment_reference, viewed_at, children(first_name, last_name), billing_batches(title, reference_month)",
     )
     .eq("status", "distributed")
     .order("created_at", { ascending: false });
@@ -49,32 +48,24 @@ export default async function FamilyDocumentsPage() {
                     <small className="mt-1 block text-[9px] text-[#7c8680]">
                       {child?.first_name} · vence em {document.due_date}
                     </small>
-                    <code className="mt-2 block text-[10px] text-[#557164]">
-                      {document.payment_reference}
-                    </code>
                   </span>
                 </span>
-                <form action={markBillingDocumentViewed}>
-                  <input
-                    type="hidden"
-                    name="documentId"
-                    value={document.id}
-                  />
-                  <SubmitButton
-                    idleLabel={
-                      document.viewed_at ? (
-                        <span className="flex items-center gap-1">
-                          <CheckCircle2 size={14} /> Visualizado
-                        </span>
-                      ) : (
-                        "Abrir documento"
-                      )
-                    }
-                    pendingLabel="Abrindo..."
-                    className="rounded-xl bg-[#1768c5] px-4 py-2.5 text-[10px] font-bold text-white"
-                  />
-                </form>
+                {document.viewed_at ? <span className="flex items-center gap-1 text-[9px] font-bold text-[#315645]"><CheckCircle2 size={14} /> Visualizado</span> : null}
               </div>
+              <div className="mt-4 rounded-xl bg-[#f5f8fc] p-3">
+                <span className="text-[9px] font-extrabold uppercase tracking-[.1em] text-[#71879e]">Linha digitável</span>
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 break-all text-[11px] leading-5 text-[#294968]">{document.payment_reference.replace(/(\d{5})(?=\d)/g, "$1 ")}</code>
+                  <CopyBarcodeButton value={document.payment_reference} />
+                </div>
+              </div>
+              {document.storage_path ? (
+                <a href={`/app/family/documents/${document.id}/download`} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1768c5] px-4 py-3 text-[10px] font-bold text-white">
+                  <Download size={15} /> Abrir PDF seguro
+                </a>
+              ) : (
+                <p className="mt-3 rounded-xl bg-[#fff4e6] p-3 text-center text-[10px] font-bold text-[#91612f]">Documento antigo sem PDF armazenado.</p>
+              )}
             </article>
           );
         })}

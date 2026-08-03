@@ -42,7 +42,7 @@ export default async function BillingPage({
     ? await supabase
         .from("billing_documents")
         .select(
-          "id, child_id, original_filename, due_date, payment_reference, match_confidence, status, viewed_at, children(first_name, last_name)",
+          "id, child_id, original_filename, storage_path, due_date, payment_reference, match_confidence, status, viewed_at, children(first_name, last_name)",
         )
         .eq("batch_id", selected.id)
         .order("created_at")
@@ -91,6 +91,7 @@ export default async function BillingPage({
           childOptions={childOptions}
           defaultMonth={month}
           defaultDueDate={due}
+          schoolId={membership.school_id}
         />
         <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
           <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
@@ -153,6 +154,12 @@ export default async function BillingPage({
                     <strong className="block">{document.original_filename}</strong>
                     <small className="text-[#7c8680]">
                       Confiança inicial: {document.match_confidence}%
+                    </small>
+                    <small className="mt-1 block font-mono text-[#557164]">
+                      {document.payment_reference.replace(/(\d{5})(?=\d)/g, "$1 ")}
+                    </small>
+                    <small className={document.storage_path ? "mt-1 block text-[#47705d]" : "mt-1 block text-[#9a623b]"}>
+                      {document.storage_path ? "PDF armazenado com segurança" : "Registro antigo sem PDF"}
                     </small>
                   </span>
                   <select

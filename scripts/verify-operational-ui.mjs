@@ -52,7 +52,7 @@ async function login(page, email) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
-  await page.getByRole("button", { name: "Entrar com segurança" }).click();
+  await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL(/\/app(?:\/|$)/);
   if (new URL(page.url()).pathname === "/app") {
     const destination = email.startsWith("direcao")

@@ -1110,7 +1110,10 @@ const billingDocumentInput = z.object({
   childId: z.union([uuid, z.literal("")]),
   confidence: z.number().min(0).max(100),
   dueDate: z.iso.date(),
-  paymentReference: z.string().trim().min(3).max(160),
+  paymentReference: z.string().transform((value) => value.replace(/\D/g, ""))
+    .refine((value) => [44, 47, 48].includes(value.length), "Linha digitável inválida."),
+  storagePath: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/),
+  fileIndex: z.number().int().min(0).max(99),
 });
 
 export async function createBillingBatch(formData: FormData) {
@@ -1125,6 +1128,18 @@ export async function createBillingBatch(formData: FormData) {
   });
   const { supabase, user, membership } = await getCurrentContext();
   if (membership.role !== "director") redirect("/app");
+
+  if (parsed.documents.some((document) => !document.storagePath.startsWith(`${membership.school_id}/`))) {
+    throw new Error("Um dos arquivos não pertence a esta escola.");
+  }
+  const { data: storedFiles, error: storageError } = await supabase.storage
+    .from("billing-documents")
+    .list(membership.school_id, { limit: 1000 });
+  if (storageError) throw storageError;
+  const storedNames = new Set((storedFiles ?? []).map((file) => file.name));
+  if (parsed.documents.some((document) => !storedNames.has(document.storagePath.split("/")[1]))) {
+    throw new Error("Um dos PDFs não foi armazenado corretamente.");
+  }
 
   const selectedChildIds = parsed.documents
     .map((document) => document.childId)
@@ -1160,6 +1175,7 @@ export async function createBillingBatch(formData: FormData) {
         batch_id: batch.id,
         child_id: document.childId || null,
         original_filename: document.filename,
+        storage_path: document.storagePath,
         due_date: document.dueDate,
         payment_reference: document.paymentReference,
         match_confidence: document.confidence,
@@ -1174,7 +1190,7 @@ export async function createBillingBatch(formData: FormData) {
     throw documentsError;
   }
   revalidatePath("/app/direction/billing");
-  redirect(`/app/direction/billing?batch=${batch.id}&success=batch-created`);
+  return batch.id;
 }
 
 export async function updateBillingMatches(formData: FormData) {
