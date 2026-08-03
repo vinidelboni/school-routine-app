@@ -18,32 +18,32 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-[#e8eef8] p-0 text-white sm:p-5">
+    <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-[#020f32] p-0 text-white sm:p-5">
       <LoginIntro />
       <div
         aria-hidden="true"
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-90"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 20% 10%, rgba(26,168,231,.28), transparent 38%), radial-gradient(circle at 80% 90%, rgba(13,52,156,.22), transparent 40%)",
+            "radial-gradient(circle at 16% 8%, rgba(8,108,230,.34), transparent 34%), radial-gradient(circle at 84% 92%, rgba(7,59,173,.42), transparent 38%)",
         }}
       />
 
-      <section className="relative flex min-h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gradient-to-b from-[#168fda] via-[#095ac2] to-[#082a96] px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] shadow-[0_30px_90px_rgba(12,47,120,.3)] sm:min-h-[760px] sm:rounded-[2.25rem] sm:border sm:border-white/25">
+      <section className="relative flex min-h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-[linear-gradient(165deg,#0c73ee_0%,#073dac_34%,#03143d_78%,#020f32_100%)] px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] shadow-[0_32px_100px_rgba(0,7,27,.7)] sm:min-h-[760px] sm:rounded-[2.25rem] sm:border sm:border-[#60aeff]/30">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-[.16]"
+          className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-[.09] mix-blend-screen"
           style={{
             backgroundImage: "url('/demo/escola-cni-logo-transparent.png')",
-            backgroundSize: "145% auto",
+            backgroundSize: "150% auto",
           }}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-25"
+          className="pointer-events-none absolute inset-0 opacity-30"
           style={{
             backgroundImage:
-              "linear-gradient(120deg, transparent 35%, rgba(255,255,255,.14) 50%, transparent 65%)",
+              "linear-gradient(120deg, transparent 34%, rgba(74,184,255,.16) 50%, transparent 66%)",
           }}
         />
 
@@ -51,17 +51,17 @@ export default async function LoginPage({
           <Link
             href="/"
             aria-label="Voltar para o início"
-            className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[#79c8ff]/25 bg-[#03143d]/25 text-white transition hover:bg-white/15"
           >
             <ArrowLeft size={19} />
           </Link>
-          <span className="text-[10px] font-bold tracking-[.12em] text-white/70">
+          <span className="text-[10px] font-bold tracking-[.12em] text-[#b8ddff]/75">
             AMBIENTE DEMONSTRATIVO
           </span>
         </header>
 
         <div className="relative mt-auto flex flex-col items-center pt-12 text-center">
-          <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white/80 bg-white shadow-[0_22px_55px_rgba(3,38,117,.24)]">
+          <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white/90 bg-white shadow-[0_0_0_9px_rgba(64,159,255,.12),0_24px_60px_rgba(0,8,35,.45)]">
             <Image
               src="/demo/escola-cni-logo.png"
               alt="Escola CNI Infantil"
@@ -71,13 +71,13 @@ export default async function LoginPage({
               className="scale-[1.04] rounded-full object-cover"
             />
           </div>
-          <p className="mt-5 text-[11px] font-bold uppercase tracking-[.22em] text-[#7edbff]">
+          <p className="mt-5 text-[11px] font-bold uppercase tracking-[.22em] text-[#19cdf4]">
             Bem-vindo
           </p>
           <h1 className="mt-2 font-[var(--font-display)] text-3xl font-bold tracking-[-.04em]">
             Acesse sua conta
           </h1>
-          <p className="mt-2 max-w-[290px] text-sm leading-6 text-white/75">
+          <p className="mt-2 max-w-[290px] text-sm leading-6 text-[#d4e9ff]/75">
             A rotina escolar da sua criança, sempre por perto.
           </p>
         </div>
@@ -104,7 +104,7 @@ export default async function LoginPage({
               type="email"
               required
               autoComplete="email"
-              className="h-14 w-full rounded-2xl border border-white/30 bg-white/10 pl-12 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-md transition placeholder:text-white/65 focus:border-[#70deff] focus:bg-white/15 focus:ring-4 focus:ring-[#70deff]/15"
+              className="h-14 w-full rounded-2xl border border-[#79c8ff]/28 bg-[#020f32]/35 pl-12 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-md transition placeholder:text-[#d4e9ff]/55 focus:border-[#19cdf4] focus:bg-[#020f32]/50 focus:ring-4 focus:ring-[#19cdf4]/15"
               placeholder="E-mail"
             />
           </label>
@@ -122,24 +122,24 @@ export default async function LoginPage({
               required
               minLength={8}
               autoComplete="current-password"
-              className="h-14 w-full rounded-2xl border border-white/30 bg-white/10 pl-12 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-md transition placeholder:text-white/65 focus:border-[#70deff] focus:bg-white/15 focus:ring-4 focus:ring-[#70deff]/15"
+              className="h-14 w-full rounded-2xl border border-[#79c8ff]/28 bg-[#020f32]/35 pl-12 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-md transition placeholder:text-[#d4e9ff]/55 focus:border-[#19cdf4] focus:bg-[#020f32]/50 focus:ring-4 focus:ring-[#19cdf4]/15"
               placeholder="Senha"
             />
           </label>
 
-          <button className="mt-1 h-14 rounded-2xl bg-[#13bee9] text-sm font-extrabold uppercase tracking-[.08em] text-[#06347d] shadow-[0_14px_34px_rgba(1,38,117,.25)] transition hover:bg-[#39d0f1] focus:outline-none focus:ring-4 focus:ring-white/25 active:translate-y-px">
+          <button className="mt-1 h-14 rounded-2xl bg-gradient-to-r from-[#13c8f2] to-[#1687f3] text-sm font-extrabold uppercase tracking-[.08em] text-white shadow-[0_16px_36px_rgba(0,31,112,.4)] transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#55dfff]/25 active:translate-y-px">
             Entrar
           </button>
         </form>
 
         <footer className="relative mt-auto pt-8 text-center">
-          <p className="text-[11px] leading-5 text-white/65">
+          <p className="text-[11px] leading-5 text-[#d4e9ff]/60">
             Acesso individual fornecido pela escola.
             <br />
             Nenhum dado real deve ser usado nesta demonstração.
           </p>
-          <p className="mt-5 text-[10px] font-semibold tracking-[.08em] text-white/45">
-            TECNOLOGIA SOMAMAIS
+          <p className="mt-5 font-[var(--font-display)] text-[12px] font-bold tracking-[-.02em] text-white/55">
+            SOMA<span className="text-[#19cdf4]">MAIS</span>
           </p>
         </footer>
       </section>
