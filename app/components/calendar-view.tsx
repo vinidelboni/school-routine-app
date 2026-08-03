@@ -129,7 +129,7 @@ export function CalendarView({
             className={`grid h-9 w-9 place-items-center rounded-full ${
               compact
                 ? "bg-[#e7effb] text-[#2d62b4] active:bg-[#dbe8f9]"
-                : "text-[#557164] active:bg-[#edf1ee]"
+                : "text-[#2d62b4] active:bg-[#e7effb]"
             }`}
           >
             <ChevronLeft size={19} />
@@ -147,7 +147,7 @@ export function CalendarView({
             className={`grid h-9 w-9 place-items-center rounded-full ${
               compact
                 ? "bg-[#e7effb] text-[#2d62b4] active:bg-[#dbe8f9]"
-                : "text-[#557164] active:bg-[#edf1ee]"
+                : "text-[#2d62b4] active:bg-[#e7effb]"
             }`}
           >
             <ChevronRight size={19} />
@@ -182,7 +182,7 @@ export function CalendarView({
                       : dateKey === todayKey
                         ? compact
                           ? "ring-1 ring-[#2d83e6] text-[#2d62b4]"
-                          : "bg-[#315645] text-white"
+                          : "bg-gradient-to-b from-[#169fe0] to-[#1253b5] text-white shadow-[0_5px_12px_rgba(18,83,181,.25)]"
                         : compact
                           ? "text-[#4a5b74]"
                           : "text-[#4f5c55]"
@@ -199,7 +199,7 @@ export function CalendarView({
                         <i
                           key={event.id}
                           title={event.title}
-                          className={`h-1.5 w-1.5 rounded-full ${kindStyles[event.kind].split(" ")[0]}`}
+                          className="h-1.5 w-1.5 rounded-full bg-[#2386df]"
                         />
                       ))
                     )}
@@ -229,8 +229,8 @@ export function CalendarView({
                 onClick={() => setFilterOpen((open) => !open)}
                 className={`relative grid h-9 w-9 place-items-center rounded-full border transition ${
                   effectiveKind === "all"
-                    ? "border-[#d9ddd8] bg-white text-[#557164] active:bg-[#eef1ee]"
-                    : "border-[#315645] bg-[#315645] text-white"
+                    ? "border-[#cddff2] bg-white text-[#2d62b4] active:bg-[#e7effb]"
+                    : "border-[#0759bd] bg-[#0759bd] text-white"
                 }`}
               >
                 <ListFilter size={17} />
@@ -269,7 +269,7 @@ export function CalendarView({
                     setSelectedKind(kind);
                     setFilterOpen(false);
                   }}
-                  dotClass={kindStyles[kind].split(" ")[0]}
+                  dotClass="bg-[#2386df]"
                 />
               ))}
           </div>
@@ -348,8 +348,8 @@ function FilterButton({
       onClick={onClick}
       className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-[10px] font-bold transition ${
         active
-          ? "bg-[#e6eee9] text-[#315645]"
-          : "text-[#64716a] active:bg-[#f0f2ef]"
+          ? "bg-[#e7f2ff] text-[#0759bd]"
+          : "text-[#536b84] active:bg-[#edf5fd]"
       }`}
     >
       {dotClass ? (
