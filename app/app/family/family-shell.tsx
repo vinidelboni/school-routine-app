@@ -49,7 +49,7 @@ export function FamilyShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-dvh bg-[#e9edf4] text-[#172b4d] md:px-5 md:py-6">
+    <div className="family-theme min-h-dvh bg-[#e9edf4] text-[#172b4d] md:px-5 md:py-6">
       <div className="relative mx-auto min-h-dvh w-full overflow-hidden bg-[#f7f8fa] md:min-h-[calc(100vh-3rem)] md:max-w-[520px] md:rounded-[2.25rem] md:border md:border-[#d5dce7] md:shadow-[0_32px_80px_rgba(28,54,94,.22)]">
         <header
           aria-label={schoolName}
@@ -110,7 +110,9 @@ export function FamilyShell({
         </header>
 
         <main className="px-4 pb-[calc(92px+env(safe-area-inset-bottom))] pt-4">
-          {children}
+          <div key={pathname} className="family-page-enter">
+            {children}
+          </div>
         </main>
 
         <nav
@@ -132,7 +134,8 @@ export function FamilyShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex h-[66px] flex-col items-center justify-center gap-1 text-[9px] font-bold transition ${
+                aria-current={active ? "page" : undefined}
+                className={`family-tab relative flex h-[66px] flex-col items-center justify-center gap-1 text-[9px] font-bold transition ${
                   active ? "text-[#2b61b4]" : "text-[#8a96a6]"
                 }`}
               >
