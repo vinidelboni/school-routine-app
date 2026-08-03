@@ -161,19 +161,19 @@ export default async function TeamEngagementPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">
           CUMPRIMENTO DA ROTINA
         </span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
           Engajamento da equipe
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#61758d]">
           Tendências operacionais comparadas somente ao trabalho esperado em
           cada turma. A leitura das famílias não entra nesta análise.
         </p>
       </header>
 
-      <form className="mt-7 grid gap-3 rounded-2xl border border-[#dfe1d9] bg-white p-4 sm:grid-cols-[1fr_1fr_160px_auto]">
+      <form className="mt-7 grid gap-3 rounded-2xl border border-[#dce6f2] bg-white p-4 sm:grid-cols-[1fr_1fr_160px_auto]">
         <Filter label="Professora">
           <select name="teacher" defaultValue={selectedTeacher} className="input">
             <option value="">Todas</option>
@@ -197,7 +197,7 @@ export default async function TeamEngagementPage({
             <option value="month">Últimos 30 dias</option>
           </select>
         </Filter>
-        <button className="h-10 self-end rounded-xl bg-[#315645] px-5 text-xs font-bold text-white">
+        <button className="h-10 self-end rounded-xl bg-[#0759bd] px-5 text-xs font-bold text-white">
           Aplicar
         </button>
       </form>
@@ -209,27 +209,27 @@ export default async function TeamEngagementPage({
         <Metric icon={<AlertCircle size={19} />} label="Passagens pendentes" value={String(openHandoffsTotal)} warning={openHandoffsTotal > 0} />
       </section>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">
-        <div className="border-b border-[#e8e8e2] p-5">
+      <section className="mt-5 overflow-hidden rounded-2xl border border-[#dce6f2] bg-white">
+        <div className="border-b border-[#e7edf4] p-5">
           <h2 className="font-[var(--font-display)] text-xl font-bold">Visão por professora</h2>
-          <p className="mt-1 text-xs text-[#7c8680]">Sem notas, rankings ou rótulos automáticos.</p>
+          <p className="mt-1 text-xs text-[#6f8299]">Sem notas, rankings ou rótulos automáticos.</p>
         </div>
-        <div className="hidden grid-cols-[1.2fr_repeat(5,.8fr)] bg-[#f3f3ef] px-5 py-3 text-[9px] font-extrabold tracking-[.08em] text-[#7c8680] md:grid">
+        <div className="hidden grid-cols-[1.2fr_repeat(5,.8fr)] bg-[#f3f7fb] px-5 py-3 text-[9px] font-extrabold tracking-[.08em] text-[#6f8299] md:grid">
           <span>Professora</span><span>Participação</span><span>Concluídas</span><span>No horário</span><span>Registros</span><span>Pendências</span>
         </div>
         {rows.map((row) => (
-          <article key={row.id} className="grid gap-3 border-t border-[#ecece7] px-5 py-4 text-xs md:grid-cols-[1.2fr_repeat(5,.8fr)] md:items-center">
+          <article key={row.id} className="grid gap-3 border-t border-[#e9eef5] px-5 py-4 text-xs md:grid-cols-[1.2fr_repeat(5,.8fr)] md:items-center">
             <strong>{row.name}</strong>
             <Cell label="Participação">{row.participated}/{row.expected}</Cell>
             <Cell label="Concluídas">{row.published}/{row.expected}</Cell>
             <Cell label="No horário"><Clock3 size={12} /> {row.onTime}/{row.publishedByTeacher}</Cell>
             <Cell label="Registros">{row.entries}</Cell>
-            <Cell label="Pendências"><span className={row.openHandoffs ? "font-bold text-[#a34336]" : "text-[#315645]"}>{row.openHandoffs}</span></Cell>
+            <Cell label="Pendências"><span className={row.openHandoffs ? "font-bold text-[#a34336]" : "text-[#0759bd]"}>{row.openHandoffs}</span></Cell>
           </article>
         ))}
-        {!rows.length ? <div className="p-8 text-center text-xs text-[#7c8680]"><BarChart3 className="mx-auto mb-2" size={22} /> Nenhuma professora ativa neste filtro.</div> : null}
+        {!rows.length ? <div className="p-8 text-center text-xs text-[#6f8299]"><BarChart3 className="mx-auto mb-2" size={22} /> Nenhuma professora ativa neste filtro.</div> : null}
       </section>
-      <p className="mt-4 text-[10px] leading-5 text-[#7c8680]">
+      <p className="mt-4 text-[10px] leading-5 text-[#6f8299]">
         “No horário” considera até uma hora após a saída padrão da turma.
         Visualizações dos responsáveis não são atribuídas à professora.
       </p>
@@ -238,11 +238,11 @@ export default async function TeamEngagementPage({
 }
 
 function Filter({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="grid gap-1.5 text-[10px] font-bold text-[#56635d]">{label}{children}</label>;
+  return <label className="grid gap-1.5 text-[10px] font-bold text-[#536b84]">{label}{children}</label>;
 }
 function Metric({ icon, label, value, warning = false }: { icon: React.ReactNode; label: string; value: string; warning?: boolean }) {
-  return <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5"><span className={`grid h-10 w-10 place-items-center rounded-xl ${warning ? "bg-[#fff0eb] text-[#a34336]" : "bg-[#e5eee8] text-[#42715d]"}`}>{icon}</span><strong className="mt-4 block font-[var(--font-display)] text-3xl">{value}</strong><span className="text-xs text-[#69746f]">{label}</span></div>;
+  return <div className="rounded-2xl border border-[#dce6f2] bg-white p-5"><span className={`grid h-10 w-10 place-items-center rounded-xl ${warning ? "bg-[#fff0eb] text-[#a34336]" : "bg-[#e5f2ff] text-[#176bc2]"}`}>{icon}</span><strong className="mt-4 block font-[var(--font-display)] text-3xl">{value}</strong><span className="text-xs text-[#61758d]">{label}</span></div>;
 }
 function Cell({ label, children }: { label: string; children: React.ReactNode }) {
-  return <span className="flex items-center gap-1 text-[#56635d]"><small className="font-bold md:hidden">{label}:</small>{children}</span>;
+  return <span className="flex items-center gap-1 text-[#536b84]"><small className="font-bold md:hidden">{label}:</small>{children}</span>;
 }

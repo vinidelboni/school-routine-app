@@ -71,3 +71,29 @@ button:not(:disabled) {
   border-color: #6f9583;
   box-shadow: 0 0 0 3px rgba(66, 113, 93, 0.1);
 }
+
+.direction-theme .input {
+  border-color: #dce6f2;
+  background: #fbfdff;
+  color: #172b4d;
+}
+
+.direction-theme .input:focus {
+  border-color: #5aa0df;
+  box-shadow: 0 0 0 3px rgba(17, 111, 209, 0.12);
+}
+
+.direction-theme input[type="checkbox"],
+.direction-theme input[type="radio"] {
+  accent-color: #0759bd;
+}
+
+.direction-theme button,
+.direction-theme a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.direction-theme :focus-visible {
+  outline: 3px solid rgba(30, 144, 231, 0.28);
+  outline-offset: 2px;
+}

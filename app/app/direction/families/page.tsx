@@ -88,13 +88,13 @@ export default async function FamiliesPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">
           FAMÍLIAS E ACESSOS
         </span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
           Quem pode acessar cada criança
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#61758d]">
           Centralize responsáveis, contatos de emergência e pessoas autorizadas
           para retirada, com permissões individuais e rastreáveis.
         </p>
@@ -104,7 +104,7 @@ export default async function FamiliesPage({
         <div
           role="status"
           aria-live="polite"
-          className="mt-6 flex items-start gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645]"
+          className="mt-6 flex items-start gap-3 rounded-2xl border border-[#b4d5f3] bg-[#eff7ff] p-4 text-[#0759bd]"
         >
           <CheckCircle2 size={21} className="mt-0.5 shrink-0" />
           <span>
@@ -113,7 +113,7 @@ export default async function FamiliesPage({
                 ? "Contato cadastrado e vinculado!"
                 : "Situação do acesso atualizada!"}
             </strong>
-            <small className="mt-1 block text-[#557164]">
+            <small className="mt-1 block text-[#386b9f]">
               As permissões e os vínculos já aparecem no painel abaixo.
             </small>
           </span>
@@ -147,17 +147,17 @@ export default async function FamiliesPage({
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.05fr_.95fr]">
         <ContactForm childOptions={childOptions} />
 
-        <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
+        <div className="rounded-2xl border border-[#dce6f2] bg-white p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
+              <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">
                 CONTATOS DA ESCOLA
               </span>
               <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">
                 Vínculos cadastrados
               </h2>
             </div>
-            <span className="rounded-full bg-[#eef3ef] px-3 py-1 text-[10px] font-bold text-[#315645]">
+            <span className="rounded-full bg-[#edf5fd] px-3 py-1 text-[10px] font-bold text-[#0759bd]">
               {contacts?.length ?? 0} pessoas
             </span>
           </div>
@@ -171,14 +171,14 @@ export default async function FamiliesPage({
                   href={`/app/direction/families?contact=${contact.id}`}
                   className={`rounded-xl border p-3 text-xs transition-colors ${
                     selectedContact?.id === contact.id
-                      ? "border-[#315645] bg-[#eef3ef]"
-                      : "border-[#e5e5df] hover:border-[#a8b8af]"
+                      ? "border-[#0759bd] bg-[#edf5fd]"
+                      : "border-[#e3eaf2] hover:border-[#b1c2d4]"
                   }`}
                 >
                   <span className="flex items-start justify-between gap-2">
                     <span>
                       <strong className="block">{contact.full_name}</strong>
-                      <small className="mt-1 block text-[#7c8680]">
+                      <small className="mt-1 block text-[#6f8299]">
                         {link ? kindLabels[link.kind] : "Sem vínculo"} ·{" "}
                         {contact.child_contact_links.length} criança(s)
                       </small>
@@ -189,7 +189,7 @@ export default async function FamiliesPage({
               );
             })}
             {!contacts?.length ? (
-              <div className="rounded-xl border border-dashed border-[#dfe1d9] p-8 text-center text-xs text-[#7c8680]">
+              <div className="rounded-xl border border-dashed border-[#dce6f2] p-8 text-center text-xs text-[#6f8299]">
                 Nenhum contato cadastrado ainda.
               </div>
             ) : null}
@@ -249,16 +249,16 @@ function ContactDetails({ contact }: { contact: Contact }) {
   const permissions = contact.child_contact_links[0];
 
   return (
-    <section className="mt-5 rounded-2xl border border-[#dfe1d9] bg-white p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#e8e8e2] pb-5">
+    <section className="mt-5 rounded-2xl border border-[#dce6f2] bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#e7edf4] pb-5">
         <div>
-          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
+          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">
             DETALHES DO CONTATO
           </span>
           <h2 className="mt-1 font-[var(--font-display)] text-3xl font-semibold">
             {contact.full_name}
           </h2>
-          <p className="mt-1 text-xs text-[#69746f]">
+          <p className="mt-1 text-xs text-[#61758d]">
             {contact.email ?? "Sem e-mail"} · {contact.phone}
           </p>
         </div>
@@ -282,9 +282,9 @@ function ContactDetails({ contact }: { contact: Contact }) {
                     <strong className="block">
                       {child?.first_name} {child?.last_name}
                     </strong>
-                    <small className="text-[#7c8680]">{link.relationship}</small>
+                    <small className="text-[#6f8299]">{link.relationship}</small>
                   </span>
-                  <span className="text-[10px] font-bold text-[#557164]">
+                  <span className="text-[10px] font-bold text-[#386b9f]">
                     {kindLabels[link.kind]}
                   </span>
                 </div>
@@ -302,8 +302,8 @@ function ContactDetails({ contact }: { contact: Contact }) {
                   key={key}
                   className={`rounded-full px-3 py-1.5 text-[10px] font-bold ${
                     permissions[key as keyof typeof permissionLabels]
-                      ? "bg-[#e6f2eb] text-[#315645]"
-                      : "bg-[#f0f0ec] text-[#87908b] line-through"
+                      ? "bg-[#e6f2eb] text-[#0759bd]"
+                      : "bg-[#f0f0ec] text-[#75869a] line-through"
                   }`}
                 >
                   {label}
@@ -328,7 +328,7 @@ function ContactDetails({ contact }: { contact: Contact }) {
 
 function AccessActions({ contact }: { contact: Contact }) {
   return (
-    <div className="mt-5 border-t border-[#e8e8e2] pt-4">
+    <div className="mt-5 border-t border-[#e7edf4] pt-4">
       <strong className="text-xs">Gerenciar acesso demonstrativo</strong>
       <div className="mt-3 flex flex-wrap gap-2">
         {contact.access_status !== "pending" ? (
@@ -359,7 +359,7 @@ function AccessActions({ contact }: { contact: Contact }) {
       </div>
       {contact.access_status === "pending" &&
       contact.invitation_expires_at ? (
-        <p className="mt-3 text-[10px] text-[#7c8680]">
+        <p className="mt-3 text-[10px] text-[#6f8299]">
           Convite demonstrativo válido até{" "}
           {new Intl.DateTimeFormat("pt-BR", {
             dateStyle: "short",
@@ -400,7 +400,7 @@ function StatusForm({
         className={`rounded-xl px-4 py-2.5 text-[10px] font-bold ${
           secondary
             ? "border border-[#d8bca7] bg-white text-[#80512f]"
-            : "bg-[#315645] text-white"
+            : "bg-[#0759bd] text-white"
         }`}
       />
     </form>
@@ -413,9 +413,9 @@ function StatusBadge({
   status: keyof typeof statusLabels;
 }) {
   const styles = {
-    not_invited: "bg-[#f0f0ec] text-[#69746f]",
+    not_invited: "bg-[#f0f0ec] text-[#61758d]",
     pending: "bg-[#fff1dc] text-[#8b5b25]",
-    active: "bg-[#e6f2eb] text-[#315645]",
+    active: "bg-[#e6f2eb] text-[#0759bd]",
     expired: "bg-[#f4ece7] text-[#80512f]",
     suspended: "bg-[#f7e8e5] text-[#93463c]",
   };
@@ -438,8 +438,8 @@ function Metric({
   value: number;
 }) {
   return (
-    <div className="rounded-2xl border border-[#dfe1d9] bg-white p-4">
-      <span className="flex items-center gap-2 text-[#557164]">
+    <div className="rounded-2xl border border-[#dce6f2] bg-white p-4">
+      <span className="flex items-center gap-2 text-[#386b9f]">
         {icon}
         <small className="text-[10px] font-bold uppercase tracking-[.08em]">
           {label}

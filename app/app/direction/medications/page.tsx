@@ -35,13 +35,13 @@ export default async function DirectionMedicationsPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">
           CENTRAL DA DIREÇÃO
         </span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
           Medicamentos
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#61758d]">
           Analise cada solicitação segundo a política da escola e registre o que
           foi efetivamente administrado.
         </p>
@@ -50,7 +50,7 @@ export default async function DirectionMedicationsPage({
       {query.success ? (
         <div
           role="status"
-          className="mt-6 flex items-center gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645]"
+          className="mt-6 flex items-center gap-3 rounded-2xl border border-[#b4d5f3] bg-[#eff7ff] p-4 text-[#0759bd]"
         >
           <CheckCircle2 size={20} />
           <strong className="text-sm">
@@ -120,8 +120,8 @@ function RequestSection({
   mode: "review" | "administration" | "history";
 }) {
   return (
-    <section className="mt-5 rounded-2xl border border-[#dfe1d9] bg-white p-5">
-      <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
+    <section className="mt-5 rounded-2xl border border-[#dce6f2] bg-white p-5">
+      <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">
         {eyebrow}
       </span>
       <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">
@@ -132,7 +132,7 @@ function RequestSection({
           <MedicationCard key={request.id} request={request} mode={mode} />
         ))}
         {!requests.length ? (
-          <div className="rounded-xl border border-dashed border-[#dfe1d9] p-7 text-center text-xs text-[#7c8680]">
+          <div className="rounded-xl border border-dashed border-[#dce6f2] p-7 text-center text-xs text-[#6f8299]">
             <Pill className="mx-auto mb-2" size={21} />
             Nenhum registro nesta etapa.
           </div>
@@ -158,13 +158,13 @@ function MedicationCard({
   const administration = request.medication_administrations[0];
 
   return (
-    <article className="rounded-xl border border-[#e5e5df] p-4">
+    <article className="rounded-xl border border-[#e3eaf2] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <strong className="block text-sm">
             {request.medication_name} · {request.dosage}
           </strong>
-          <small className="mt-1 block text-[#7c8680]">
+          <small className="mt-1 block text-[#6f8299]">
             {child?.first_name} {child?.last_name} ·{" "}
             {request.scheduled_time.slice(0, 5)} · por {profile?.full_name}
           </small>
@@ -201,7 +201,7 @@ function MedicationCard({
       {mode === "administration" ? (
         <form
           action={recordMedicationAdministration}
-          className="mt-4 grid gap-3 border-t border-[#ecece7] pt-4 sm:grid-cols-[.8fr_1.2fr_auto]"
+          className="mt-4 grid gap-3 border-t border-[#e9eef5] pt-4 sm:grid-cols-[.8fr_1.2fr_auto]"
         >
           <input type="hidden" name="requestId" value={request.id} />
           <select name="administrationStatus" className="input">
@@ -216,13 +216,13 @@ function MedicationCard({
           <SubmitButton
             idleLabel="Registrar"
             pendingLabel="Registrando..."
-            className="rounded-xl bg-[#315645] px-4 py-3 text-[10px] font-bold text-white"
+            className="rounded-xl bg-[#0759bd] px-4 py-3 text-[10px] font-bold text-white"
           />
         </form>
       ) : null}
 
       {mode === "history" ? (
-        <p className="mt-3 flex items-center gap-2 text-xs text-[#557164]">
+        <p className="mt-3 flex items-center gap-2 text-xs text-[#386b9f]">
           {request.status === "declined" ? (
             <ShieldAlert size={15} />
           ) : (
@@ -260,7 +260,7 @@ function DecisionForm({
         className={`rounded-xl px-4 py-2.5 text-[10px] font-bold ${
           secondary
             ? "border border-[#d8bca7] bg-white text-[#80512f]"
-            : "bg-[#315645] text-white"
+            : "bg-[#0759bd] text-white"
         }`}
       />
     </form>

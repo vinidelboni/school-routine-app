@@ -43,9 +43,9 @@ export default async function DirectionCalendarPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">CALENDÁRIO DA ESCOLA</span>
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">CALENDÁRIO DA ESCOLA</span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">Histórico e próximos compromissos</h1>
-        <p className="mt-2 text-sm text-[#69746f]">Uma visão unificada das turmas, famílias, comunicados e ocorrências.</p>
+        <p className="mt-2 text-sm text-[#61758d]">Uma visão unificada das turmas, famílias, comunicados e ocorrências.</p>
       </header>
       <CalendarView year={year} month={month} events={events} basePath="/app/direction/calendar" />
     </div>

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { AlertTriangle, BarChart3, BookOpen, CalendarDays, Camera, FileText, Inbox, LayoutDashboard, LogOut, Megaphone, Pill, ShieldCheck, Users, UsersRound } from "lucide-react";
+import { BookOpen, CalendarDays, Camera, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { getCurrentContext } from "../lib/auth";
 import { logout } from "../login/actions";
 import { FamilyShell } from "./family/family-shell";
+import { DirectionShell } from "./direction/direction-shell";
 
 const roleLabels = {
   director: "Direção",
@@ -75,6 +76,17 @@ export default async function OperationalLayout({
     );
   }
 
+  if (membership.role === "director") {
+    return (
+      <DirectionShell
+        schoolName={school?.name ?? "Escola"}
+        profileName={profile?.full_name ?? "Direção"}
+      >
+        {children}
+      </DirectionShell>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f5f0] text-[#24312b]">
       <header className="border-b border-[#dfe1d9] bg-[#fffefa]">
@@ -119,43 +131,6 @@ export default async function OperationalLayout({
             <Link href="/app" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
               <LayoutDashboard size={17} /> Início
             </Link>
-            {membership.role === "director" && (
-              <>
-                <Link href="/app/direction" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <LayoutDashboard size={17} /> Painel da direção
-                </Link>
-                <Link href="/app/direction/calendar" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <CalendarDays size={17} /> Calendário
-                </Link>
-                <Link href="/app/direction/registry" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Users size={17} /> Pessoas e turmas
-                </Link>
-                <Link href="/app/direction/families" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <UsersRound size={17} /> Famílias e acessos
-                </Link>
-                <Link href="/app/direction/requests" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Inbox size={17} /> Avisos e solicitações
-                </Link>
-                <Link href="/app/direction/communications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Megaphone size={17} /> Comunicados
-                </Link>
-                <Link href="/app/direction/occurrences" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <AlertTriangle size={17} /> Ocorrências
-                </Link>
-                <Link href="/app/direction/team-engagement" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <BarChart3 size={17} /> Engajamento da equipe
-                </Link>
-                <Link href="/app/direction/photos" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Camera size={17} /> Fotos e autorizações
-                </Link>
-                <Link href="/app/direction/medications" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <Pill size={17} /> Medicamentos
-                </Link>
-                <Link href="/app/direction/billing" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">
-                  <FileText size={17} /> Boletos em lote
-                </Link>
-              </>
-            )}
             {membership.role === "teacher" && (
               <>
                 <Link href="/app/teacher" className="flex items-center gap-3 rounded-lg px-3 py-3 text-xs hover:bg-white/10">

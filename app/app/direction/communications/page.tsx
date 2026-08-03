@@ -25,14 +25,14 @@ export default async function DirectionCommunicationsPage({ searchParams }: { se
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">COMUNICAÇÃO DA ESCOLA</span>
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">COMUNICAÇÃO DA ESCOLA</span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">Comunicados às famílias</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#61758d]">
           Publique por escola, turma ou criança e acompanhe apenas as confirmações esperadas para cada tipo.
         </p>
       </header>
       {query.success ? (
-        <div role="status" className="mt-6 flex items-center gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645]">
+        <div role="status" className="mt-6 flex items-center gap-3 rounded-2xl border border-[#b4d5f3] bg-[#eff7ff] p-4 text-[#0759bd]">
           <CheckCircle2 size={20} />
           <strong className="text-sm">Comunicado publicado com sucesso!</strong>
         </div>
@@ -42,8 +42,8 @@ export default async function DirectionCommunicationsPage({ searchParams }: { se
           classrooms={(classrooms ?? []).map((item) => ({ id: item.id, name: item.name }))}
           childOptions={(children ?? []).map((item) => ({ id: item.id, name: `${item.first_name} ${item.last_name}` }))}
         />
-        <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
-          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">ACOMPANHAMENTO</span>
+        <div className="rounded-2xl border border-[#dce6f2] bg-white p-5">
+          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">ACOMPANHAMENTO</span>
           <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">Publicações recentes</h2>
           <div className="mt-5 grid gap-3">
             {communications?.map((communication) => {
@@ -51,34 +51,34 @@ export default async function DirectionCommunicationsPage({ searchParams }: { se
               const viewed = recipients.filter((recipient) => recipient.viewed_at).length;
               const responded = recipients.filter((recipient) => recipient.response).length;
               return (
-                <article key={communication.id} className="rounded-xl border border-[#e5e5df] p-4">
+                <article key={communication.id} className="rounded-xl border border-[#e3eaf2] p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <span className="text-[9px] font-extrabold tracking-[.1em] text-[#9a623b]">
                         {communicationKindLabels[communication.kind as CommunicationKind].toUpperCase()}
                       </span>
                       <strong className="mt-1 block text-sm">{communication.title}</strong>
-                      <p className="mt-2 max-w-xl text-xs leading-5 text-[#56635d]">{communication.body}</p>
+                      <p className="mt-2 max-w-xl text-xs leading-5 text-[#536b84]">{communication.body}</p>
                     </div>
                     <div className="flex gap-2 text-[9px] font-bold">
-                      <span className="flex items-center gap-1 rounded-full bg-[#f5f5f0] px-2.5 py-1 text-[#56635d]">
+                      <span className="flex items-center gap-1 rounded-full bg-[#f2f6fb] px-2.5 py-1 text-[#536b84]">
                         {communication.scope === "child" ? <Bell size={11} /> : <Radio size={11} />}
                         {communication.scope === "child" ? "Exclusivo" : "Push"}
                       </span>
-                      <span className="flex items-center gap-1 rounded-full bg-[#eef3ef] px-2.5 py-1 text-[#315645]"><Eye size={11} /> {viewed}/{recipients.length}</span>
+                      <span className="flex items-center gap-1 rounded-full bg-[#edf5fd] px-2.5 py-1 text-[#0759bd]"><Eye size={11} /> {viewed}/{recipients.length}</span>
                       {communication.kind !== "general" ? (
                         <span className="flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[#8b5b25]"><MessageCircleReply size={11} /> {responded}/{recipients.length}</span>
                       ) : null}
                     </div>
                   </div>
                   {recipients.some((recipient) => recipient.response) ? (
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-[#ecece7] pt-3">
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-[#e9eef5] pt-3">
                       {recipients.filter((recipient) => recipient.response).map((recipient) => {
                         const child = Array.isArray(recipient.children) ? recipient.children[0] : recipient.children;
                         const member = Array.isArray(recipient.school_memberships) ? recipient.school_memberships[0] : recipient.school_memberships;
                         const profile = Array.isArray(member?.profiles) ? member?.profiles[0] : member?.profiles;
                         return (
-                          <span key={recipient.id} className="rounded-lg bg-[#f5f5f0] px-2.5 py-2 text-[9px] text-[#56635d]">
+                          <span key={recipient.id} className="rounded-lg bg-[#f2f6fb] px-2.5 py-2 text-[9px] text-[#536b84]">
                             <strong>{profile?.full_name}</strong> · {child?.first_name}: {communicationResponseLabels[recipient.response as CommunicationResponse]}
                           </span>
                         );
@@ -89,7 +89,7 @@ export default async function DirectionCommunicationsPage({ searchParams }: { se
               );
             })}
             {!communications?.length ? (
-              <div className="rounded-xl border border-dashed border-[#dfe1d9] p-8 text-center text-xs text-[#7c8680]">
+              <div className="rounded-xl border border-dashed border-[#dce6f2] p-8 text-center text-xs text-[#6f8299]">
                 <Megaphone className="mx-auto mb-2" size={22} /> Nenhum comunicado publicado ainda.
               </div>
             ) : null}

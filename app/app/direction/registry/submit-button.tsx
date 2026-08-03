@@ -20,7 +20,7 @@ export function SubmitButton({
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className={`${className} transition hover:bg-[#284a3b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315645] disabled:cursor-wait disabled:opacity-70`}
+      className={`${className} transition hover:bg-[#064da5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0759bd] disabled:cursor-wait disabled:opacity-70`}
     >
       {pending ? <LoaderCircle size={15} className="animate-spin" /> : null}
       {pending ? pendingLabel : idleLabel}

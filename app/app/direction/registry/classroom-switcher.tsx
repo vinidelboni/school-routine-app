@@ -46,7 +46,7 @@ export function ClassroomSwitcher({
     <>
       <section className="mt-8 grid gap-4 xl:grid-cols-2">
         {classroomForm}
-        <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
+        <div className="rounded-2xl border border-[#dce6f2] bg-white p-5">
           <strong className="flex items-center gap-2 text-sm">
             <BookOpen size={17} /> Turmas ativas
           </strong>
@@ -61,13 +61,13 @@ export function ClassroomSwitcher({
                   onClick={() => selectClassroom(classroom.id)}
                   className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs transition-colors ${
                     isSelected
-                      ? "border-[#315645] bg-[#eef3ef]"
-                      : "border-[#e5e5df] hover:border-[#a8b8af] hover:bg-[#fafbf9]"
+                      ? "border-[#0759bd] bg-[#edf5fd]"
+                      : "border-[#e3eaf2] hover:border-[#b1c2d4] hover:bg-[#fbfdff]"
                   }`}
                 >
                   <span>
                     <strong className="block">{classroom.name}</strong>
-                    <small className="text-[#7c8680]">{classroom.ageGroup}</small>
+                    <small className="text-[#6f8299]">{classroom.ageGroup}</small>
                   </span>
                   <span>
                     {classroom.defaultStart.slice(0, 5)}–
@@ -78,7 +78,7 @@ export function ClassroomSwitcher({
             })}
           </div>
           {selected ? (
-            <p aria-live="polite" className="mt-3 text-[11px] text-[#557164]">
+            <p aria-live="polite" className="mt-3 text-[11px] text-[#386b9f]">
               Editando agora: <strong>{selected.name}</strong>
             </p>
           ) : null}

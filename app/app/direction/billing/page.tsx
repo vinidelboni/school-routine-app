@@ -58,13 +58,13 @@ export default async function BillingPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">
           DOCUMENTOS FINANCEIROS
         </span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
           Boletos em lote
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#69746f]">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#61758d]">
           Analise sugestões, confirme todos os pareamentos e distribua sem
           anexar um PDF por família.
         </p>
@@ -73,7 +73,7 @@ export default async function BillingPage({
       {query.success ? (
         <div
           role="status"
-          className="mt-6 flex items-center gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645]"
+          className="mt-6 flex items-center gap-3 rounded-2xl border border-[#b4d5f3] bg-[#eff7ff] p-4 text-[#0759bd]"
         >
           <CheckCircle2 size={20} />
           <strong className="text-sm">
@@ -93,8 +93,8 @@ export default async function BillingPage({
           defaultDueDate={due}
           schoolId={membership.school_id}
         />
-        <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
-          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
+        <div className="rounded-2xl border border-[#dce6f2] bg-white p-5">
+          <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">
             LOTES RECENTES
           </span>
           <div className="mt-4 grid gap-2">
@@ -104,12 +104,12 @@ export default async function BillingPage({
                 href={`/app/direction/billing?batch=${batch.id}`}
                 className={`rounded-xl border p-3 text-xs ${
                   selected?.id === batch.id
-                    ? "border-[#315645] bg-[#eef3ef]"
-                    : "border-[#e5e5df]"
+                    ? "border-[#0759bd] bg-[#edf5fd]"
+                    : "border-[#e3eaf2]"
                 }`}
               >
                 <strong className="block">{batch.title}</strong>
-                <small className="mt-1 block text-[#7c8680]">
+                <small className="mt-1 block text-[#6f8299]">
                   {batch.status === "distributed"
                     ? "Distribuído"
                     : "Em revisão"}
@@ -117,7 +117,7 @@ export default async function BillingPage({
               </Link>
             ))}
             {!batches?.length ? (
-              <div className="rounded-xl border border-dashed border-[#dfe1d9] p-8 text-center text-xs text-[#7c8680]">
+              <div className="rounded-xl border border-dashed border-[#dce6f2] p-8 text-center text-xs text-[#6f8299]">
                 <Files className="mx-auto mb-2" size={22} />
                 Nenhum lote criado.
               </div>
@@ -127,17 +127,17 @@ export default async function BillingPage({
       </section>
 
       {selected ? (
-        <section className="mt-5 rounded-2xl border border-[#dfe1d9] bg-white p-5">
+        <section className="mt-5 rounded-2xl border border-[#dce6f2] bg-white p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="flex items-center gap-2 text-[10px] font-extrabold tracking-[.12em] text-[#557164]">
+              <span className="flex items-center gap-2 text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">
                 <Sparkles size={14} /> REVISÃO HUMANA OBRIGATÓRIA
               </span>
               <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">
                 {selected.title}
               </h2>
             </div>
-            <span className="rounded-full bg-[#eef3ef] px-3 py-1 text-[10px] font-bold text-[#315645]">
+            <span className="rounded-full bg-[#edf5fd] px-3 py-1 text-[10px] font-bold text-[#0759bd]">
               {documents?.length ?? 0} documentos
             </span>
           </div>
@@ -148,17 +148,17 @@ export default async function BillingPage({
               {documents?.map((document) => (
                 <div
                   key={document.id}
-                  className="grid gap-2 rounded-xl border border-[#e5e5df] p-3 sm:grid-cols-[1fr_1fr_auto]"
+                  className="grid gap-2 rounded-xl border border-[#e3eaf2] p-3 sm:grid-cols-[1fr_1fr_auto]"
                 >
                   <span className="text-xs">
                     <strong className="block">{document.original_filename}</strong>
-                    <small className="text-[#7c8680]">
+                    <small className="text-[#6f8299]">
                       Confiança inicial: {document.match_confidence}%
                     </small>
-                    <small className="mt-1 block font-mono text-[#557164]">
+                    <small className="mt-1 block font-mono text-[#386b9f]">
                       {document.payment_reference.replace(/(\d{5})(?=\d)/g, "$1 ")}
                     </small>
-                    <small className={document.storage_path ? "mt-1 block text-[#47705d]" : "mt-1 block text-[#9a623b]"}>
+                    <small className={document.storage_path ? "mt-1 block text-[#176bc2]" : "mt-1 block text-[#9a623b]"}>
                       {document.storage_path ? "PDF armazenado com segurança" : "Registro antigo sem PDF"}
                     </small>
                   </span>
@@ -176,7 +176,7 @@ export default async function BillingPage({
                       </option>
                     ))}
                   </select>
-                  <span className="self-center text-[9px] font-bold text-[#557164]">
+                  <span className="self-center text-[9px] font-bold text-[#386b9f]">
                     {document.viewed_at ? "Visualizado" : document.status}
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export default async function BillingPage({
               <SubmitButton
                 idleLabel="Confirmar pareamentos"
                 pendingLabel="Confirmando..."
-                className="mt-4 rounded-xl border border-[#315645] bg-white px-5 py-3 text-xs font-bold text-[#315645]"
+                className="mt-4 rounded-xl border border-[#0759bd] bg-white px-5 py-3 text-xs font-bold text-[#0759bd]"
               />
             ) : null}
           </form>
@@ -196,7 +196,7 @@ export default async function BillingPage({
               <SubmitButton
                 idleLabel="Distribuir lote às famílias"
                 pendingLabel="Distribuindo..."
-                className="rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white"
+                className="rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white"
               />
             </form>
           ) : null}

@@ -80,27 +80,27 @@ export function ImportRoster({ classroomId }: { classroomId: string }) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
+    <div className="rounded-2xl border border-[#dce6f2] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <strong className="flex items-center gap-2 text-sm">
-            <FileSpreadsheet size={17} className="text-[#42715d]" />
+            <FileSpreadsheet size={17} className="text-[#176bc2]" />
             Importação em lote
           </strong>
-          <p className="mt-1 text-xs text-[#7c8680]">
+          <p className="mt-1 text-xs text-[#6f8299]">
             Selecione o CSV, confira a prévia e confirme o lote.
           </p>
         </div>
         <a
           download="modelo-alunos-laco.csv"
           href={`data:text/csv;charset=utf-8,${encodeURIComponent(`${expectedHeader}\nLaura,Silva,2023-03-14,Integral,07:30,17:30\n`)}`}
-          className="flex items-center gap-2 rounded-xl border border-[#98b3a4] px-4 py-2.5 text-xs font-bold text-[#315645]"
+          className="flex items-center gap-2 rounded-xl border border-[#9cc4eb] px-4 py-2.5 text-xs font-bold text-[#0759bd]"
         >
           <Download size={15} /> Baixar modelo
         </a>
       </div>
 
-      <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#9db2a6] bg-[#f7faf7] p-5 text-xs font-bold text-[#315645]">
+      <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#abc2da] bg-[#f8fbff] p-5 text-xs font-bold text-[#0759bd]">
         <Upload size={17} /> Selecionar arquivo CSV
         <input
           className="sr-only"
@@ -116,12 +116,12 @@ export function ImportRoster({ classroomId }: { classroomId: string }) {
         <form action={formAction} className="mt-4">
           <input type="hidden" name="classroomId" value={classroomId} />
           <input type="hidden" name="rosterJson" value={rosterJson} />
-          <div className="max-h-64 overflow-auto rounded-xl border border-[#e5e5df]">
-            <div className="grid grid-cols-[1.2fr_.8fr_.7fr] bg-[#f3f3ef] px-3 py-2 text-[9px] font-extrabold uppercase text-[#758079]">
+          <div className="max-h-64 overflow-auto rounded-xl border border-[#e3eaf2]">
+            <div className="grid grid-cols-[1.2fr_.8fr_.7fr] bg-[#f3f7fb] px-3 py-2 text-[9px] font-extrabold uppercase text-[#607994]">
               <span>Criança</span><span>Nascimento</span><span>Jornada</span>
             </div>
             {rows.map((row, index) => (
-              <div key={`${row.firstName}-${row.lastName}-${index}`} className="grid grid-cols-[1.2fr_.8fr_.7fr] border-t border-[#ecece7] px-3 py-2.5 text-[10px]">
+              <div key={`${row.firstName}-${row.lastName}-${index}`} className="grid grid-cols-[1.2fr_.8fr_.7fr] border-t border-[#e9eef5] px-3 py-2.5 text-[10px]">
                 <strong>{row.firstName} {row.lastName}</strong>
                 <span>{row.birthDate}</span>
                 <span>{row.schedule}</span>
@@ -129,10 +129,10 @@ export function ImportRoster({ classroomId }: { classroomId: string }) {
             ))}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <span aria-live="polite" className={`text-xs ${state.status === "error" ? "text-[#a34f45]" : "text-[#42715d]"}`}>
+            <span aria-live="polite" className={`text-xs ${state.status === "error" ? "text-[#a34f45]" : "text-[#176bc2]"}`}>
               {state.message || `${rows.length} linhas prontas para confirmação.`}
             </span>
-            <button disabled={pending} className="rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">
+            <button disabled={pending} className="rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">
               {pending ? "Importando..." : `Confirmar ${rows.length} cadastros`}
             </button>
           </div>

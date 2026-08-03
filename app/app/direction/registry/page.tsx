@@ -70,7 +70,7 @@ export default async function RegistryPage({
   const classroomForm = (
     <form
       action={createClassroom}
-      className="rounded-2xl border border-[#dfe1d9] bg-white p-5"
+      className="rounded-2xl border border-[#dce6f2] bg-white p-5"
     >
       <strong className="flex items-center gap-2 text-sm">
         <School size={17} /> Nova turma
@@ -130,7 +130,7 @@ export default async function RegistryPage({
       <SubmitButton
         idleLabel="Criar turma"
         pendingLabel="Criando turma..."
-        className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white"
+        className="mt-4 flex items-center gap-2 rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white"
       />
     </form>
   );
@@ -138,13 +138,13 @@ export default async function RegistryPage({
   return (
     <div>
       <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#386b9f]">
           PESSOAS E TURMAS
         </span>
         <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
           Estrutura da escola
         </h1>
-        <p className="mt-2 text-sm text-[#69746f]">
+        <p className="mt-2 text-sm text-[#61758d]">
           Cadastre turmas e matrículas individualmente ou por arquivo.
         </p>
       </header>
@@ -153,7 +153,7 @@ export default async function RegistryPage({
         <div
           role="status"
           aria-live="polite"
-          className="mt-6 flex items-start gap-3 rounded-2xl border border-[#a8c4b4] bg-[#edf6f0] p-4 text-[#315645] shadow-sm"
+          className="mt-6 flex items-start gap-3 rounded-2xl border border-[#b4d5f3] bg-[#eff7ff] p-4 text-[#0759bd] shadow-sm"
         >
           <CheckCircle2 size={22} className="mt-0.5 shrink-0" />
           <span>
@@ -162,7 +162,7 @@ export default async function RegistryPage({
                 ? "Turma criada com sucesso!"
                 : "Criança cadastrada com sucesso!"}
             </strong>
-            <small className="mt-1 block text-[#557164]">
+            <small className="mt-1 block text-[#386b9f]">
               {query.success === "classroom-created"
                 ? "A turma já está disponível nos seletores da direção e da professora responsável."
                 : "A matrícula já aparece na turma selecionada e na rotina correspondente."}
@@ -207,7 +207,7 @@ function ClassroomContent({
       <section className="mt-5 grid gap-4 xl:grid-cols-[.8fr_1.2fr]">
         <form
           action={createEnrolledChild}
-          className="rounded-2xl border border-[#dfe1d9] bg-white p-5"
+          className="rounded-2xl border border-[#dce6f2] bg-white p-5"
         >
           <input type="hidden" name="classroomId" value={classroom.id} />
           <strong className="flex items-center gap-2 text-sm">
@@ -253,16 +253,16 @@ function ClassroomContent({
           <SubmitButton
             idleLabel="Cadastrar criança"
             pendingLabel="Cadastrando criança..."
-            className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white"
+            className="mt-4 flex items-center gap-2 rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white"
           />
         </form>
         <ImportRoster classroomId={classroom.id} />
       </section>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">
-        <div className="border-b border-[#e8e8e2] px-5 py-4">
+      <section className="mt-5 overflow-hidden rounded-2xl border border-[#dce6f2] bg-white">
+        <div className="border-b border-[#e7edf4] px-5 py-4">
           <strong className="text-sm">Matrículas em {classroom.name}</strong>
-          <p className="mt-1 text-xs text-[#7c8680]">
+          <p className="mt-1 text-xs text-[#6f8299]">
             {enrollments.length} crianças ativas.
           </p>
         </div>
@@ -273,7 +273,7 @@ function ClassroomContent({
           return (
             <div
               key={enrollment.id}
-              className="grid grid-cols-[1fr_.7fr_.7fr] border-b border-[#ecece7] px-5 py-3 text-xs last:border-0"
+              className="grid grid-cols-[1fr_.7fr_.7fr] border-b border-[#e9eef5] px-5 py-3 text-xs last:border-0"
             >
               <strong>
                 {child?.first_name} {child?.last_name}
@@ -300,7 +300,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[9px] font-extrabold uppercase tracking-[.08em] text-[#758079]">
+      <span className="mb-1.5 block text-[9px] font-extrabold uppercase tracking-[.08em] text-[#607994]">
         {label}
       </span>
       {children}

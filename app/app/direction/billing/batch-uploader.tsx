@@ -114,10 +114,10 @@ export function BatchUploader({
   }
 
   return (
-    <form action={uploadAndCreateBatch} className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
-      <span className="text-[10px] font-extrabold tracking-[.12em] text-[#557164]">NOVO LOTE</span>
+    <form action={uploadAndCreateBatch} className="rounded-2xl border border-[#dce6f2] bg-white p-5">
+      <span className="text-[10px] font-extrabold tracking-[.12em] text-[#386b9f]">NOVO LOTE</span>
       <h2 className="mt-1 font-[var(--font-display)] text-2xl font-semibold">Enviar vários PDFs</h2>
-      <p className="mt-1 text-xs leading-5 text-[#69746f]">
+      <p className="mt-1 text-xs leading-5 text-[#61758d]">
         Os PDFs ficam em armazenamento privado. Revise a criança e informe a linha digitável antes de criar o lote.
       </p>
 
@@ -126,22 +126,22 @@ export function BatchUploader({
         <label><span className="field-label">Mês de referência</span><input name="referenceMonth" type="date" required defaultValue={defaultMonth} className="input" /></label>
       </div>
 
-      <label className="mt-4 flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-[#b9c7bf] bg-[#f8faf8] p-7 text-center">
-        <UploadCloud size={26} className="text-[#315645]" />
+      <label className="mt-4 flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-[#b9cee0] bg-[#f8fbff] p-7 text-center">
+        <UploadCloud size={26} className="text-[#0759bd]" />
         <strong className="mt-2 text-xs">Selecionar vários boletos em PDF</strong>
-        <small className="mt-1 text-[10px] text-[#7c8680]">PDF de até 10 MB · use nomes como boleto-alice-moreira.pdf</small>
+        <small className="mt-1 text-[10px] text-[#6f8299]">PDF de até 10 MB · use nomes como boleto-alice-moreira.pdf</small>
         <input type="file" accept=".pdf,application/pdf" multiple onChange={(event) => analyze(event.target.files)} className="sr-only" />
       </label>
 
       {documents.length ? (
         <div className="mt-5">
-          <div className="flex items-center gap-2 text-xs"><FileSearch size={17} className="text-[#557164]" /><strong>{documents.length} documento(s) selecionado(s)</strong></div>
+          <div className="flex items-center gap-2 text-xs"><FileSearch size={17} className="text-[#386b9f]" /><strong>{documents.length} documento(s) selecionado(s)</strong></div>
           <div className="mt-3 grid gap-3">
             {documents.map((document, index) => (
-              <div key={document.storagePath} className="grid gap-3 rounded-xl border border-[#e5e5df] p-3 sm:grid-cols-2">
+              <div key={document.storagePath} className="grid gap-3 rounded-xl border border-[#e3eaf2] p-3 sm:grid-cols-2">
                 <span className="min-w-0 text-xs sm:col-span-2">
                   <strong className="block truncate">{document.filename}</strong>
-                  <small className={document.confidence >= 70 ? "text-[#47705d]" : "text-[#9a623b]"}>Confiança sugerida: {document.confidence}%</small>
+                  <small className={document.confidence >= 70 ? "text-[#176bc2]" : "text-[#9a623b]"}>Confiança sugerida: {document.confidence}%</small>
                 </span>
                 <label>
                   <span className="field-label">Criança</span>
@@ -157,14 +157,14 @@ export function BatchUploader({
                 <label className="sm:col-span-2">
                   <span className="field-label">Linha digitável / código de barras</span>
                   <input inputMode="numeric" autoComplete="off" className="input font-mono" value={document.paymentReference} onChange={(event) => updateDocument(index, { paymentReference: normalizeBarcode(event.target.value) })} minLength={44} maxLength={48} placeholder="Cole os 44, 47 ou 48 números" required />
-                  <small className="mt-1 block text-[9px] text-[#7c8680]">Somente números · {document.paymentReference.length}/48</small>
+                  <small className="mt-1 block text-[9px] text-[#6f8299]">Somente números · {document.paymentReference.length}/48</small>
                 </label>
               </div>
             ))}
           </div>
           <input type="hidden" name="documentsJson" value={JSON.stringify(documents)} />
           {error ? <p role="alert" className="mt-4 flex items-center gap-2 rounded-xl bg-[#fff0ed] p-3 text-xs font-bold text-[#9a3f32]"><AlertCircle size={16} />{error}</p> : null}
-          <button disabled={pending} className="mt-4 flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white disabled:cursor-wait disabled:opacity-70">
+          <button disabled={pending} className="mt-4 flex items-center gap-2 rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white disabled:cursor-wait disabled:opacity-70">
             {pending ? <><LoaderCircle className="animate-spin" size={16} /> Enviando PDFs...</> : "Enviar PDFs e criar lote"}
           </button>
         </div>
