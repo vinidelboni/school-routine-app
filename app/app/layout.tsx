@@ -58,5 +58,8 @@ export default async function OperationalLayout({
     );
   }
 
-  return <TeacherShell schoolName={school?.name ?? "Escola"} profileName={profile?.full_name ?? "Professora"}>{children}</TeacherShell>;
+  const { data: avatar } = profile?.avatar_path
+    ? await supabase.storage.from("teacher-avatars").createSignedUrl(profile.avatar_path, 3600)
+    : { data: null };
+  return <TeacherShell schoolName={school?.name ?? "Escola"} profileName={profile?.full_name ?? "Professora"} avatarUrl={avatar?.signedUrl}>{children}</TeacherShell>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { BookOpen, CalendarDays, Camera, ChevronRight, LogOut, Menu, ShieldCheck, UserRound, X } from "lucide-react";
 import { useState } from "react";
@@ -13,7 +14,7 @@ const navigation = [
   { href: "/app/teacher/profile", label: "Perfil", icon: UserRound },
 ] as const;
 
-export function TeacherShell({ children, schoolName, profileName }: { children: React.ReactNode; schoolName: string; profileName: string }) {
+export function TeacherShell({ children, schoolName, profileName, avatarUrl }: { children: React.ReactNode; schoolName: string; profileName: string; avatarUrl?: string }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const initial = profileName.trim().charAt(0).toUpperCase() || "P";
@@ -52,7 +53,7 @@ export function TeacherShell({ children, schoolName, profileName }: { children: 
             </div>
             <Link href="/app/teacher/profile" className="flex min-w-0 items-center gap-3 rounded-2xl p-1.5 transition hover:bg-[#edf5fd]">
               <span className="hidden min-w-0 text-right sm:block"><strong className="block max-w-44 truncate text-xs">{profileName}</strong><small className="text-[10px] text-[#6f8299]">Acesso pedagógico</small></span>
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#24a3ef] to-[#0758c8] text-xs font-extrabold text-white shadow-[0_7px_18px_rgba(19,104,202,.2)]">{initial}</span>
+              <span className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-[#24a3ef] to-[#0758c8] text-xs font-extrabold text-white shadow-[0_7px_18px_rgba(19,104,202,.2)]">{avatarUrl ? <Image src={avatarUrl} alt={`Foto de ${profileName}`} fill sizes="40px" className="object-cover" /> : initial}</span>
             </Link>
           </div>
         </header>

@@ -2,23 +2,30 @@ import { redirect } from "next/navigation";
 import { BookOpenCheck, CalendarDays, Camera, LogOut, Mail, ShieldCheck, UsersRound } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
 import { logout } from "../../../login/actions";
+import { AvatarUploadForm } from "./avatar-upload-form";
 
-export default async function TeacherProfilePage() {
+export default async function TeacherProfilePage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
+  const query = await searchParams;
   const { supabase, user, membership, profile } = await getCurrentContext();
   if (membership.role !== "teacher") redirect("/app");
   const school = Array.isArray(membership.schools) ? membership.schools[0] : membership.schools;
   const { data: assignments, error } = await supabase.from("classroom_staff").select("classroom_id, classrooms(name, age_group)").eq("membership_id", membership.id).order("created_at");
   if (error) throw error;
+  const { data: avatar } = profile?.avatar_path ? await supabase.storage.from("teacher-avatars").createSignedUrl(profile.avatar_path, 3600) : { data: null };
+  const initial = profile?.full_name?.trim().charAt(0).toUpperCase() || "P";
 
   return (
     <div>
       <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#0759bd] via-[#0b6ed1] to-[#19a5e9] px-6 py-7 text-white shadow-[0_18px_45px_rgba(7,89,189,.2)] sm:px-8">
         <div aria-hidden="true" className="absolute -right-12 -top-20 h-56 w-56 rounded-full border-[40px] border-white/[.07]" />
         <div className="relative flex items-center gap-4">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-white/25 bg-white/15 font-[var(--font-display)] text-xl font-black backdrop-blur">{profile?.full_name?.trim().charAt(0).toUpperCase() || "P"}</span>
           <span className="min-w-0"><small className="text-[9px] font-extrabold uppercase tracking-[.16em] text-[#c4e6ff]">Perfil da professora</small><h1 className="mt-1 truncate font-[var(--font-display)] text-2xl font-semibold tracking-[-.04em] sm:text-3xl">{profile?.full_name ?? "Professora"}</h1><span className="mt-1 flex items-center gap-1.5 text-xs text-[#d8ecff]"><Mail size={13} /> {user.email}</span></span>
         </div>
+        <div className="relative"><AvatarUploadForm avatarUrl={avatar?.signedUrl} initial={initial} /></div>
       </header>
+
+      {query.success === "avatar-updated" ? <p role="status" className="mt-4 rounded-2xl border border-[#acd7bf] bg-[#edf9f2] p-4 text-xs font-bold text-[#28704e]">Foto de perfil atualizada com sucesso.</p> : null}
+      {query.error === "invalid-avatar" ? <p role="alert" className="mt-4 rounded-2xl border border-[#efc5bf] bg-[#fff1ef] p-4 text-xs font-bold text-[#9b4438]">Escolha uma imagem JPG, PNG ou WebP de até 3 MB.</p> : null}
 
       <section className="mt-5 grid gap-4 lg:grid-cols-[.8fr_1.2fr]">
         <article className="rounded-2xl border border-[#dce6f2] bg-white p-5 shadow-[0_8px_24px_rgba(27,66,112,.05)]">

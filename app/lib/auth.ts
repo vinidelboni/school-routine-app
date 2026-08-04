@@ -16,7 +16,7 @@ export const getCurrentContext = cache(async () => {
 
   const [{ data: membership, error }, { data: profile }] = await Promise.all([
     supabase.from("school_memberships").select("id, school_id, role, status, schools(id, name, slug)").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
-    supabase.from("profiles").select("full_name").eq("id", user.id).single(),
+    supabase.from("profiles").select("full_name, avatar_path").eq("id", user.id).single(),
   ]);
 
   if (error) throw error;
