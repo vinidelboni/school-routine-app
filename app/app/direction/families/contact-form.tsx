@@ -120,10 +120,10 @@ export function ContactForm({ childOptions }: { childOptions: ChildOption[] }) {
             className="mt-0.5 accent-[#0759bd]"
           />
           <span>
-            <strong className="block">Simular envio do convite agora</strong>
+            <strong className="block">Enviar convite por e-mail agora</strong>
             <small className="mt-1 block leading-4 text-[#61758d]">
-              O acesso ficará pendente por sete dias. Nenhum e-mail real será
-              enviado nesta fase.
+              O responsável receberá um link individual para criar a própria senha.
+              Por segurança, o link ficará válido por uma hora.
             </small>
           </span>
         </label>

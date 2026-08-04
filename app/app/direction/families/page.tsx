@@ -10,7 +10,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
-import { updateFamilyAccessStatus } from "../../actions";
+import { resendFamilyInvite, updateFamilyAccessStatus } from "../../actions";
 import { ContactForm } from "./contact-form";
 import { SubmitButton } from "../registry/submit-button";
 
@@ -63,7 +63,7 @@ export default async function FamiliesPage({
       supabase
         .from("family_contacts")
         .select(
-          "id, full_name, email, phone, access_status, invited_at, invitation_expires_at, child_contact_links(id, child_id, kind, relationship, can_view_routine, can_view_photos, can_view_communications, can_view_documents, children(first_name, last_name))",
+          "id, full_name, email, phone, membership_id, access_status, invited_at, invitation_expires_at, child_contact_links(id, child_id, kind, relationship, can_view_routine, can_view_photos, can_view_communications, can_view_documents, children(first_name, last_name))",
         )
         .eq("school_id", membership.school_id)
         .order("created_at", { ascending: false }),
@@ -110,8 +110,10 @@ export default async function FamiliesPage({
           <span>
             <strong className="block text-sm">
               {query.success === "contact-created"
-                ? "Contato cadastrado e vinculado!"
-                : "Situação do acesso atualizada!"}
+                ? "Contato cadastrado e convite processado!"
+                : query.success === "invite-sent"
+                  ? "Novo link de acesso enviado!"
+                  : "Situação do acesso atualizada!"}
             </strong>
             <small className="mt-1 block text-[#386b9f]">
               As permissões e os vínculos já aparecem no painel abaixo.
@@ -223,6 +225,7 @@ type Contact = NonNullable<
         | "suspended";
       invited_at: string | null;
       invitation_expires_at: string | null;
+      membership_id: string | null;
       child_contact_links: {
         id: string;
         child_id: string;
@@ -329,24 +332,23 @@ function ContactDetails({ contact }: { contact: Contact }) {
 function AccessActions({ contact }: { contact: Contact }) {
   return (
     <div className="mt-5 border-t border-[#e7edf4] pt-4">
-      <strong className="text-xs">Gerenciar acesso demonstrativo</strong>
+      <strong className="text-xs">Gerenciar acesso</strong>
       <div className="mt-3 flex flex-wrap gap-2">
-        {contact.access_status !== "pending" ? (
-          <StatusForm
-            contactId={contact.id}
-            status="pending"
-            label="Enviar novo convite"
-            icon={<KeyRound size={14} />}
-          />
-        ) : (
+        {contact.membership_id && contact.email && contact.access_status !== "suspended" ? (
+          <form action={resendFamilyInvite}>
+            <input type="hidden" name="contactId" value={contact.id} />
+            <SubmitButton idleLabel={<span className="flex items-center gap-1.5"><KeyRound size={14} /> Reenviar acesso</span>} pendingLabel="Enviando..." className="rounded-xl bg-[#0759bd] px-4 py-2.5 text-[10px] font-bold text-white" />
+          </form>
+        ) : null}
+        {contact.access_status === "suspended" ? (
           <StatusForm
             contactId={contact.id}
             status="active"
-            label="Simular ativação"
+            label="Restaurar acesso"
             icon={<UserRoundCheck size={14} />}
           />
-        )}
-        {contact.access_status !== "suspended" &&
+        ) : null}
+        {contact.membership_id && contact.access_status !== "suspended" &&
         contact.access_status !== "not_invited" ? (
           <StatusForm
             contactId={contact.id}
@@ -360,7 +362,7 @@ function AccessActions({ contact }: { contact: Contact }) {
       {contact.access_status === "pending" &&
       contact.invitation_expires_at ? (
         <p className="mt-3 text-[10px] text-[#6f8299]">
-          Convite demonstrativo válido até{" "}
+          Convite válido até{" "}
           {new Intl.DateTimeFormat("pt-BR", {
             dateStyle: "short",
             timeStyle: "short",
@@ -381,7 +383,7 @@ function StatusForm({
   secondary = false,
 }: {
   contactId: string;
-  status: "pending" | "active" | "suspended";
+  status: "active" | "suspended";
   label: string;
   icon: React.ReactNode;
   secondary?: boolean;

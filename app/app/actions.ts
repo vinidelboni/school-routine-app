@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentContext } from "../lib/auth";
 import { createSupabaseAdminClient } from "../lib/supabase/admin";
+import { getInviteRedirectUrl, inviteNewUser } from "../lib/invitations";
 import {
   allowedCommunicationResponses,
   type CommunicationKind,
@@ -705,9 +706,43 @@ export async function createFamilyContact(formData: FormData) {
     throw new Error("O convite exige um responsável com e-mail válido.");
   }
 
+  let invitedUserId: string | null = null;
+  let invitedMembershipId: string | null = null;
+  let invitedAdmin: ReturnType<typeof createSupabaseAdminClient> | null = null;
+  if (parsed.sendInvite) {
+    const invitation = await inviteNewUser(parsed.email, parsed.fullName);
+    invitedAdmin = invitation.admin;
+    invitedUserId = invitation.invitedUser.id;
+
+    const { error: profileError } = await invitedAdmin.from("profiles").upsert({
+      id: invitedUserId,
+      full_name: parsed.fullName,
+    });
+    if (profileError) {
+      await invitedAdmin.auth.admin.deleteUser(invitedUserId);
+      throw profileError;
+    }
+
+    const { data: invitedMembership, error: membershipError } = await invitedAdmin
+      .from("school_memberships")
+      .insert({
+        school_id: membership.school_id,
+        user_id: invitedUserId,
+        role: "family",
+        status: "invited",
+      })
+      .select("id")
+      .single();
+    if (membershipError) {
+      await invitedAdmin.auth.admin.deleteUser(invitedUserId);
+      throw membershipError;
+    }
+    invitedMembershipId = invitedMembership.id;
+  }
+
   const invitedAt = parsed.sendInvite ? new Date() : null;
   const invitationExpiresAt = invitedAt
-    ? new Date(invitedAt.getTime() + 7 * 24 * 60 * 60 * 1000)
+    ? new Date(invitedAt.getTime() + 60 * 60 * 1000)
     : null;
   const { data: contact, error: contactError } = await supabase
     .from("family_contacts")
@@ -716,13 +751,17 @@ export async function createFamilyContact(formData: FormData) {
       full_name: parsed.fullName,
       email: parsed.email || null,
       phone: parsed.phone,
+      membership_id: invitedMembershipId,
       access_status: parsed.sendInvite ? "pending" : "not_invited",
       invited_at: invitedAt?.toISOString() ?? null,
       invitation_expires_at: invitationExpiresAt?.toISOString() ?? null,
     })
     .select("id")
     .single();
-  if (contactError) throw contactError;
+  if (contactError) {
+    if (invitedUserId && invitedAdmin) await invitedAdmin.auth.admin.deleteUser(invitedUserId);
+    throw contactError;
+  }
 
   const permissions = grantsAppAccess
     ? {
@@ -749,7 +788,25 @@ export async function createFamilyContact(formData: FormData) {
   );
   if (linksError) {
     await supabase.from("family_contacts").delete().eq("id", contact.id);
+    if (invitedUserId && invitedAdmin) await invitedAdmin.auth.admin.deleteUser(invitedUserId);
     throw linksError;
+  }
+
+  if (invitedMembershipId && invitedAdmin) {
+    const { error: guardianError } = await invitedAdmin.from("guardian_links").insert(
+      parsed.childIds.map((childId) => ({
+        school_id: membership.school_id,
+        child_id: childId,
+        membership_id: invitedMembershipId,
+        relationship: parsed.relationship,
+        can_view_routine: parsed.canViewRoutine,
+      })),
+    );
+    if (guardianError) {
+      await supabase.from("family_contacts").delete().eq("id", contact.id);
+      await invitedAdmin.auth.admin.deleteUser(invitedUserId!);
+      throw guardianError;
+    }
   }
 
   await supabase.from("audit_logs").insert({
@@ -775,7 +832,7 @@ export async function updateFamilyAccessStatus(formData: FormData) {
   const parsed = z
     .object({
       contactId: uuid,
-      status: z.enum(["pending", "active", "expired", "suspended"]),
+      status: z.enum(["active", "suspended"]),
     })
     .parse({
       contactId: formData.get("contactId"),
@@ -788,11 +845,6 @@ export async function updateFamilyAccessStatus(formData: FormData) {
   const now = new Date();
   const update = {
     access_status: parsed.status,
-    invited_at: parsed.status === "pending" ? now.toISOString() : undefined,
-    invitation_expires_at:
-      parsed.status === "pending"
-        ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        : undefined,
     activated_at: parsed.status === "active" ? now.toISOString() : undefined,
     suspended_at:
       parsed.status === "suspended" ? now.toISOString() : null,
@@ -802,10 +854,20 @@ export async function updateFamilyAccessStatus(formData: FormData) {
     .update(update)
     .eq("id", parsed.contactId)
     .eq("school_id", membership.school_id)
-    .select("id")
+    .select("id, membership_id")
     .maybeSingle();
   if (error) throw error;
   if (!contact) throw new Error("Contato inválido.");
+
+  if (contact.membership_id) {
+    const { error: membershipError } = await supabase
+      .from("school_memberships")
+      .update({ status: parsed.status })
+      .eq("id", contact.membership_id)
+      .eq("school_id", membership.school_id)
+      .eq("role", "family");
+    if (membershipError) throw membershipError;
+  }
 
   await supabase.from("audit_logs").insert({
     school_id: membership.school_id,
@@ -820,6 +882,96 @@ export async function updateFamilyAccessStatus(formData: FormData) {
   redirect(
     `/app/direction/families?contact=${contact.id}&success=status-updated`,
   );
+}
+
+export async function resendFamilyInvite(formData: FormData) {
+  const contactId = uuid.parse(formData.get("contactId"));
+  const { supabase, user, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { data: contact, error } = await supabase
+    .from("family_contacts")
+    .select("id, email, membership_id, access_status")
+    .eq("id", contactId)
+    .eq("school_id", membership.school_id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!contact?.email || !contact.membership_id) throw new Error("Este contato não possui acesso convidável.");
+
+  const admin = createSupabaseAdminClient();
+  const redirectTo = await getInviteRedirectUrl();
+  const { error: resendError } = await admin.auth.resetPasswordForEmail(contact.email, { redirectTo });
+  if (resendError) throw resendError;
+
+  const now = new Date();
+  await supabase.from("family_contacts").update({
+    access_status: contact.access_status === "active" ? "active" : "pending",
+    invited_at: now.toISOString(),
+    invitation_expires_at: new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
+  }).eq("id", contact.id);
+  if (contact.access_status !== "active") {
+    await supabase.from("school_memberships").update({ status: "invited" }).eq("id", contact.membership_id);
+  }
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: "family_contact.invite_resent", entity_type: "family_contact", entity_id: contact.id, metadata: {} });
+
+  revalidatePath("/app/direction/families");
+  redirect(`/app/direction/families?contact=${contact.id}&success=invite-sent`);
+}
+
+export async function createTeacherInvite(formData: FormData) {
+  const parsed = z.object({
+    fullName: z.string().trim().min(3).max(160),
+    email: z.email(),
+  }).parse({ fullName: formData.get("fullName"), email: formData.get("email") });
+  const { membership, supabase, user } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { admin, invitedUser } = await inviteNewUser(parsed.email, parsed.fullName);
+  const { error: profileError } = await admin.from("profiles").upsert({ id: invitedUser.id, full_name: parsed.fullName });
+  if (profileError) { await admin.auth.admin.deleteUser(invitedUser.id); throw profileError; }
+  const { data: teacherMembership, error: membershipError } = await admin.from("school_memberships").insert({
+    school_id: membership.school_id, user_id: invitedUser.id, role: "teacher", status: "invited",
+  }).select("id").single();
+  if (membershipError) { await admin.auth.admin.deleteUser(invitedUser.id); throw membershipError; }
+
+  await supabase.from("audit_logs").insert({ school_id: membership.school_id, actor_id: user.id, action: "teacher.invited", entity_type: "school_membership", entity_id: teacherMembership.id, metadata: { email: parsed.email } });
+  revalidatePath("/app/direction/team-access");
+  redirect(`/app/direction/team-access?success=invite-sent`);
+}
+
+export async function updateTeacherAccessStatus(formData: FormData) {
+  const parsed = z.object({ membershipId: uuid, status: z.enum(["active", "suspended"]) }).parse({
+    membershipId: formData.get("membershipId"), status: formData.get("status"),
+  });
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data, error } = await supabase.from("school_memberships").update({ status: parsed.status }).eq("id", parsed.membershipId).eq("school_id", membership.school_id).eq("role", "teacher").select("id").maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Professora inválida.");
+  revalidatePath("/app/direction/team-access");
+  revalidatePath("/app/direction/registry");
+  redirect("/app/direction/team-access?success=status-updated");
+}
+
+export async function resendTeacherInvite(formData: FormData) {
+  const membershipId = uuid.parse(formData.get("membershipId"));
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+  const { data: teacher, error } = await supabase.from("school_memberships")
+    .select("id, user_id").eq("id", membershipId).eq("school_id", membership.school_id)
+    .eq("role", "teacher").eq("status", "invited").maybeSingle();
+  if (error) throw error;
+  if (!teacher) throw new Error("Convite pendente não encontrado.");
+
+  const admin = createSupabaseAdminClient();
+  const { data: authUser, error: userError } = await admin.auth.admin.getUserById(teacher.user_id);
+  if (userError) throw userError;
+  if (!authUser.user.email) throw new Error("A professora não possui e-mail cadastrado.");
+  const redirectTo = await getInviteRedirectUrl();
+  const { error: resendError } = await admin.auth.resetPasswordForEmail(authUser.user.email, { redirectTo });
+  if (resendError) throw resendError;
+  revalidatePath("/app/direction/team-access");
+  redirect("/app/direction/team-access?success=invite-sent");
 }
 
 const familyRequestTypeSchema = z.enum([

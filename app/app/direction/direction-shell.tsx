@@ -21,6 +21,7 @@ import {
   Soup,
   Users,
   UsersRound,
+  UserRoundCheck,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -30,6 +31,7 @@ const navigation = [
   { href: "/app/direction", label: "Visão geral", icon: LayoutDashboard, exact: true },
   { href: "/app/direction/calendar", label: "Calendário", icon: CalendarDays },
   { href: "/app/direction/registry", label: "Pessoas e turmas", icon: Users },
+  { href: "/app/direction/team-access", label: "Equipe e acessos", icon: UserRoundCheck },
   { href: "/app/direction/families", label: "Famílias e acessos", icon: UsersRound },
   { href: "/app/direction/requests", label: "Avisos e solicitações", icon: Inbox },
   { href: "/app/direction/communications", label: "Comunicados", icon: Megaphone },

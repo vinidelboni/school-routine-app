@@ -734,6 +734,7 @@ export type Database = {
           id: string
           invitation_expires_at: string | null
           invited_at: string | null
+          membership_id: string | null
           phone: string
           school_id: string
           suspended_at: string | null
@@ -748,6 +749,7 @@ export type Database = {
           id?: string
           invitation_expires_at?: string | null
           invited_at?: string | null
+          membership_id?: string | null
           phone: string
           school_id: string
           suspended_at?: string | null
@@ -762,12 +764,20 @@ export type Database = {
           id?: string
           invitation_expires_at?: string | null
           invited_at?: string | null
+          membership_id?: string | null
           phone?: string
           school_id?: string
           suspended_at?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "family_contacts_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: true
+            referencedRelation: "school_memberships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "family_contacts_school_id_fkey"
             columns: ["school_id"]
@@ -2167,6 +2177,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_current_user_invites: { Args: never; Returns: number }
       can_access_child: { Args: { target_child_id: string }; Returns: boolean }
       can_access_classroom: {
         Args: { target_classroom_id: string }
