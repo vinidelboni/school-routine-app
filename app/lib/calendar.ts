@@ -20,10 +20,10 @@ export function toSaoPauloDateKey(value: string | Date) {
   }).format(typeof value === "string" ? new Date(value) : value);
 }
 
-export type CalendarPeriod = "week" | "month" | "bimester" | "trimester";
+export type CalendarPeriod = "week" | "month" | "year";
 
 export function parseCalendarPeriod(value?: string): CalendarPeriod {
-  return value === "month" || value === "bimester" || value === "trimester" ? value : "week";
+  return value === "month" || value === "year" ? value : "week";
 }
 
 export function getCalendarRange(year: number, month: number, period: CalendarPeriod) {
@@ -36,10 +36,12 @@ export function getCalendarRange(year: number, month: number, period: CalendarPe
     const mondayOffset = (anchor.getDay() + 6) % 7;
     start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - mondayOffset);
     end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
-  } else {
-    const months = period === "month" ? 1 : period === "bimester" ? 2 : 3;
+  } else if (period === "month") {
     start = new Date(year, month, 1);
-    end = new Date(year, month + months, 1);
+    end = new Date(year, month + 1, 1);
+  } else {
+    start = new Date(today.getFullYear(), 0, 1);
+    end = new Date(today.getFullYear() + 1, 0, 1);
   }
   const toKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   return { start: toKey(start), end: toKey(end) };
