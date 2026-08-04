@@ -4,28 +4,23 @@ import { createSupabaseServerClient } from "./supabase/server";
 
 export const getCurrentContext = cache(async () => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims;
 
-  if (!user) redirect("/login");
+  if (!claims?.sub) redirect("/login");
 
-  const { data: membership, error } = await supabase
-    .from("school_memberships")
-    .select("id, school_id, role, status, schools(id, name, slug)")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+  const user = {
+    id: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : undefined,
+  };
+
+  const [{ data: membership, error }, { data: profile }] = await Promise.all([
+    supabase.from("school_memberships").select("id, school_id, role, status, schools(id, name, slug)").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", user.id).single(),
+  ]);
 
   if (error) throw error;
   if (!membership) redirect("/login?error=no-active-membership");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
 
   return { supabase, user, membership, profile };
 });

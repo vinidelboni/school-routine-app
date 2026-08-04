@@ -2177,6 +2177,14 @@ export type Database = {
         Returns: boolean
       }
       generate_school_event_reminders: { Args: never; Returns: number }
+      get_family_shell_context: {
+        Args: { target_membership_id: string }
+        Returns: {
+          child_first_name: string | null
+          child_last_name: string | null
+          notification_count: number
+        }[]
+      }
       is_active_school_member: {
         Args: { target_school_id: string }
         Returns: boolean

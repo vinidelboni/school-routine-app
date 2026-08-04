@@ -22,59 +22,19 @@ export default async function OperationalLayout({
     : membership.schools;
 
   if (membership.role === "family") {
-    const [
-      { data: guardianLink },
-      { count: communicationCount },
-      { count: occurrenceCount },
-      { count: billingCount },
-      { count: libraryCount },
-      { count: eventCount },
-      { count: reminderCount },
-    ] = await Promise.all([
-      supabase
-        .from("guardian_links")
-        .select("children(first_name, last_name)")
-        .eq("membership_id", membership.id)
-        .eq("active", true)
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("communication_recipients")
-        .select("*", { count: "exact", head: true })
-        .eq("membership_id", membership.id)
-        .is("viewed_at", null),
-      supabase
-        .from("occurrence_recipients")
-        .select("*", { count: "exact", head: true })
-        .eq("membership_id", membership.id)
-        .is("acknowledged_at", null),
-      supabase
-        .from("billing_documents")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "distributed")
-        .is("viewed_at", null),
-      supabase
-        .from("school_document_recipients")
-        .select("*", { count: "exact", head: true })
-        .eq("membership_id", membership.id)
-        .is("viewed_at", null),
-      supabase
-        .from("school_event_recipients")
-        .select("*, school_events!inner(status)", { count: "exact", head: true })
-        .eq("membership_id", membership.id)
-        .eq("school_events.status", "published")
-        .is("viewed_at", null),
-      supabase
-        .from("school_event_reminders")
-        .select("*", { count: "exact", head: true })
-        .eq("membership_id", membership.id)
-        .is("viewed_at", null),
-    ]);
-    const linkedChild = guardianLink
-      ? Array.isArray(guardianLink.children)
-        ? guardianLink.children[0]
-        : guardianLink.children
+    const { data: shellContext, error: shellError } = await supabase
+      .rpc("get_family_shell_context", { target_membership_id: membership.id })
+      .maybeSingle();
+    if (shellError) throw shellError;
+    const linkedChild = shellContext?.child_first_name
+      ? { first_name: shellContext.child_first_name, last_name: shellContext.child_last_name ?? "" }
       : null;
+    const communicationCount = Number(shellContext?.notification_count ?? 0);
+    const occurrenceCount = 0;
+    const billingCount = 0;
+    const libraryCount = 0;
+    const eventCount = 0;
+    const reminderCount = 0;
     const childName = linkedChild
       ? `${linkedChild.first_name} ${linkedChild.last_name}`
       : "Criança";
