@@ -2188,6 +2188,18 @@ export type Database = {
           notification_count: number
         }[]
       }
+      get_family_child_teachers: {
+        Args: { target_membership_id: string }
+        Returns: {
+          guardian_link_id: string
+          child_id: string
+          classroom_id: string
+          classroom_name: string
+          teacher_membership_id: string | null
+          teacher_name: string | null
+          teacher_avatar_path: string | null
+        }[]
+      }
       get_family_calendar_items: {
         Args: { target_membership_id: string; range_start: string; range_end: string }
         Returns: {
@@ -2209,6 +2221,10 @@ export type Database = {
       }
       resolve_shift_handoff: {
         Args: { target_handoff_id: string }
+        Returns: undefined
+      }
+      set_classroom_teachers: {
+        Args: { target_classroom_id: string; target_membership_ids: string[] }
         Returns: undefined
       }
     }

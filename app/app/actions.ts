@@ -441,6 +441,30 @@ export async function createClassroom(formData: FormData) {
   redirect(`/app/direction/registry?classroom=${classroom.id}&success=classroom-created`);
 }
 
+export async function updateClassroomTeachers(formData: FormData) {
+  const parsed = z.object({
+    classroomId: uuid,
+    teacherMembershipIds: z.array(uuid),
+  }).parse({
+    classroomId: formData.get("classroomId"),
+    teacherMembershipIds: formData.getAll("teacherMembershipId"),
+  });
+
+  const { supabase, membership } = await getCurrentContext();
+  if (membership.role !== "director") redirect("/app");
+
+  const { error } = await supabase.rpc("set_classroom_teachers", {
+    target_classroom_id: parsed.classroomId,
+    target_membership_ids: parsed.teacherMembershipIds,
+  });
+  if (error) throw error;
+
+  revalidateOperationalViews();
+  revalidatePath("/app/direction/registry");
+  revalidatePath("/app/family/profile");
+  redirect(`/app/direction/registry?classroom=${parsed.classroomId}&success=teachers-updated`);
+}
+
 export async function createEnrolledChild(formData: FormData) {
   const parsed = z.object({
     classroomId: uuid,

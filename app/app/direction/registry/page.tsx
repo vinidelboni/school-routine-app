@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, School, Users } from "lucide-react";
+import { CheckCircle2, School, UserRoundCheck, Users } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
-import { createClassroom, createEnrolledChild } from "../../actions";
+import { createClassroom, createEnrolledChild, updateClassroomTeachers } from "../../actions";
 import { ClassroomSwitcher } from "./classroom-switcher";
 import { ImportRoster } from "./import-roster";
 import { SubmitButton } from "./submit-button";
@@ -56,16 +56,24 @@ export default async function RegistryPage({
   const selected =
     classrooms?.find((classroom) => classroom.id === query.classroom) ??
     classrooms?.[0];
-  const { data: enrollments } = classroomIds.length
-    ? await supabase
+  const [{ data: enrollments }, { data: classroomStaff }] = classroomIds.length
+    ? await Promise.all([supabase
         .from("enrollments")
         .select(
           "id, classroom_id, schedule_name, expected_start, expected_end, children(first_name, last_name, birth_date)",
         )
         .in("classroom_id", classroomIds)
         .eq("status", "active")
-        .order("created_at")
-    : { data: [] };
+        .order("created_at"), supabase
+        .from("classroom_staff")
+        .select("classroom_id, membership_id")
+        .in("classroom_id", classroomIds)])
+    : [{ data: [] }, { data: [] }];
+
+  const teacherOptions = (teachers ?? []).map((teacher) => {
+    const teacherProfile = Array.isArray(teacher.profiles) ? teacher.profiles[0] : teacher.profiles;
+    return { id: teacher.id, name: teacherProfile?.full_name ?? "Professora" };
+  });
 
   const classroomForm = (
     <form
@@ -160,12 +168,16 @@ export default async function RegistryPage({
             <strong className="block text-sm">
               {query.success === "classroom-created"
                 ? "Turma criada com sucesso!"
-                : "Criança cadastrada com sucesso!"}
+                : query.success === "teachers-updated"
+                  ? "Equipe da turma atualizada!"
+                  : "Criança cadastrada com sucesso!"}
             </strong>
             <small className="mt-1 block text-[#386b9f]">
               {query.success === "classroom-created"
                 ? "A turma já está disponível nos seletores da direção e da professora responsável."
-                : "A matrícula já aparece na turma selecionada e na rotina correspondente."}
+                : query.success === "teachers-updated"
+                  ? "As professoras vinculadas já aparecem no perfil das famílias desta turma."
+                  : "A matrícula já aparece na turma selecionada e na rotina correspondente."}
             </small>
           </span>
         </div>
@@ -187,6 +199,10 @@ export default async function RegistryPage({
               enrollments={(enrollments ?? []).filter(
                 (enrollment) => enrollment.classroom_id === classroom.id,
               )}
+              teachers={teacherOptions}
+              assignedTeacherIds={(classroomStaff ?? [])
+                .filter((staff) => staff.classroom_id === classroom.id)
+                .map((staff) => staff.membership_id)}
             />
           ),
         }))}
@@ -198,12 +214,33 @@ export default async function RegistryPage({
 function ClassroomContent({
   classroom,
   enrollments,
+  teachers,
+  assignedTeacherIds,
 }: {
   classroom: Classroom;
   enrollments: Enrollment[];
+  teachers: { id: string; name: string }[];
+  assignedTeacherIds: string[];
 }) {
   return (
     <>
+      <form action={updateClassroomTeachers} className="mt-5 rounded-2xl border border-[#cfe0f3] bg-[#f5f9ff] p-5">
+        <input type="hidden" name="classroomId" value={classroom.id} />
+        <strong className="flex items-center gap-2 text-sm text-[#12345b]">
+          <UserRoundCheck size={18} className="text-[#0759bd]" /> Equipe de {classroom.name}
+        </strong>
+        <p className="mt-1 text-xs text-[#61758d]">Selecione todas as professoras que acompanham esta turma.</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {teachers.map((teacher) => (
+            <label key={teacher.id} className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#d7e4f2] bg-white px-4 py-3 text-xs font-semibold">
+              <input type="checkbox" name="teacherMembershipId" value={teacher.id} defaultChecked={assignedTeacherIds.includes(teacher.id)} className="h-4 w-4 accent-[#0759bd]" />
+              {teacher.name}
+            </label>
+          ))}
+          {!teachers.length ? <span className="text-xs text-[#6f8299]">Cadastre uma professora ativa para montar a equipe.</span> : null}
+        </div>
+        <SubmitButton idleLabel="Salvar equipe" pendingLabel="Salvando equipe..." className="mt-4 rounded-xl bg-[#0759bd] px-5 py-3 text-xs font-bold text-white" />
+      </form>
       <section className="mt-5 grid gap-4 xl:grid-cols-[.8fr_1.2fr]">
         <form
           action={createEnrolledChild}

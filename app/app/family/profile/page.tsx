@@ -1,6 +1,8 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
-import { LogOut, Mail, ShieldCheck, UserRound } from "lucide-react";
+import { GraduationCap, LogOut, Mail, ShieldCheck, UserRound } from "lucide-react";
 import { getCurrentContext } from "../../../lib/auth";
+import { createSupabaseAdminClient } from "../../../lib/supabase/admin";
 import { logout } from "../../../login/actions";
 
 export default async function FamilyProfilePage() {
@@ -10,14 +12,20 @@ export default async function FamilyProfilePage() {
     ? membership.schools[0]
     : membership.schools;
 
-  const { data: links, error } = await supabase
-    .from("guardian_links")
-    .select(
-      "id, relationship, can_view_routine, children(first_name, last_name)",
-    )
-    .eq("membership_id", membership.id)
-    .eq("active", true);
+  const [{ data: links, error }, { data: childTeachers, error: teachersError }] = await Promise.all([
+    supabase.from("guardian_links").select("id, relationship, can_view_routine, children(first_name, last_name)").eq("membership_id", membership.id).eq("active", true),
+    supabase.rpc("get_family_child_teachers", { target_membership_id: membership.id }),
+  ]);
   if (error) throw error;
+  if (teachersError) throw teachersError;
+
+  const avatarPaths = [...new Set((childTeachers ?? []).map((item) => item.teacher_avatar_path).filter((path): path is string => Boolean(path)))];
+  const admin = createSupabaseAdminClient();
+  const signedAvatars = new Map<string, string>();
+  await Promise.all(avatarPaths.map(async (path) => {
+    const { data } = await admin.storage.from("teacher-avatars").createSignedUrl(path, 3600);
+    if (data?.signedUrl) signedAvatars.set(path, data.signedUrl);
+  }));
 
   return (
     <div>
@@ -57,6 +65,9 @@ export default async function FamilyProfilePage() {
             const child = Array.isArray(link.children)
               ? link.children[0]
               : link.children;
+            const teamRows = (childTeachers ?? []).filter((item) => item.guardian_link_id === link.id);
+            const classroomName = teamRows[0]?.classroom_name;
+            const team = teamRows.filter((item) => item.teacher_membership_id && item.teacher_name);
             return (
               <article
                 key={link.id}
@@ -71,6 +82,23 @@ export default async function FamilyProfilePage() {
                     <small className="mt-1 block text-[10px] text-[#7c8680]">
                       {link.relationship ?? "Responsável"} · acesso individual protegido
                     </small>
+                    <div className="mt-3 rounded-xl bg-[#f1f7ff] p-3">
+                      <small className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[.08em] text-[#386b9f]">
+                        <GraduationCap size={13} /> {classroomName ?? "Turma em definição"}
+                      </small>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {team.map((teacher) => {
+                          const avatarUrl = teacher.teacher_avatar_path ? signedAvatars.get(teacher.teacher_avatar_path) : undefined;
+                          return <span key={teacher.teacher_membership_id} className="flex items-center gap-2 rounded-full bg-white py-1.5 pl-1.5 pr-3 text-[10px] font-bold text-[#17375e] shadow-sm">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-[#dcecff] text-[#0759bd]">
+                              {avatarUrl ? <Image src={avatarUrl} alt="" width={28} height={28} className="h-full w-full object-cover" /> : <UserRound size={14} />}
+                            </span>
+                            Prof.ª {teacher.teacher_name}
+                          </span>;
+                        })}
+                        {!team.length ? <small className="text-[10px] text-[#6f8299]">Equipe pedagógica em definição.</small> : null}
+                      </div>
+                    </div>
                     <span className="mt-2 flex flex-wrap gap-1">
                       {link.can_view_routine ? <Permission label="Agenda" /> : null}
                       <Permission label="Galeria autorizada" />
