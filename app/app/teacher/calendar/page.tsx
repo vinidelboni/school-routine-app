@@ -38,10 +38,11 @@ export default async function TeacherCalendarPage({
 
   return (
     <div>
-      <header>
-        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">CALENDÁRIO DA TURMA</span>
-        <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">Rotinas e pendências por dia</h1>
-        <p className="mt-2 text-sm text-[#69746f]">Consulte dias publicados, compromissos da escola, passagens de turno e atividades registradas.</p>
+      <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#0759bd] via-[#0b6ed1] to-[#19a5e9] px-6 py-7 text-white shadow-[0_18px_45px_rgba(7,89,189,.2)] sm:px-8">
+        <div aria-hidden="true" className="absolute -right-12 -top-20 h-56 w-56 rounded-full border-[40px] border-white/[.07]" />
+        <div className="relative"><span className="text-[9px] font-extrabold tracking-[.16em] text-[#c3e5ff]">CALENDÁRIO DA TURMA</span>
+        <h1 className="mt-2 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] sm:text-4xl">Rotinas e pendências por dia</h1>
+        <p className="mt-2 max-w-2xl text-sm text-[#d8ecff]">Consulte dias publicados, compromissos, passagens de turno e atividades.</p></div>
       </header>
       <CalendarView year={year} month={month} events={events} basePath="/app/teacher/calendar" />
     </div>

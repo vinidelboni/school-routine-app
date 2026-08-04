@@ -159,25 +159,27 @@ export default async function TeacherPage({
 
   return (
     <div>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <span className="text-[10px] font-extrabold tracking-[.16em] text-[#557164]">
-            ROTINA OPERACIONAL · {classroom.name.toUpperCase()}
+      <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#0759bd] via-[#0b6ed1] to-[#19a5e9] px-6 py-7 text-white shadow-[0_18px_45px_rgba(7,89,189,.2)] sm:px-8">
+        <div aria-hidden="true" className="absolute -right-12 -top-20 h-60 w-60 rounded-full border-[42px] border-white/[.07]" />
+        <div className="relative flex flex-wrap items-start justify-between gap-5">
+          <div>
+            <span className="text-[9px] font-extrabold tracking-[.16em] text-[#c3e5ff]">ROTINA · {classroom.name.toUpperCase()}</span>
+            <h1 className="mt-2 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] sm:text-4xl">Registro coletivo</h1>
+            <p className="mt-2 text-sm text-[#d8ecff]">Preencha o grupo e ajuste somente as exceções.</p>
+          </div>
+          <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 text-[10px] font-bold backdrop-blur">
+            {isPublished ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
+            {isPublished ? "Dia publicado" : shiftComplete ? "Turno completo" : "Em preenchimento"}
           </span>
-          <h1 className="mt-2 font-[var(--font-display)] text-4xl font-semibold tracking-[-.05em]">
-            Registro coletivo
-          </h1>
-          <p className="mt-2 text-sm text-[#69746f]">
-            O sistema mostra apenas as crianças previstas neste turno.
-          </p>
         </div>
-        <span className={`flex items-center gap-2 rounded-full px-3 py-2 text-[10px] font-bold ${isPublished ? "bg-[#e4eee7] text-[#47705d]" : "bg-[#f5eadc] text-[#8d684c]"}`}>
-          {isPublished ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
-          {isPublished ? "Dia publicado" : shiftComplete ? "Turno completo" : "Em preenchimento"}
-        </span>
+        <div className="relative mt-6 grid grid-cols-3 gap-2 sm:max-w-xl">
+          <Summary label="Crianças" value={children.length} />
+          <Summary label="Presença" value={attendanceComplete ? "Concluída" : `${attendanceIds.size}/${children.length}`} />
+          <Summary label="Rotina" value={`${requiredCompleted}/${requiredExpected}`} />
+        </div>
       </header>
 
-      <nav aria-label="Turno" className="mt-6 inline-flex rounded-xl border border-[#dfe1d9] bg-white p-1">
+      <nav aria-label="Turno" className="mt-5 inline-flex rounded-2xl border border-[#d8e5f2] bg-white p-1 shadow-sm">
         <ShiftLink active={shift === "morning"} href={`/app/teacher?classroom=${classroom.id}&shift=morning`}>
           Manhã
         </ShiftLink>
@@ -196,7 +198,7 @@ export default async function TeacherPage({
               <Link
                 key={assignment.classroom_id}
                 href={`/app/teacher?classroom=${assignedClassroom.id}&shift=${shift}`}
-                className={`rounded-xl border px-4 py-2 text-xs font-bold ${assignedClassroom.id === classroom.id ? "border-[#315645] bg-[#eef3ef] text-[#315645]" : "border-[#dfe1d9] bg-white text-[#69746f]"}`}
+                className={`rounded-xl border px-4 py-2 text-xs font-bold ${assignedClassroom.id === classroom.id ? "border-[#1768c5] bg-[#eaf4ff] text-[#1768c5]" : "border-[#d8e5f2] bg-white text-[#647b94]"}`}
               >
                 {assignedClassroom.name}
               </Link>
@@ -207,8 +209,8 @@ export default async function TeacherPage({
 
       <section className="mt-6 grid gap-4 lg:grid-cols-[.72fr_1.28fr]">
         <div className="space-y-4">
-          <div className="rounded-2xl bg-[#315645] p-6 text-white">
-            <span className="text-[9px] font-extrabold tracking-[.14em] text-[#bfd2c7]">
+          <div className="rounded-2xl bg-gradient-to-br from-[#09295e] to-[#0759bd] p-6 text-white shadow-[0_14px_35px_rgba(7,55,120,.18)]">
+            <span className="text-[9px] font-extrabold tracking-[.14em] text-[#9ed5ff]">
               {shift === "morning" ? "TURNO DA MANHÃ" : "TURNO DA TARDE"}
             </span>
             <strong className="mt-3 block font-[var(--font-display)] text-2xl">
@@ -218,27 +220,27 @@ export default async function TeacherPage({
               {children.map((child) => (
                 <div key={child.id} className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2.5 text-xs">
                   <span>{child.first_name} · {child.scheduleName}</span>
-                  <small className="text-[#cbd9d2]">{child.expectedStart}–{child.expectedEnd}</small>
+                  <small className="text-[#c8e3ff]">{child.expectedStart}–{child.expectedEnd}</small>
                 </div>
               ))}
             </div>
           </div>
 
-          <form action={markAllPresent} className="rounded-2xl border border-[#dfe1d9] bg-white p-5">
+          <form action={markAllPresent} className="rounded-2xl border border-[#d8e5f2] bg-white p-5 shadow-[0_8px_24px_rgba(27,66,112,.05)]">
             <input type="hidden" name="schoolDayId" value={schoolDay.id} />
             <input type="hidden" name="schoolId" value={membership.school_id} />
             {children.map((child) => (
               <input key={child.id} type="hidden" name="childId" value={child.id} />
             ))}
             <strong className="flex items-center gap-2 text-sm">
-              <Check size={17} className="text-[#42715d]" /> Chamada coletiva
+              <Check size={17} className="text-[#1768c5]" /> Chamada coletiva
             </strong>
-            <p className="mt-2 text-xs leading-5 text-[#69746f]">
+            <p className="mt-2 text-xs leading-5 text-[#6f8299]">
               Marca somente as crianças previstas para {shift === "morning" ? "a manhã" : "a tarde"}.
             </p>
             <button
               disabled={isPublished || children.length === 0}
-              className="mt-4 w-full rounded-xl border border-[#98b3a4] px-4 py-3 text-xs font-bold text-[#315645] disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-4 w-full rounded-xl border border-[#9dc7ef] bg-[#eef7ff] px-4 py-3 text-xs font-bold text-[#1768c5] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {attendanceComplete ? "Atualizar chamada" : "Marcar grupo presente"}
             </button>
@@ -252,7 +254,7 @@ export default async function TeacherPage({
               <p className="mt-2 text-sm leading-6 text-[#604f42]">{handoff.note}</p>
               <form action={resolveShiftHandoff}>
                 <input type="hidden" name="handoffId" value={handoff.id} />
-                <button className="mt-3 text-xs font-bold text-[#315645]">Marcar como resolvida</button>
+                <button className="mt-3 text-xs font-bold text-[#1768c5]">Marcar como resolvida</button>
               </form>
             </div>
           ))}
@@ -268,7 +270,7 @@ export default async function TeacherPage({
               entryMap.has(`${child.id}:${module.category}:${shift}`),
             ).length;
             return (
-              <form key={module.category} action={recordRoutineBatch} className="overflow-hidden rounded-2xl border border-[#dfe1d9] bg-white">
+              <form key={module.category} action={recordRoutineBatch} className="overflow-hidden rounded-2xl border border-[#d8e5f2] bg-white shadow-[0_8px_24px_rgba(27,66,112,.05)]">
                 <input type="hidden" name="schoolDayId" value={schoolDay.id} />
                 <input type="hidden" name="schoolId" value={membership.school_id} />
                 <input type="hidden" name="category" value={module.category} />
@@ -279,12 +281,12 @@ export default async function TeacherPage({
                       <h2 className="font-[var(--font-display)] text-xl font-bold">
                         {categoryLabels[module.category as keyof typeof categoryLabels]}
                       </h2>
-                      <p className="mt-1 text-xs text-[#69746f]">
+                      <p className="mt-1 text-xs text-[#6f8299]">
                         {module.required ? "Obrigatório neste turno" : "Opcional"} · {completed}/{children.length} registrados
                       </p>
                     </div>
                     {completed === children.length && children.length > 0 ? (
-                      <CheckCircle2 size={20} className="text-[#42715d]" />
+                      <CheckCircle2 size={20} className="text-[#1768c5]" />
                     ) : (
                       <Clock3 size={20} className="text-[#b68a67]" />
                     )}
@@ -300,7 +302,7 @@ export default async function TeacherPage({
                           defaultChecked={index === 0}
                           disabled={isPublished}
                         />
-                        <span className="block rounded-xl border border-[#dfe1d9] px-3 py-3 text-center text-[10px] font-bold peer-checked:border-[#315645] peer-checked:bg-[#315645] peer-checked:text-white">
+                        <span className="block rounded-xl border border-[#d8e5f2] px-3 py-3 text-center text-[10px] font-bold text-[#516b86] peer-checked:border-[#1768c5] peer-checked:bg-[#1768c5] peer-checked:text-white">
                           {option}
                         </span>
                       </label>
@@ -323,7 +325,7 @@ export default async function TeacherPage({
                         defaultValue={entryMap.get(`${child.id}:${module.category}:${shift}`) ?? ""}
                         disabled={isPublished}
                         aria-label={`Exceção de ${categoryLabels[module.category as keyof typeof categoryLabels]} para ${child.first_name}`}
-                        className="h-9 rounded-lg border border-[#dfe1d9] bg-[#fafaf7] px-2 text-[10px]"
+                        className="h-9 rounded-lg border border-[#d8e5f2] bg-[#f7faff] px-2 text-[10px]"
                       >
                         <option value="">Sem exceção</option>
                         {options.map((option) => <option key={option} value={option}>{option}</option>)}
@@ -332,7 +334,7 @@ export default async function TeacherPage({
                   ))}
                 </div>
                 <div className="flex justify-end bg-[#f4f5f1] p-4">
-                  <button disabled={isPublished || !attendanceComplete || children.length === 0} className="rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">
+                  <button disabled={isPublished || !attendanceComplete || children.length === 0} className="rounded-xl bg-[#1768c5] px-5 py-3 text-xs font-bold text-white shadow-[0_7px_18px_rgba(23,104,197,.2)] disabled:opacity-40">
                     Aplicar para o grupo
                   </button>
                 </div>
@@ -344,28 +346,28 @@ export default async function TeacherPage({
 
       {!isPublished ? (
         shift === "morning" ? (
-          <form action={createShiftHandoff} className="mt-5 rounded-2xl border border-[#d5ddd7] bg-[#eef3ef] p-5">
+          <form action={createShiftHandoff} className="mt-5 rounded-2xl border border-[#cfe1f3] bg-[#eef7ff] p-5">
             <input type="hidden" name="schoolDayId" value={schoolDay.id} />
             <input type="hidden" name="schoolId" value={membership.school_id} />
             <input type="hidden" name="classroomId" value={classroom.id} />
             <input type="hidden" name="fromShift" value="morning" />
             <input type="hidden" name="toShift" value="afternoon" />
             <strong className="flex items-center gap-2 text-sm"><ArrowRight size={17} /> Passagem para a tarde</strong>
-            <textarea name="note" required minLength={3} maxLength={500} placeholder="Ex.: Bento precisa trocar a roupa após o descanso." className="mt-3 min-h-20 w-full rounded-xl border border-[#cad6ce] bg-white p-3 text-sm" />
-            <button disabled={!shiftComplete} className="mt-3 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">
+            <textarea name="note" required minLength={3} maxLength={500} placeholder="Ex.: Bento precisa trocar a roupa após o descanso." className="mt-3 min-h-20 w-full rounded-xl border border-[#bfd7ee] bg-white p-3 text-sm" />
+            <button disabled={!shiftComplete} className="mt-3 rounded-xl bg-[#1768c5] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">
               Registrar passagem de turno
             </button>
           </form>
         ) : (
-          <form action={publishDay} className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d5ddd7] bg-[#eef3ef] p-5">
+          <form action={publishDay} className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#cfe1f3] bg-[#eef7ff] p-5">
             <input type="hidden" name="schoolDayId" value={schoolDay.id} />
             <div>
               <strong className="flex items-center gap-2 text-sm"><ClipboardCheck size={17} /> Revisar e publicar</strong>
-              <span className="text-xs text-[#69746f]">
+              <span className="text-xs text-[#6f8299]">
                 {shiftComplete ? "Turno completo e pronto para publicação." : "Conclua os campos obrigatórios do turno."}
               </span>
             </div>
-            <button disabled={!shiftComplete || incomingHandoffs.length > 0} className="flex items-center gap-2 rounded-xl bg-[#315645] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">
+            <button disabled={!shiftComplete || incomingHandoffs.length > 0} className="flex items-center gap-2 rounded-xl bg-[#1768c5] px-5 py-3 text-xs font-bold text-white shadow-[0_7px_18px_rgba(23,104,197,.2)] disabled:opacity-40">
               <Send size={16} /> Publicar agendas
             </button>
           </form>
@@ -385,7 +387,7 @@ function ShiftLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} className={`rounded-lg px-5 py-2.5 text-xs font-bold ${active ? "bg-[#315645] text-white" : "text-[#607069]"}`}>
+    <Link href={href} className={`rounded-xl px-5 py-2.5 text-xs font-bold transition ${active ? "bg-[#1768c5] text-white shadow-sm" : "text-[#61758d]"}`}>
       {children}
     </Link>
   );
@@ -393,10 +395,14 @@ function ShiftLink({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-[#dfe1d9] bg-white p-8">
-      <Users className="text-[#557164]" />
+    <div className="rounded-2xl border border-[#d8e5f2] bg-white p-8">
+      <Users className="text-[#1768c5]" />
       <h1 className="mt-4 font-[var(--font-display)] text-2xl font-bold">Nada para preencher</h1>
-      <p className="mt-2 text-sm text-[#69746f]">{message}</p>
+      <p className="mt-2 text-sm text-[#6f8299]">{message}</p>
     </div>
   );
+}
+
+function Summary({ label, value }: { label: string; value: string | number }) {
+  return <div className="rounded-xl border border-white/15 bg-[#073f91]/35 px-3 py-3 backdrop-blur"><small className="block text-[8px] font-bold uppercase tracking-[.1em] text-[#bfe2ff]">{label}</small><strong className="mt-1 block truncate text-xs text-white sm:text-sm">{value}</strong></div>;
 }
