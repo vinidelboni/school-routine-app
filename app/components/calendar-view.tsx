@@ -49,12 +49,18 @@ export function CalendarView({
   events,
   basePath,
   compact = false,
+  period,
+  loadedStart,
+  loadedEnd,
 }: {
   year: number;
   month: number;
   events: CalendarEvent[];
   basePath: string;
   compact?: boolean;
+  period?: string;
+  loadedStart?: string;
+  loadedEnd?: string;
 }) {
   const [selectedKind, setSelectedKind] = useState<"all" | CalendarEvent["kind"]>("all");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -124,7 +130,7 @@ export function CalendarView({
           }`}
         >
           <Link
-            href={`${basePath}?month=${previous.getFullYear()}-${String(previous.getMonth() + 1).padStart(2, "0")}`}
+            href={`${basePath}?month=${previous.getFullYear()}-${String(previous.getMonth() + 1).padStart(2, "0")}${period ? `&period=${period}` : ""}`}
             aria-label="Mês anterior"
             className={`grid h-9 w-9 place-items-center rounded-full ${
               compact
@@ -142,7 +148,7 @@ export function CalendarView({
             {monthLabel}
           </strong>
           <Link
-            href={`${basePath}?month=${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`}
+            href={`${basePath}?month=${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}${period ? `&period=${period}` : ""}`}
             aria-label="Próximo mês"
             className={`grid h-9 w-9 place-items-center rounded-full ${
               compact
@@ -163,16 +169,17 @@ export function CalendarView({
             if (!day) return <span key={`empty-${index}`} className={compact ? "h-12" : "h-16"} />;
             const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const dayEvents = eventsByDate.get(dateKey) ?? [];
+            const isLoaded = !loadedStart || !loadedEnd || (dateKey >= loadedStart && dateKey < loadedEnd);
             return (
               <button
                 type="button"
                 key={dateKey}
                 aria-label={`${day} de ${monthLabel}${dayEvents.length ? `, ${dayEvents.length} registros` : ""}`}
                 aria-pressed={compact ? selectedDate === dateKey : undefined}
-                disabled={!compact}
+                disabled={!compact || !isLoaded}
                 onClick={compact ? () => setSelectedDate(dateKey) : undefined}
                 className={`flex ${compact ? "h-14 cursor-pointer rounded-xl" : "h-16 border-t border-[#f0f0ec]"} flex-col items-center pt-1.5 transition ${
-                  compact && selectedDate === dateKey ? "bg-[#e7effb]" : ""
+                  compact && selectedDate === dateKey ? "bg-[#e7effb]" : !isLoaded ? "opacity-35" : ""
                 }`}
               >
                 <span

@@ -2185,6 +2185,17 @@ export type Database = {
           notification_count: number
         }[]
       }
+      get_family_calendar_items: {
+        Args: { target_membership_id: string; range_start: string; range_end: string }
+        Returns: {
+          item_id: string
+          item_date: string
+          title: string
+          detail: string | null
+          kind: string
+          href: string
+        }[]
+      }
       is_active_school_member: {
         Args: { target_school_id: string }
         Returns: boolean

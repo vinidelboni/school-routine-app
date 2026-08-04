@@ -19,3 +19,28 @@ export function toSaoPauloDateKey(value: string | Date) {
     day: "2-digit",
   }).format(typeof value === "string" ? new Date(value) : value);
 }
+
+export type CalendarPeriod = "week" | "month" | "bimester" | "trimester";
+
+export function parseCalendarPeriod(value?: string): CalendarPeriod {
+  return value === "month" || value === "bimester" || value === "trimester" ? value : "week";
+}
+
+export function getCalendarRange(year: number, month: number, period: CalendarPeriod) {
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  const anchor = isCurrentMonth ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : new Date(year, month, 1);
+  let start: Date;
+  let end: Date;
+  if (period === "week") {
+    const mondayOffset = (anchor.getDay() + 6) % 7;
+    start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - mondayOffset);
+    end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+  } else {
+    const months = period === "month" ? 1 : period === "bimester" ? 2 : 3;
+    start = new Date(year, month, 1);
+    end = new Date(year, month + months, 1);
+  }
+  const toKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return { start: toKey(start), end: toKey(end) };
+}
