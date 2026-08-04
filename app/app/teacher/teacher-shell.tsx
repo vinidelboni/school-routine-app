@@ -35,7 +35,7 @@ export function TeacherShell({ children, schoolName, profileName }: { children: 
         </div>
         <nav aria-label="Navegação da professora" className="mt-5 grid gap-1">
           {navigation.map((item) => {
-            const active = "exact" in item && item.exact ? pathname === item.href : pathname.startsWith(item.href);
+            const active = "exact" in item && item.exact ? pathname === item.href || pathname.startsWith("/app/teacher/simulation") : pathname.startsWith(item.href);
             const Icon = item.icon;
             return <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={active ? "page" : undefined} className={`group flex min-h-12 items-center gap-3 rounded-xl px-3 text-xs font-semibold transition ${active ? "bg-gradient-to-r from-[#1175d8] to-[#0858bd] text-white shadow-[0_8px_22px_rgba(3,78,166,.32)]" : "text-[#b9cee7] hover:bg-white/[.07] hover:text-white"}`}><Icon size={18} strokeWidth={active ? 2.4 : 1.8} /><span className="flex-1">{item.label}</span>{active ? <ChevronRight size={14} className="text-[#83c9ff]" /> : null}</Link>;
           })}
@@ -60,7 +60,7 @@ export function TeacherShell({ children, schoolName, profileName }: { children: 
       </div>
 
       <nav aria-label="Navegação rápida da professora" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#dce6f2] bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_26px_rgba(35,73,128,.08)] backdrop-blur lg:hidden">
-        {navigation.map((item) => { const active = "exact" in item && item.exact ? pathname === item.href : pathname.startsWith(item.href); const Icon = item.icon; return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`relative flex h-[68px] flex-col items-center justify-center gap-1 text-[9px] font-bold ${active ? "text-[#1768c5]" : "text-[#8291a5]"}`}>{active ? <span className="absolute top-0 h-0.5 w-9 rounded-full bg-[#1768c5]" /> : null}<Icon size={20} strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>; })}
+        {navigation.map((item) => { const active = "exact" in item && item.exact ? pathname === item.href || pathname.startsWith("/app/teacher/simulation") : pathname.startsWith(item.href); const Icon = item.icon; return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`relative flex h-[68px] flex-col items-center justify-center gap-1 text-[9px] font-bold ${active ? "text-[#1768c5]" : "text-[#8291a5]"}`}>{active ? <span className="absolute top-0 h-0.5 w-9 rounded-full bg-[#1768c5]" /> : null}<Icon size={20} strokeWidth={active ? 2.4 : 1.8} />{item.label}</Link>; })}
       </nav>
     </div>
   );

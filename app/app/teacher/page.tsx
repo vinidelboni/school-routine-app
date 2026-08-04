@@ -167,10 +167,10 @@ export default async function TeacherPage({
             <h1 className="mt-2 font-[var(--font-display)] text-3xl font-semibold tracking-[-.05em] sm:text-4xl">Registro coletivo</h1>
             <p className="mt-2 text-sm text-[#d8ecff]">Preencha o grupo e ajuste somente as exceções.</p>
           </div>
-          <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 text-[10px] font-bold backdrop-blur">
-            {isPublished ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
-            {isPublished ? "Dia publicado" : shiftComplete ? "Turno completo" : "Em preenchimento"}
-          </span>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 text-[10px] font-bold backdrop-blur">{isPublished ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}{isPublished ? "Dia publicado" : shiftComplete ? "Turno completo" : "Em preenchimento"}</span>
+            <Link href="/app/teacher/simulation" className="rounded-xl bg-white px-4 py-3 text-[10px] font-extrabold text-[#1768c5] shadow-sm transition hover:bg-[#eef7ff]">Simular um dia</Link>
+          </div>
         </div>
         <div className="relative mt-6 grid grid-cols-3 gap-2 sm:max-w-xl">
           <Summary label="Crianças" value={children.length} />
