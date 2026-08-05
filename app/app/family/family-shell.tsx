@@ -13,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { logout } from "../../login/actions";
+import { SchoolSwitcher, type SchoolOption } from "../school-switcher";
 
 const navigation = [
   { href: "/app/family", label: "Início", icon: Home, exact: true },
@@ -40,12 +41,16 @@ export function FamilyShell({
   childInitials,
   schoolName,
   notificationCount,
+  schoolOptions,
+  activeMembershipId,
 }: {
   children: React.ReactNode;
   childName: string;
   childInitials: string;
   schoolName: string;
   notificationCount: number;
+  schoolOptions: SchoolOption[];
+  activeMembershipId: string;
 }) {
   const pathname = usePathname();
 
@@ -68,7 +73,7 @@ export function FamilyShell({
               backgroundSize: "94% auto",
             }}
           />
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex items-center justify-between gap-2">
             <form action={logout}>
               <button
                 type="submit"
@@ -79,6 +84,7 @@ export function FamilyShell({
                 <LogOut size={18} strokeWidth={2} />
               </button>
             </form>
+            <SchoolSwitcher options={schoolOptions} activeMembershipId={activeMembershipId} tone="dark" />
             <Link
               href="/app/family/notifications"
               aria-label={`${notificationCount} notificações pendentes`}

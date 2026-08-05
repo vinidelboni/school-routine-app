@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { BookOpen, CalendarDays, Camera, ChevronRight, LogOut, Menu, ShieldCheck, UserRound, X } from "lucide-react";
 import { useState } from "react";
 import { logout } from "../../login/actions";
+import { SchoolSwitcher, type SchoolOption } from "../school-switcher";
 
 const navigation = [
   { href: "/app/teacher", label: "Rotina", icon: BookOpen, exact: true },
@@ -14,7 +15,7 @@ const navigation = [
   { href: "/app/teacher/profile", label: "Perfil", icon: UserRound },
 ] as const;
 
-export function TeacherShell({ children, schoolName, profileName, avatarUrl }: { children: React.ReactNode; schoolName: string; profileName: string; avatarUrl?: string }) {
+export function TeacherShell({ children, schoolName, profileName, avatarUrl, schoolOptions, activeMembershipId }: { children: React.ReactNode; schoolName: string; profileName: string; avatarUrl?: string; schoolOptions: SchoolOption[]; activeMembershipId: string }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const initial = profileName.trim().charAt(0).toUpperCase() || "P";
@@ -50,6 +51,7 @@ export function TeacherShell({ children, schoolName, profileName, avatarUrl }: {
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" aria-label="Abrir menu" onClick={() => setMenuOpen(true)} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[#d8e5f2] bg-white text-[#1768c5] shadow-sm lg:hidden"><Menu size={20} /></button>
               <span className="min-w-0"><small className="block text-[9px] font-extrabold uppercase tracking-[.14em] text-[#5d7d9f]">Professora</small><strong className="block truncate text-sm text-[#142b4b]">{schoolName}</strong></span>
+              <SchoolSwitcher options={schoolOptions} activeMembershipId={activeMembershipId} />
             </div>
             <Link href="/app/teacher/profile" className="flex min-w-0 items-center gap-3 rounded-2xl p-1.5 transition hover:bg-[#edf5fd]">
               <span className="hidden min-w-0 text-right sm:block"><strong className="block max-w-44 truncate text-xs">{profileName}</strong><small className="text-[10px] text-[#6f8299]">Acesso pedagógico</small></span>

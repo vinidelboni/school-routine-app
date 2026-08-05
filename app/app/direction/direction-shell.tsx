@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { logout } from "../../login/actions";
+import { SchoolSwitcher, type SchoolOption } from "../school-switcher";
 
 const navigation = [
   { href: "/app/direction", label: "Visão geral", icon: LayoutDashboard, exact: true },
@@ -48,10 +49,14 @@ export function DirectionShell({
   children,
   schoolName,
   profileName,
+  schoolOptions,
+  activeMembershipId,
 }: {
   children: React.ReactNode;
   schoolName: string;
   profileName: string;
+  schoolOptions: SchoolOption[];
+  activeMembershipId: string;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -140,6 +145,7 @@ export function DirectionShell({
                 <small className="block text-[9px] font-extrabold uppercase tracking-[.14em] text-[#5d7d9f]">Direção</small>
                 <strong className="block truncate text-sm text-[#142b4b]">{schoolName}</strong>
               </span>
+              <SchoolSwitcher options={schoolOptions} activeMembershipId={activeMembershipId} />
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <Link

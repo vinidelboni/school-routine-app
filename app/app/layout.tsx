@@ -2,16 +2,21 @@ import { getCurrentContext } from "../lib/auth";
 import { FamilyShell } from "./family/family-shell";
 import { DirectionShell } from "./direction/direction-shell";
 import { TeacherShell } from "./teacher/teacher-shell";
+import type { SchoolOption } from "./school-switcher";
 
 export default async function OperationalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { supabase, membership, profile } = await getCurrentContext();
+  const { supabase, membership, memberships, profile } = await getCurrentContext();
   const school = Array.isArray(membership.schools)
     ? membership.schools[0]
     : membership.schools;
+  const schoolOptions: SchoolOption[] = memberships.map((item) => {
+    const itemSchool = Array.isArray(item.schools) ? item.schools[0] : item.schools;
+    return { membershipId: item.id, schoolName: itemSchool?.name ?? "Escola", role: item.role };
+  });
 
   if (membership.role === "family") {
     const { data: shellContext, error: shellError } = await supabase
@@ -41,6 +46,8 @@ export default async function OperationalLayout({
         notificationCount={
           (communicationCount ?? 0) + (occurrenceCount ?? 0) + (billingCount ?? 0) + (libraryCount ?? 0) + (eventCount ?? 0) + (reminderCount ?? 0)
         }
+        schoolOptions={schoolOptions}
+        activeMembershipId={membership.id}
       >
         {children}
       </FamilyShell>
@@ -52,6 +59,8 @@ export default async function OperationalLayout({
       <DirectionShell
         schoolName={school?.name ?? "Escola"}
         profileName={profile?.full_name ?? "Direção"}
+        schoolOptions={schoolOptions}
+        activeMembershipId={membership.id}
       >
         {children}
       </DirectionShell>
@@ -61,5 +70,5 @@ export default async function OperationalLayout({
   const { data: avatar } = profile?.avatar_path
     ? await supabase.storage.from("teacher-avatars").createSignedUrl(profile.avatar_path, 3600)
     : { data: null };
-  return <TeacherShell schoolName={school?.name ?? "Escola"} profileName={profile?.full_name ?? "Professora"} avatarUrl={avatar?.signedUrl}>{children}</TeacherShell>;
+  return <TeacherShell schoolName={school?.name ?? "Escola"} profileName={profile?.full_name ?? "Professora"} avatarUrl={avatar?.signedUrl} schoolOptions={schoolOptions} activeMembershipId={membership.id}>{children}</TeacherShell>;
 }
