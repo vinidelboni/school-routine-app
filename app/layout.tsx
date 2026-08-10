@@ -14,9 +14,12 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "SomaMais — Escola e família",
+  title: {
+    default: "SomaMais — A rotina escolar, simples de verdade",
+    template: "%s · SomaMais",
+  },
   description:
-    "Protótipo demonstrativo da plataforma de rotina e comunicação para educação infantil.",
+    "Rotina, comunicação e gestão para escolas de educação infantil. Menos tempo preenchendo, mais tempo cuidando e ensinando.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
