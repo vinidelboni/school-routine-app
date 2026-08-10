@@ -96,3 +96,33 @@
 @media (max-width: 650px) {
   .demoBar b { display:none; }.teacherShell,.directorShell { display:block; }.teacherSide,.directorSide { display:none; }.teacherMain,.directorMain { padding:28px 17px; }.contentHeader h1,.directorHeader h1,.flowHeader h1 { font-size:27px; }.progressTrack { width:230px; }.progressRing { display:none; }.routineGrid,.studentGrid,.attentionGrid { grid-template-columns:1fr; }.batchCard { align-items:flex-start; flex-direction:column; gap:15px; }.choiceRow { flex-wrap:wrap; }.flowHeader { grid-template-columns:42px 1fr; }.flowHeader .stepPill { display:none; }.inlineEditor { grid-template-columns:1fr; }.editorChoices { flex-wrap:wrap; }.flowFooter { align-items:flex-start; gap:13px; flex-direction:column; }.flowFooter .primaryButton { width:100%; }.directorHeader { gap:14px; flex-direction:column; }.statGrid { grid-template-columns:1fr; }.tableHead,.tableRow { grid-template-columns:1.2fr 1fr .8fr; }.tableHead span:nth-child(2),.tableRow>span:nth-child(2) { display:none; }.familyBackground { padding:0; }.phoneShell { border-radius:0; width:100%; min-height:calc(100vh - 36px); }.entryHeader .demoPill { font-size:0; padding:9px; }.entryHeader .demoPill svg { width:15px; }.hero { min-height:420px; padding-inline:0; }.hero h1 { letter-spacing:-2.8px; }
 }
+
+/* SomaMais public demo entry: aligned with the technological blue brand. */
+.entry {
+  max-width:none;
+  color:#fff;
+  background:
+    radial-gradient(circle at 78% 15%, rgba(0,179,245,.16), transparent 27rem),
+    radial-gradient(circle at 10% 70%, rgba(7,89,190,.18), transparent 30rem),
+    linear-gradient(145deg,#020b1c,#041735 55%,#020b1c);
+  position:relative;
+  overflow:hidden;
+}
+.entry:before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.2; background-image:linear-gradient(rgba(82,169,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(82,169,255,.09) 1px,transparent 1px); background-size:64px 64px; mask-image:linear-gradient(#000,transparent 85%); }
+.entryHeader,.entry .hero,.entry .roleSection,.entryFooter { position:relative; z-index:1; }
+.entry .brand { color:#fff; }.entry .brandMark span { border-color:#26baff; }
+.entry .demoPill { color:#a9ccef; background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); backdrop-filter:blur(12px); }
+.entry .kicker { color:#53c9ff; }
+.entry .hero h1 em { color:transparent; background:linear-gradient(100deg,#74dbff,#168eef); background-clip:text; -webkit-background-clip:text; }
+.entry .hero p,.entry .sectionHeading p,.entry .roleDescription { color:#91acc9; }
+.entry .sunShape { background:#0ca9ec; box-shadow:0 0 65px rgba(13,169,236,.28); }
+.entry .archShape { color:#65d0ff; background:linear-gradient(145deg,rgba(17,132,219,.3),rgba(5,47,107,.65)); border:1px solid rgba(75,196,255,.18); box-shadow:0 25px 70px rgba(0,0,0,.25); }
+.entry .archShape:after { border-color:rgba(86,202,255,.2); }
+.entry .leafOne,.entry .leafTwo { color:#168eef; }
+.entry .sectionHeading { border-color:rgba(255,255,255,.1); }
+.entry .roleCard { color:#fff; border-color:rgba(255,255,255,.08); border-radius:18px; padding:27px 28px; }
+.entry .roleGrid { gap:10px; margin-top:10px; }
+.entry .roleCard:hover { background:rgba(255,255,255,.065); box-shadow:0 20px 50px rgba(0,0,0,.22); }
+.entry .roleEyebrow,.entry .roleNumber { color:#5abff0; }
+.entry .roleAction { color:#53c9ff; }
+.entryFooter { color:#6284aa; }
