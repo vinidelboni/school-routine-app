@@ -157,10 +157,18 @@ export default function Home() {
 function HeroProduct() {
   return <div className="landing-product relative mx-auto w-full max-w-[570px]" aria-label="Prévia da experiência SomaMais">
     <div className="landing-orbit" aria-hidden="true" />
-    <div className="relative ml-auto w-[88%] rounded-[2rem] border border-white/[.13] bg-[#071a3a]/80 p-3 shadow-[0_40px_100px_rgba(0,0,0,.45)] backdrop-blur-2xl">
-      <div className="overflow-hidden rounded-[1.45rem] border border-white/[.08] bg-[#f7f9fc] text-[#172b4d]">
-        <div className="bg-gradient-to-br from-[#118fe5] to-[#073aa1] p-5 text-white"><div className="flex items-center justify-between"><span className="flex items-center gap-2"><Image src="/icons/somamais-192.png" alt="" width={34} height={34} className="rounded-[10px]" /><span><small className="block text-[8px] text-[#bfe6ff]">Bem-vinda</small><strong className="text-xs">Família da Alice</strong></span></span><BellRing size={18} /></div><div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur"><small className="text-[8px] text-[#c5e5ff]">HOJE · PUBLICADO ÀS 17H32</small><strong className="mt-1 block text-sm">O dia de Alice está pronto</strong></div></div>
-        <div className="grid grid-cols-3 gap-3 p-4">{features.map(([Icon, label]) => <div key={label} className="grid min-h-24 place-items-center rounded-xl bg-white p-2 text-center shadow-[0_5px_18px_rgba(31,72,122,.08)]"><span><span className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#13b8ef] to-[#0755c1] text-white"><Icon size={16} /></span><small className="mt-2 block text-[7px] font-bold">{label}</small></span></div>)}</div>
+    <div className="landing-phone-wrap relative ml-auto">
+      <span className="landing-phone-button landing-phone-volume-up" aria-hidden="true" />
+      <span className="landing-phone-button landing-phone-volume-down" aria-hidden="true" />
+      <span className="landing-phone-button landing-phone-power" aria-hidden="true" />
+      <div className="landing-phone-frame">
+        <div className="landing-phone-screen bg-[#f7f9fc] text-[#172b4d]">
+          <div className="landing-phone-status" aria-hidden="true"><strong>9:41</strong><span className="flex items-center gap-1"><i className="landing-signal" /><i className="landing-wifi" /><i className="landing-battery" /></span></div>
+          <div className="landing-dynamic-island" aria-hidden="true"><span /></div>
+          <div className="bg-gradient-to-br from-[#119ce8] via-[#0875d6] to-[#073aa1] px-5 pb-5 pt-14 text-white"><div className="flex items-center justify-between"><span className="flex items-center gap-2"><Image src="/icons/somamais-192.png" alt="" width={36} height={36} className="rounded-[11px]" /><span><small className="block text-[8px] text-[#bfe6ff]">Bem-vinda</small><strong className="text-xs">Família da Alice</strong></span></span><span className="relative"><BellRing size={18} /><i className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#ff746c] ring-2 ring-[#0875d6]" /></span></div><div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur"><small className="text-[8px] text-[#c5e5ff]">HOJE · PUBLICADO ÀS 17H32</small><strong className="mt-1 block text-sm">O dia de Alice está pronto</strong></div></div>
+          <div className="grid grid-cols-3 gap-3 p-4">{features.map(([Icon, label]) => <div key={label} className="grid min-h-24 place-items-center rounded-xl bg-white p-2 text-center shadow-[0_5px_18px_rgba(31,72,122,.08)]"><span><span className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#13b8ef] to-[#0755c1] text-white"><Icon size={16} /></span><small className="mt-2 block text-[7px] font-bold">{label}</small></span></div>)}</div>
+          <div className="landing-home-indicator" aria-hidden="true" />
+        </div>
       </div>
     </div>
     <div className="landing-float-card absolute -bottom-7 left-0 flex items-center gap-3 rounded-2xl border border-white/[.13] bg-[#071b40]/90 p-4 shadow-2xl backdrop-blur-xl"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#0b8de4]/20 text-[#5acbff]"><CheckCircle2 size={20} /></span><span><small className="block text-[8px] font-bold uppercase tracking-[.12em] text-[#70a6d2]">ROTINA</small><strong className="mt-0.5 block text-xs">Agenda publicada</strong></span></div>
