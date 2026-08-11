@@ -300,7 +300,128 @@ button:not(:disabled) {
   animation: landing-up 850ms 180ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
-.landing-product > div:nth-child(2) {
+.landing-phone-wrap {
+  width: min(78%, 390px);
+  padding: 10px;
+  border-radius: 3.4rem;
+  background: linear-gradient(145deg, #42516b 0%, #080c13 18%, #010308 74%, #25334c 100%);
+  box-shadow:
+    0 52px 110px rgba(0, 0, 0, .58),
+    0 0 0 1px rgba(172, 214, 255, .22),
+    inset 0 0 0 1px rgba(255, 255, 255, .15),
+    inset 0 -12px 28px rgba(0, 0, 0, .7);
+  transform: rotate(2.5deg);
+}
+
+.landing-phone-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  z-index: 5;
+  border-radius: 2.85rem;
+  border: 1px solid rgba(255, 255, 255, .09);
+  pointer-events: none;
+}
+
+.landing-phone-frame {
+  overflow: hidden;
+  border-radius: 2.85rem;
+  background: #03060b;
+  padding: 4px;
+}
+
+.landing-phone-screen {
+  position: relative;
+  min-height: 614px;
+  overflow: hidden;
+  border-radius: 2.58rem;
+}
+
+.landing-phone-status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 25px 0;
+  color: #fff;
+  font-size: 9px;
+}
+
+.landing-dynamic-island {
+  position: absolute;
+  z-index: 6;
+  top: 10px;
+  left: 50%;
+  width: 88px;
+  height: 25px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #010205;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .035);
+}
+
+.landing-dynamic-island span {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #071529;
+  box-shadow: inset 0 0 2px #1a4f85;
+}
+
+.landing-signal {
+  width: 11px;
+  height: 7px;
+  background: linear-gradient(to right, #fff 18%, transparent 18% 27%, #fff 27% 47%, transparent 47% 56%, #fff 56% 76%, transparent 76% 85%, #fff 85%);
+  clip-path: polygon(0 100%, 0 76%, 18% 76%, 18% 57%, 47% 57%, 47% 32%, 76% 32%, 76% 0, 100% 0, 100% 100%);
+}
+
+.landing-wifi {
+  width: 10px;
+  height: 7px;
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.landing-battery {
+  width: 14px;
+  height: 7px;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1.5px #fff;
+}
+
+.landing-phone-button {
+  position: absolute;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(to bottom, #536078, #080c13 25% 75%, #38465e);
+  box-shadow: -1px 0 1px rgba(149, 198, 255, .28);
+}
+
+.landing-phone-volume-up { left: -3px; top: 112px; height: 44px; }
+.landing-phone-volume-down { left: -3px; top: 168px; height: 44px; }
+.landing-phone-power { right: -3px; top: 136px; height: 76px; border-radius: 0 3px 3px 0; }
+
+.landing-home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 100px;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 99px;
+  background: #10223e;
+  opacity: .78;
+}
+
+.landing-product .landing-phone-wrap {
   animation: landing-float 6s ease-in-out infinite;
 }
 
@@ -386,6 +507,8 @@ button:not(:disabled) {
 
 @media (max-width: 640px) {
   .landing-product { margin-top: 1rem; }
+  .landing-phone-wrap { width: min(82%, 350px); margin-right: 5%; }
+  .landing-phone-screen { min-height: 570px; }
   .landing-float-card { left: .25rem; }
   .landing-grid { background-size: 48px 48px; }
 }
@@ -394,7 +517,7 @@ button:not(:disabled) {
   .landing-nav,
   .landing-reveal,
   .landing-product,
-  .landing-product > div:nth-child(2),
+  .landing-product .landing-phone-wrap,
   .landing-float-card,
   .landing-glow-one {
     animation: none !important;
