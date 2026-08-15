@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  ChevronDown,
   Clock3,
   ClipboardCheck,
   Send,
@@ -179,88 +180,100 @@ export default async function TeacherPage({
         </div>
       </header>
 
-      <nav aria-label="Turno" className="mt-5 inline-flex rounded-2xl border border-[#d8e5f2] bg-white p-1 shadow-sm">
-        <ShiftLink active={shift === "morning"} href={`/app/teacher?classroom=${classroom.id}&shift=morning`}>
-          Manhã
-        </ShiftLink>
-        <ShiftLink active={shift === "afternoon"} href={`/app/teacher?classroom=${classroom.id}&shift=afternoon`}>
-          Tarde
-        </ShiftLink>
-      </nav>
+      <section className="mt-5 rounded-2xl border border-[#d8e5f2] bg-white p-4 shadow-[0_8px_24px_rgba(27,66,112,.05)] sm:p-5">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div>
+            <span className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#6582a2]">1 · Selecione o turno</span>
+            <nav aria-label="Turno" className="mt-2 inline-flex rounded-xl bg-[#edf4fb] p-1">
+              <ShiftLink active={shift === "morning"} href={`/app/teacher?classroom=${classroom.id}&shift=morning`}>
+                Manhã
+              </ShiftLink>
+              <ShiftLink active={shift === "afternoon"} href={`/app/teacher?classroom=${classroom.id}&shift=afternoon`}>
+                Tarde
+              </ShiftLink>
+            </nav>
+          </div>
+          <div>
+            <span className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#6582a2]">2 · Selecione a turma</span>
+            <nav aria-label="Turma" className="mt-2 flex flex-wrap gap-2">
+              {assignments.map((assignment) => {
+                const assignedClassroom = Array.isArray(assignment.classrooms)
+                  ? assignment.classrooms[0]
+                  : assignment.classrooms;
+                return assignedClassroom ? (
+                  <Link
+                    key={assignment.classroom_id}
+                    href={`/app/teacher?classroom=${assignedClassroom.id}&shift=${shift}`}
+                    aria-current={assignedClassroom.id === classroom.id ? "page" : undefined}
+                    className={`flex min-h-10 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition ${assignedClassroom.id === classroom.id ? "border-[#1768c5] bg-[#1768c5] text-white shadow-sm" : "border-[#d8e5f2] bg-white text-[#647b94] hover:border-[#9dc7ef] hover:bg-[#f3f8fd]"}`}
+                  >
+                    {assignedClassroom.name}
+                    {assignedClassroom.id === classroom.id ? <Check size={14} /> : null}
+                  </Link>
+                ) : null;
+              })}
+            </nav>
+          </div>
+        </div>
+      </section>
 
-      {assignments.length > 1 ? (
-        <nav aria-label="Turma" className="mt-3 flex flex-wrap gap-2">
-          {assignments.map((assignment) => {
-            const assignedClassroom = Array.isArray(assignment.classrooms)
-              ? assignment.classrooms[0]
-              : assignment.classrooms;
-            return assignedClassroom ? (
-              <Link
-                key={assignment.classroom_id}
-                href={`/app/teacher?classroom=${assignedClassroom.id}&shift=${shift}`}
-                className={`rounded-xl border px-4 py-2 text-xs font-bold ${assignedClassroom.id === classroom.id ? "border-[#1768c5] bg-[#eaf4ff] text-[#1768c5]" : "border-[#d8e5f2] bg-white text-[#647b94]"}`}
-              >
-                {assignedClassroom.name}
-              </Link>
-            ) : null;
-          })}
-        </nav>
-      ) : null}
+      <section className="mt-5 space-y-3">
+        <div className="flex items-center justify-between gap-4 px-1">
+          <div>
+            <span className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#6582a2]">3 · Abra o item para preencher</span>
+            <h2 className="mt-1 font-[var(--font-display)] text-xl font-bold tracking-[-.03em]">{classroom.name} · {shift === "morning" ? "Manhã" : "Tarde"}</h2>
+          </div>
+          <small className="hidden text-right text-[10px] leading-4 text-[#73869c] sm:block">Cada linha abre<br />sua própria lista</small>
+        </div>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-[.72fr_1.28fr]">
-        <div className="space-y-4">
-          <div className="rounded-2xl bg-gradient-to-br from-[#09295e] to-[#0759bd] p-6 text-white shadow-[0_14px_35px_rgba(7,55,120,.18)]">
-            <span className="text-[9px] font-extrabold tracking-[.14em] text-[#9ed5ff]">
-              {shift === "morning" ? "TURNO DA MANHÃ" : "TURNO DA TARDE"}
+        <details className="group overflow-hidden rounded-2xl border border-[#d8e5f2] bg-white shadow-[0_8px_24px_rgba(27,66,112,.05)] open:border-[#a9cbed] open:shadow-[0_14px_34px_rgba(23,104,197,.1)]">
+          <summary className="flex min-h-[78px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
+            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${attendanceComplete ? "bg-[#e8f4ff] text-[#1768c5]" : "bg-[#f4f6f8] text-[#73869c]"}`}>
+              {attendanceComplete ? <CheckCircle2 size={21} /> : <Users size={21} />}
             </span>
-            <strong className="mt-3 block font-[var(--font-display)] text-2xl">
-              {children.length} crianças previstas
-            </strong>
-            <div className="mt-5 space-y-2">
+            <span className="min-w-0 flex-1">
+              <strong className="block font-[var(--font-display)] text-base font-bold">Crianças e chamada</strong>
+              <small className="mt-1 block text-[10px] text-[#6f8299]">{children.length} previstas · {attendanceIds.size}/{children.length} presentes</small>
+            </span>
+            <span className={`hidden rounded-full px-3 py-1.5 text-[9px] font-extrabold sm:block ${attendanceComplete ? "bg-[#e8f4ff] text-[#1768c5]" : "bg-[#fff4e9] text-[#9a6b43]"}`}>{attendanceComplete ? "CONCLUÍDO" : "PENDENTE"}</span>
+            <ChevronDown size={19} className="shrink-0 text-[#7890a8] transition-transform duration-200 group-open:rotate-180" />
+          </summary>
+          <div className="border-t border-[#e5edf5] bg-[#fbfdff] p-4 sm:p-5">
+            <div className="grid gap-2 sm:grid-cols-2">
               {children.map((child) => (
-                <div key={child.id} className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2.5 text-xs">
-                  <span>{child.first_name} · {child.scheduleName}</span>
-                  <small className="text-[#c8e3ff]">{child.expectedStart}–{child.expectedEnd}</small>
+                <div key={child.id} className="flex items-center justify-between rounded-xl border border-[#dce8f3] bg-white px-3 py-3 text-xs">
+                  <span><strong className="block">{child.first_name} {child.last_name}</strong><small className="mt-0.5 block text-[9px] text-[#788ba0]">{child.scheduleName}</small></span>
+                  <small className="text-[#5d7895]">{child.expectedStart}–{child.expectedEnd}</small>
                 </div>
               ))}
             </div>
+            <form action={markAllPresent} className="mt-4 border-t border-[#e5edf5] pt-4">
+              <input type="hidden" name="schoolDayId" value={schoolDay.id} />
+              <input type="hidden" name="schoolId" value={membership.school_id} />
+              {children.map((child) => <input key={child.id} type="hidden" name="childId" value={child.id} />)}
+              <p className="text-xs leading-5 text-[#6f8299]">Marque somente as crianças previstas para {shift === "morning" ? "a manhã" : "a tarde"}.</p>
+              <button disabled={isPublished || children.length === 0} className="mt-3 w-full rounded-xl border border-[#9dc7ef] bg-[#eef7ff] px-4 py-3 text-xs font-bold text-[#1768c5] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto">
+                {attendanceComplete ? "Atualizar chamada" : "Marcar grupo presente"}
+              </button>
+            </form>
           </div>
+        </details>
 
-          <form action={markAllPresent} className="rounded-2xl border border-[#d8e5f2] bg-white p-5 shadow-[0_8px_24px_rgba(27,66,112,.05)]">
-            <input type="hidden" name="schoolDayId" value={schoolDay.id} />
-            <input type="hidden" name="schoolId" value={membership.school_id} />
-            {children.map((child) => (
-              <input key={child.id} type="hidden" name="childId" value={child.id} />
-            ))}
-            <strong className="flex items-center gap-2 text-sm">
-              <Check size={17} className="text-[#1768c5]" /> Chamada coletiva
-            </strong>
-            <p className="mt-2 text-xs leading-5 text-[#6f8299]">
-              Marca somente as crianças previstas para {shift === "morning" ? "a manhã" : "a tarde"}.
-            </p>
-            <button
-              disabled={isPublished || children.length === 0}
-              className="mt-4 w-full rounded-xl border border-[#9dc7ef] bg-[#eef7ff] px-4 py-3 text-xs font-bold text-[#1768c5] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {attendanceComplete ? "Atualizar chamada" : "Marcar grupo presente"}
-            </button>
-          </form>
+        {incomingHandoffs.map((handoff) => (
+          <details key={handoff.id} className="group overflow-hidden rounded-2xl border border-[#e4c6a9] bg-[#fffaf4]">
+            <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#fff0df] text-[#976b49]"><ArrowRight size={20} /></span>
+              <span className="min-w-0 flex-1"><strong className="block text-sm">Passagem de turno recebida</strong><small className="mt-1 block truncate text-[10px] text-[#876d58]">Toque para ler a pendência</small></span>
+              <ChevronDown size={19} className="text-[#976b49] transition-transform duration-200 group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-[#ecd9c7] p-5"><p className="text-sm leading-6 text-[#604f42]">{handoff.note}</p><form action={resolveShiftHandoff}><input type="hidden" name="handoffId" value={handoff.id} /><button className="mt-3 text-xs font-bold text-[#1768c5]">Marcar como resolvida</button></form></div>
+          </details>
+        ))}
 
-          {incomingHandoffs.map((handoff) => (
-            <div key={handoff.id} className="rounded-2xl border border-[#e4c6a9] bg-[#fff8f0] p-5">
-              <span className="text-[9px] font-extrabold tracking-[.12em] text-[#976b49]">
-                PASSAGEM RECEBIDA
-              </span>
-              <p className="mt-2 text-sm leading-6 text-[#604f42]">{handoff.note}</p>
-              <form action={resolveShiftHandoff}>
-                <input type="hidden" name="handoffId" value={handoff.id} />
-                <button className="mt-3 text-xs font-bold text-[#1768c5]">Marcar como resolvida</button>
-              </form>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-4 px-1">
+            <span className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#6582a2]">Rotina da turma</span>
+          </div>
           {enabledModules.map((module) => {
             const options = Array.isArray(module.options)
               ? module.options.filter((option): option is string => typeof option === "string")
@@ -269,76 +282,86 @@ export default async function TeacherPage({
             const completed = children.filter((child) =>
               entryMap.has(`${child.id}:${module.category}:${shift}`),
             ).length;
+            const moduleComplete = completed === children.length && children.length > 0;
             return (
-              <form key={module.category} action={recordRoutineBatch} className="overflow-hidden rounded-2xl border border-[#d8e5f2] bg-white shadow-[0_8px_24px_rgba(27,66,112,.05)]">
-                <input type="hidden" name="schoolDayId" value={schoolDay.id} />
-                <input type="hidden" name="schoolId" value={membership.school_id} />
-                <input type="hidden" name="category" value={module.category} />
-                <input type="hidden" name="periodKey" value={shift} />
-                <div className="border-b border-[#ecece7] p-5">
-                  <div className="flex items-start justify-between gap-3">
+              <details key={module.category} className="group overflow-hidden rounded-2xl border border-[#d8e5f2] bg-white shadow-[0_8px_24px_rgba(27,66,112,.05)] open:border-[#a9cbed] open:shadow-[0_14px_34px_rgba(23,104,197,.1)]">
+                <summary className="flex min-h-[78px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${moduleComplete ? "bg-[#e8f4ff] text-[#1768c5]" : "bg-[#f4f6f8] text-[#73869c]"}`}>
+                    {moduleComplete ? <CheckCircle2 size={21} /> : <Clock3 size={21} />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <strong className="block truncate font-[var(--font-display)] text-base font-bold">
+                      {categoryLabels[module.category as keyof typeof categoryLabels]}
+                    </strong>
+                    <small className="mt-1 block text-[10px] text-[#6f8299]">
+                      {module.required ? "Obrigatório" : "Opcional"} · {completed}/{children.length} registrados
+                    </small>
+                  </span>
+                  <span className={`hidden rounded-full px-3 py-1.5 text-[9px] font-extrabold sm:block ${moduleComplete ? "bg-[#e8f4ff] text-[#1768c5]" : "bg-[#fff4e9] text-[#9a6b43]"}`}>
+                    {moduleComplete ? "CONCLUÍDO" : completed > 0 ? "EM ANDAMENTO" : "PENDENTE"}
+                  </span>
+                  <ChevronDown size={19} className="shrink-0 text-[#7890a8] transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+
+                <form action={recordRoutineBatch} className="border-t border-[#e5edf5] bg-[#fbfdff]">
+                  <input type="hidden" name="schoolDayId" value={schoolDay.id} />
+                  <input type="hidden" name="schoolId" value={membership.school_id} />
+                  <input type="hidden" name="category" value={module.category} />
+                  <input type="hidden" name="periodKey" value={shift} />
+                  <div className="border-b border-[#e5edf5] p-5">
                     <div>
-                      <h2 className="font-[var(--font-display)] text-xl font-bold">
-                        {categoryLabels[module.category as keyof typeof categoryLabels]}
-                      </h2>
-                      <p className="mt-1 text-xs text-[#6f8299]">
-                        {module.required ? "Obrigatório neste turno" : "Opcional"} · {completed}/{children.length} registrados
-                      </p>
+                      <strong className="text-xs">Aplicar uma opção para toda a turma</strong>
+                      <p className="mt-1 text-[10px] text-[#6f8299]">Depois, altere somente as crianças que tiveram uma exceção.</p>
                     </div>
-                    {completed === children.length && children.length > 0 ? (
-                      <CheckCircle2 size={20} className="text-[#1768c5]" />
-                    ) : (
-                      <Clock3 size={20} className="text-[#b68a67]" />
-                    )}
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      {options.map((option, index) => (
+                        <label key={option} className="cursor-pointer">
+                          <input
+                            className="peer sr-only"
+                            type="radio"
+                            name="defaultStatus"
+                            value={option}
+                            defaultChecked={index === 0}
+                            disabled={isPublished}
+                          />
+                          <span className="block rounded-xl border border-[#d8e5f2] bg-white px-3 py-3 text-center text-[10px] font-bold text-[#516b86] peer-checked:border-[#1768c5] peer-checked:bg-[#1768c5] peer-checked:text-white">
+                            {option}
+                          </span>
+                        </label>
+                      ))}
+                      {options.length === 0 ? (
+                        <input type="hidden" name="defaultStatus" value={defaultOption} />
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {options.map((option, index) => (
-                      <label key={option} className="cursor-pointer">
-                        <input
-                          className="peer sr-only"
-                          type="radio"
-                          name="defaultStatus"
-                          value={option}
-                          defaultChecked={index === 0}
-                          disabled={isPublished}
-                        />
-                        <span className="block rounded-xl border border-[#d8e5f2] px-3 py-3 text-center text-[10px] font-bold text-[#516b86] peer-checked:border-[#1768c5] peer-checked:bg-[#1768c5] peer-checked:text-white">
-                          {option}
+                  <div className="bg-white">
+                    {children.map((child) => (
+                      <div key={child.id} className="grid grid-cols-[1fr_145px] items-center gap-3 border-b border-[#e9eef4] px-5 py-3 last:border-0 sm:grid-cols-[1fr_180px]">
+                        <input type="hidden" name="childId" value={child.id} />
+                        <span>
+                          <strong className="block text-xs">{child.first_name} {child.last_name}</strong>
+                          <small className="text-[9px] text-[#858d88]">{child.scheduleName}</small>
                         </span>
-                      </label>
+                        <select
+                          name={`exception-${child.id}`}
+                          defaultValue={entryMap.get(`${child.id}:${module.category}:${shift}`) ?? ""}
+                          disabled={isPublished}
+                          aria-label={`Exceção de ${categoryLabels[module.category as keyof typeof categoryLabels]} para ${child.first_name}`}
+                          className="h-10 min-w-0 rounded-lg border border-[#d8e5f2] bg-[#f7faff] px-2 text-[10px]"
+                        >
+                          <option value="">Sem exceção</option>
+                          {options.map((option) => <option key={option} value={option}>{option}</option>)}
+                        </select>
+                      </div>
                     ))}
-                    {options.length === 0 ? (
-                      <input type="hidden" name="defaultStatus" value={defaultOption} />
-                    ) : null}
                   </div>
-                </div>
-                <div>
-                  {children.map((child) => (
-                    <div key={child.id} className="grid grid-cols-[1fr_155px] items-center gap-3 border-b border-[#efefea] px-5 py-3 last:border-0">
-                      <input type="hidden" name="childId" value={child.id} />
-                      <span>
-                        <strong className="block text-xs">{child.first_name} {child.last_name}</strong>
-                        <small className="text-[9px] text-[#858d88]">{child.scheduleName}</small>
-                      </span>
-                      <select
-                        name={`exception-${child.id}`}
-                        defaultValue={entryMap.get(`${child.id}:${module.category}:${shift}`) ?? ""}
-                        disabled={isPublished}
-                        aria-label={`Exceção de ${categoryLabels[module.category as keyof typeof categoryLabels]} para ${child.first_name}`}
-                        className="h-9 rounded-lg border border-[#d8e5f2] bg-[#f7faff] px-2 text-[10px]"
-                      >
-                        <option value="">Sem exceção</option>
-                        {options.map((option) => <option key={option} value={option}>{option}</option>)}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-end bg-[#f4f5f1] p-4">
-                  <button disabled={isPublished || !attendanceComplete || children.length === 0} className="rounded-xl bg-[#1768c5] px-5 py-3 text-xs font-bold text-white shadow-[0_7px_18px_rgba(23,104,197,.2)] disabled:opacity-40">
-                    Aplicar para o grupo
-                  </button>
-                </div>
-              </form>
+                  <div className="flex justify-end border-t border-[#e5edf5] bg-[#f5f9fd] p-4">
+                    <button disabled={isPublished || !attendanceComplete || children.length === 0} className="w-full rounded-xl bg-[#1768c5] px-5 py-3 text-xs font-bold text-white shadow-[0_7px_18px_rgba(23,104,197,.2)] disabled:opacity-40 sm:w-auto">
+                      Salvar {categoryLabels[module.category as keyof typeof categoryLabels]}
+                    </button>
+                  </div>
+                </form>
+              </details>
             );
           })}
         </div>
