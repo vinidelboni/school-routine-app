@@ -11,12 +11,22 @@ const cases = [
     role: "director",
     email: "direcao@laco.validacao",
     minimumChildren: 5,
-    expectedMemberships: 3,
+    expectedMemberships: 4,
   },
   {
     role: "teacher",
     email: "professora@laco.validacao",
-    minimumChildren: 5,
+    minimumChildren: 4,
+    exactChildren: 4,
+    expectedClassroom: "Maternal I",
+    expectedMemberships: 1,
+  },
+  {
+    role: "teacher-bercario",
+    email: "professora.bercario2@laco.validacao",
+    minimumChildren: 1,
+    exactChildren: 1,
+    expectedClassroom: "Berçário II",
     expectedMemberships: 1,
   },
   {
@@ -49,6 +59,12 @@ for (const testCase of cases) {
     .from("school_memberships")
     .select("id, role, school_id");
   if (membershipsError) throw membershipsError;
+
+  const { data: classroomAssignments, error: classroomAssignmentsError } =
+    await client
+      .from("classroom_staff")
+      .select("classroom_id, classrooms(name)");
+  if (classroomAssignmentsError) throw classroomAssignmentsError;
 
   const { data: familyContacts, error: familyContactsError } = await client
     .from("family_contacts")
@@ -92,6 +108,11 @@ for (const testCase of cases) {
     role: testCase.role,
     childrenVisible: children.length,
     membershipsVisible: memberships.length,
+    classroomAssignments: classroomAssignments.map((item) =>
+      Array.isArray(item.classrooms)
+        ? item.classrooms[0]?.name
+        : item.classrooms?.name,
+    ),
     familyContactsVisible: familyContacts.length,
     familyRequestsVisible: familyRequests.length,
     medicationRequestsVisible: medicationRequests.length,
@@ -111,6 +132,13 @@ for (const testCase of cases) {
   if (memberships.length !== testCase.expectedMemberships) {
     throw new Error(`${testCase.role}: unexpected membership visibility`);
   }
+  if (
+    testCase.expectedClassroom &&
+    (classroomAssignments.length !== 1 ||
+      result.classroomAssignments[0] !== testCase.expectedClassroom)
+  ) {
+    throw new Error(`${testCase.role}: unexpected classroom assignment`);
+  }
   if (isolatedVisible) {
     throw new Error(`${testCase.role}: cross-tenant child was visible`);
   }
@@ -120,22 +148,22 @@ for (const testCase of cases) {
   ) {
     throw new Error(`${testCase.role}: unexpected family contact visibility`);
   }
-  if (testCase.role === "teacher" && familyRequests.length !== 0) {
+  if (testCase.role.startsWith("teacher") && familyRequests.length !== 0) {
     throw new Error("teacher: family requests were visible");
   }
-  if (testCase.role === "teacher" && medicationRequests.length !== 0) {
+  if (testCase.role.startsWith("teacher") && medicationRequests.length !== 0) {
     throw new Error("teacher: medication requests were visible");
   }
-  if (testCase.role === "teacher" && billingDocuments.length !== 0) {
+  if (testCase.role.startsWith("teacher") && billingDocuments.length !== 0) {
     throw new Error("teacher: billing documents were visible");
   }
   if (
-    testCase.role === "teacher" &&
+    testCase.role.startsWith("teacher") &&
     (communications.length !== 0 || communicationRecipients.length !== 0)
   ) {
     throw new Error("teacher: family communications were visible");
   }
-  if (testCase.role === "teacher" && occurrences.length !== 0) {
+  if (testCase.role.startsWith("teacher") && occurrences.length !== 0) {
     throw new Error("teacher: occurrences were visible");
   }
 

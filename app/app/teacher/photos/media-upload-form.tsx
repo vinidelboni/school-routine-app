@@ -21,7 +21,7 @@ export function MediaUploadForm({ schoolId, classroomId, childOptions }: { schoo
     }
     setPending(true);
     const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (file.type.startsWith("video/") ? "mp4" : "jpg");
-    const storagePath = `${schoolId}/${crypto.randomUUID()}.${extension}`;
+    const storagePath = `${schoolId}/${classroomId}/${crypto.randomUUID()}.${extension}`;
     const supabase = getSupabaseBrowserClient();
     const { error: uploadError } = await supabase.storage.from("school-photos").upload(storagePath, file, { contentType: file.type, cacheControl: "3600", upsert: false });
     if (uploadError) { setError("Não foi possível enviar o arquivo. Tente novamente."); setPending(false); return; }

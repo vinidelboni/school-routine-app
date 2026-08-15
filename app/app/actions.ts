@@ -2142,11 +2142,11 @@ export async function publishActivityMedia(formData: FormData) {
   const storagePath = z.string().min(40).max(240).parse(formData.get("storagePath"));
   const { supabase, user, membership } = await getCurrentContext();
   if (!["teacher", "director"].includes(membership.role)) redirect("/app");
-  if (!storagePath.startsWith(`${membership.school_id}/`)) throw new Error("Arquivo inválido.");
+  if (!storagePath.startsWith(`${membership.school_id}/${classroomId}/`)) throw new Error("Arquivo inválido.");
   if ((mediaType === "image") !== mimeType.startsWith("image/")) throw new Error("Tipo de arquivo inconsistente.");
-  const filename = storagePath.slice(storagePath.indexOf("/") + 1);
+  const filename = storagePath.slice(storagePath.lastIndexOf("/") + 1);
   const admin = createSupabaseAdminClient();
-  const { data: storedFiles, error: storageError } = await admin.storage.from("school-photos").list(membership.school_id, { search: filename, limit: 2 });
+  const { data: storedFiles, error: storageError } = await admin.storage.from("school-photos").list(`${membership.school_id}/${classroomId}`, { search: filename, limit: 2 });
   const storedFile = storedFiles?.find((item) => item.name === filename);
   if (storageError || !storedFile || storedFile.metadata?.mimetype !== mimeType || Number(storedFile.metadata?.size) !== fileSize) throw new Error("Não foi possível confirmar o arquivo enviado.");
   const { data: classroom } = await supabase.from("classrooms").select("id").eq("id", classroomId).eq("school_id", membership.school_id).single();
@@ -2201,7 +2201,7 @@ export async function publishActivityPhoto(formData: FormData) {
   const blocked = childIds.filter((id) => !authorized.has(id));
   if (blocked.length) throw new Error("A publicação foi bloqueada: há criança sem autorização de imagem.");
   const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const storagePath = `${membership.school_id}/${crypto.randomUUID()}.${extension}`;
+  const storagePath = `${membership.school_id}/${classroomId}/${crypto.randomUUID()}.${extension}`;
   const { error: uploadError } = await supabase.storage.from("school-photos")
     .upload(storagePath, file, { contentType: file.type, upsert: false });
   if (uploadError) throw uploadError;
