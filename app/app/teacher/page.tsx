@@ -7,7 +7,13 @@ import {
   ChevronDown,
   Clock3,
   ClipboardCheck,
+  Droplets,
+  MessageSquareText,
+  Moon,
+  Palette,
   Send,
+  Sparkles,
+  Utensils,
   Users,
 } from "lucide-react";
 import { getCurrentContext } from "../../lib/auth";
@@ -29,6 +35,15 @@ const categoryLabels = {
   hygiene: "Higiene",
   activity: "Atividade",
   note: "Observação",
+} as const;
+
+const categoryIcons = {
+  meal: Utensils,
+  hydration: Droplets,
+  sleep: Moon,
+  hygiene: Sparkles,
+  activity: Palette,
+  note: MessageSquareText,
 } as const;
 
 export default async function TeacherPage({
@@ -283,11 +298,12 @@ export default async function TeacherPage({
               entryMap.has(`${child.id}:${module.category}:${shift}`),
             ).length;
             const moduleComplete = completed === children.length && children.length > 0;
+            const CategoryIcon = categoryIcons[module.category as keyof typeof categoryIcons] ?? ClipboardCheck;
             return (
               <details key={module.category} className="group overflow-hidden rounded-2xl border border-[#d8e5f2] bg-white shadow-[0_8px_24px_rgba(27,66,112,.05)] open:border-[#a9cbed] open:shadow-[0_14px_34px_rgba(23,104,197,.1)]">
                 <summary className="flex min-h-[78px] cursor-pointer list-none items-center gap-4 px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${moduleComplete ? "bg-[#e8f4ff] text-[#1768c5]" : "bg-[#f4f6f8] text-[#73869c]"}`}>
-                    {moduleComplete ? <CheckCircle2 size={21} /> : <Clock3 size={21} />}
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#39b8ef] bg-gradient-to-br from-[#12b8ec] via-[#0783dd] to-[#0648bd] text-white shadow-[0_7px_18px_rgba(7,104,197,.22)]">
+                    <CategoryIcon size={21} strokeWidth={2} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <strong className="block truncate font-[var(--font-display)] text-base font-bold">
